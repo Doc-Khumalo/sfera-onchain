@@ -1,0 +1,10 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.jsx';
+import '../styles/home.css';
+---
+
+<Base>
+  {/* No client:* directive — this renders to HTML at build time and ships no JS. */}
+  <Hero />
+</Base>

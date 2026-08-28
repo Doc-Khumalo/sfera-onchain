@@ -1,0 +1,519 @@
+<title>How it works · Sfera Onchain</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Sfera Onchain reads the permission an application asks your wallet to grant, shows what it exposes, and rewrites it to fit before you sign.">
+<link rel="canonical" href="https://sferaonchain.xyz/how-it-works.html">
+<meta name="theme-color" content="#05070A">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sfera Onchain">
+<meta property="og:title" content="Sfera Onchain">
+<meta property="og:url" content="https://sferaonchain.xyz/how-it-works.html">
+<meta property="og:description" content="Sfera Onchain reads the permission an application asks your wallet to grant, shows what it exposes, and rewrites it to fit before you sign.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sfera Onchain">
+<meta name="twitter:description" content="Sfera Onchain reads the permission an application asks your wallet to grant, shows what it exposes, and rewrites it to fit before you sign.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{--void:#05070A;--deck:#0A0F15;--line:#16202B;--line2:#263543;
+ --ice:#F2F6F9;--mist:#7D93A4;--slate:#48606F;--ok:#2FE0BC;--bad:#FF5F4E;
+ --d:"Archivo",system-ui,-apple-system,sans-serif;--m:"JetBrains Mono",ui-monospace,monospace;
+ --gut:clamp(20px,4.4vw,80px)}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{margin:0;background:var(--void);color:var(--ice);font-family:var(--d);font-size:17px;
+ line-height:1.55;-webkit-font-smoothing:antialiased}
+h2{margin:0;font-weight:800;letter-spacing:-.035em;text-wrap:balance}
+.app{position:fixed;inset:0;height:100vh;height:100svh;container-type:size;
+ display:grid;grid-template-rows:auto 1fr auto;
+ padding:clamp(18px,2.4vh,30px) 0 clamp(16px,2.2vh,26px);
+ background:radial-gradient(78% 48% at 50% -6%,rgba(47,224,188,.10),transparent 66%) no-repeat;
+ transition:background .6s}
+.app.warn{background:radial-gradient(78% 48% at 50% -6%,rgba(255,95,78,.10),transparent 66%) no-repeat}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding-inline:var(--gut)}
+.logo{font-family:var(--m);font-weight:700;font-size:13px;letter-spacing:.26em;text-transform:uppercase}
+.logo i{color:var(--ok);font-style:normal;margin-left:.12em}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--m);font-size:11px;font-weight:700;
+ letter-spacing:.14em;text-transform:uppercase;background:var(--ok);color:#04100D;border:0;border-radius:99px;
+ padding:12px 20px;text-decoration:none;cursor:pointer;transition:background .25s,transform .25s}
+.btn:hover{background:#54EDCE;transform:translateY(-2px)}
+.btn.ghost{background:none;color:var(--mist);border:1px solid rgba(255,255,255,.15)}
+.btn.ghost:hover{color:var(--ice);border-color:rgba(255,255,255,.32);background:none}
+.snum{font-family:var(--m);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--slate);
+ margin-bottom:clamp(10px,1.5vh,18px);display:flex;align-items:center;gap:11px}
+.snum::before{content:"";width:6px;height:6px;background:var(--ok);transform:rotate(45deg);border-radius:1px;
+ box-shadow:0 0 10px rgba(47,224,188,.8)}
+.bad .snum{color:var(--bad)} .bad .snum::before{background:var(--bad);box-shadow:0 0 10px rgba(255,95,78,.8)}
+.copy h2{font-size:clamp(26px,3.8vw,52px);line-height:1.04;max-width:15ch}
+.copy h2 em{font-style:normal;color:var(--ok)} .bad .copy h2 em{color:var(--bad)}
+.copy p{margin:0;color:var(--mist);font-size:clamp(15px,1.3vw,18px);max-width:42ch}
+.peek{position:absolute;left:50%;bottom:calc(100% + 12px);transform:translate(-50%,6px);
+ z-index:6;opacity:0;visibility:hidden;pointer-events:none;
+ transition:opacity .28s ease,transform .32s cubic-bezier(.2,.7,.3,1),visibility .28s;
+ border:1px solid var(--line2);border-radius:12px;padding:12px 14px;
+ background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01)),var(--deck);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 22px 46px -26px #000;
+ max-width:min(520px,calc(100vw - var(--gut)*2))}
+.peek.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.peek .pk{font-family:var(--m);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
+ color:var(--slate);margin-bottom:9px;text-align:center}
+.peek .pk b{color:var(--ice);font-weight:700}
+.chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.clab{font-family:var(--m);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
+ color:var(--slate);margin:clamp(14px,2vh,22px) 0 9px}
+.conc{border-top:1px dashed rgba(255,255,255,.11);max-width:56ch;margin-inline:auto;
+ min-height:calc(2 * 1.62em)}
+.conc .ck{display:block;font-family:var(--m);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
+ color:var(--slate);margin-top:7px}
+.conc .cv{display:block;font-family:var(--m);font-size:clamp(11.5px,1.05vw,13px);line-height:1.62;color:var(--mist)}
+.conc .cv b{color:var(--ice);font-weight:700}
+.conc .cv em{font-style:normal;color:var(--bad);font-weight:700}
+.chips{margin-top:0}
+.chips li{font-family:var(--m);font-size:9px;letter-spacing:.06em;line-height:1.35;color:var(--mist);
+ border:1px solid var(--line2);border-radius:99px;padding:4px 9px;background:rgba(255,255,255,.02)}
+/* ── centre slot: the wallet prompt, then the receipt ── */
+.slot{position:relative;display:grid;place-items:center;min-height:clamp(196px,26vh,232px);width:100%}
+.slot>*{grid-area:1/1;transition:opacity .45s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
+.slot>.off{opacity:0;visibility:hidden;transform:translateY(8px);pointer-events:none}
+
+/* the one button */
+.sheet{width:min(320px,calc(100vw - var(--gut)*2));border:1px solid rgba(255,255,255,.11);border-radius:16px;
+ overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012)),#0F171F;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 30px 66px -36px #000}
+.sheet .sh{display:flex;align-items:center;gap:9px;padding:11px 15px;border-bottom:1px solid rgba(255,255,255,.07);
+ font-family:var(--m);font-size:10px;color:var(--mist)}
+.sheet .sh i{width:16px;height:16px;border-radius:5px;background:#2C6FE8;flex:0 0 auto}
+.sheet .sh b{margin-left:auto;display:inline-flex;align-items:center;flex:0 0 auto}
+.sheet .sh b svg{display:block;width:13px;height:13px;fill:#0000FF}
+.sheet .sb{padding:16px 15px 15px}
+.sheet h3{margin:0 0 6px;font-size:16px;font-weight:700;letter-spacing:-.02em;color:var(--ice)}
+.sheet small{display:block;font-size:12.5px;line-height:1.45;color:var(--slate);margin-bottom:15px}
+.oneb{display:block;text-align:center;background:#2C6FE8;color:#fff;border-radius:10px;padding:12px;
+ font-size:13.5px;font-weight:600;position:relative;overflow:hidden}
+.oneb::after{content:"";position:absolute;inset:0;
+ background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.3) 50%,transparent 62%);
+ transform:translateX(-120%);animation:sheen 3.4s ease-in-out infinite 1.2s}
+@keyframes sheen{0%,74%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.onenote{font-family:var(--m);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--slate);
+ text-align:center;margin-top:11px}
+
+/* the closing card carries neither the sheet nor the receipt,
+   so its empty slot leaves the flow and the centring does the rest */
+.app.bare .slot{min-height:0;height:0;overflow:hidden}
+.app.bare .scene{row-gap:0}
+
+/* the receipt, printed on paper */
+.perm{--paper:#F2EEE6;--ink:#191C1F;--ink2:#8C8377;--rule:rgba(25,28,31,.34);--stamp:#C2342A;
+ --tw:9px;--th:5px;
+ width:min(318px,calc(100vw - var(--gut)*2));border:0;border-radius:0;
+ background:linear-gradient(180deg,rgba(0,0,0,.055),rgba(0,0,0,0) 9%,rgba(0,0,0,0) 90%,rgba(0,0,0,.07)),var(--paper);
+ color:var(--ink);rotate:-.7deg;
+ filter:drop-shadow(0 1px 1px rgba(0,0,0,.55)) drop-shadow(0 18px 26px rgba(0,0,0,.6));
+ transition:filter .8s,opacity .45s,transform .5s;
+ -webkit-mask:linear-gradient(#000 0 0) 0 var(--th)/100% calc(100% - var(--th)*2) no-repeat,
+  conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) 0 0/var(--tw) var(--th) repeat-x,
+  conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 0 100%/var(--tw) var(--th) repeat-x;
+ mask:linear-gradient(#000 0 0) 0 var(--th)/100% calc(100% - var(--th)*2) no-repeat,
+  conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) 0 0/var(--tw) var(--th) repeat-x,
+  conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 0 100%/var(--tw) var(--th) repeat-x}
+.perm.ok{--stamp:#0F7355}
+/* header block, centred the way a till prints it */
+.rhead{display:block;text-align:center;padding:13px 15px 9px}
+.rhead .rt{display:block;font-family:var(--m);font-weight:700;font-size:9px;letter-spacing:.32em;
+ text-transform:uppercase;color:var(--ink)}
+.rhead .rs{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-family:var(--m);font-weight:700;
+ font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--stamp);transition:color .7s}
+.rhead .rs::before{content:"";width:4px;height:4px;border-radius:50%;background:currentColor}
+/* line items, with the leader dots that make a receipt a receipt */
+.rbody{padding:2px 15px 7px;border-top:1px dashed var(--rule)}
+.prow{display:flex;align-items:baseline;margin:0;padding:5px 0}
+.prow dt{display:flex;align-items:baseline;flex:1 1 auto;min-width:0;gap:6px;margin:0;white-space:nowrap;
+ font-family:var(--m);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+.prow dt::after{content:"";flex:1 1 auto;border-bottom:1px dotted var(--rule);transform:translateY(-2px)}
+.prow dd{flex:0 0 auto;margin:0;padding-left:8px;white-space:nowrap;font-family:var(--m);font-size:11.5px;
+ font-weight:700;color:var(--stamp);font-variant-numeric:tabular-nums;transition:color .7s,opacity .28s}
+.prow.lead{padding:8px 0 10px;margin-bottom:6px;border-bottom:4px double var(--rule)}
+.prow.lead dd{font-size:19px;letter-spacing:-.01em;padding-left:10px}
+.perm.swap .prow dd{opacity:0}
+/* the trailing metadata, centred and stacked */
+.rfoot{display:block;text-align:center;padding:8px 15px 14px;border-top:1px dashed var(--rule);
+ font-family:var(--m);font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2)}
+.rfoot span{display:block}
+.rfoot span+span{margin-top:5px;font-weight:700;color:var(--stamp);transition:color .7s}
+.rail{display:flex;align-items:center;justify-content:space-between;gap:clamp(14px,2.4vw,30px);
+ flex-wrap:wrap;padding-inline:var(--gut)}
+.count{font-family:var(--m);font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--mist);white-space:nowrap}
+.count s{text-decoration:none;color:var(--slate)}
+.hint{font-family:var(--m);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--slate);
+ display:flex;align-items:center;gap:9px;white-space:nowrap}
+.hint kbd{font-family:var(--m);font-size:9px;border:1px solid var(--line2);border-radius:4px;padding:2px 5px;color:var(--mist)}
+.nudge{width:26px;height:1px;background:var(--line2);position:relative;overflow:hidden}
+.nudge::after{content:"";position:absolute;inset:0;background:var(--ok);animation:trace 2.4s cubic-bezier(.6,0,.3,1) infinite}
+@keyframes trace{0%{transform:translateX(-100%)}62%,100%{transform:translateX(100%)}}
+.arrows{display:flex;gap:8px}
+.arrows button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);background:none;color:var(--mist);
+ cursor:pointer;display:grid;place-items:center;font-size:15px;line-height:1;transition:color .25s,border-color .25s,opacity .25s}
+.arrows button:hover:not(:disabled){color:var(--ok);border-color:var(--ok)}
+.arrows button:disabled{opacity:.3;cursor:default}
+button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:3px}
+.who{display:flex;gap:clamp(16px,3vw,40px);flex-wrap:wrap;margin-top:clamp(16px,2.4vh,26px);font-size:14px;color:var(--mist)}
+.who a{color:var(--mist);text-decoration:none;border-bottom:1px solid var(--line2);padding-bottom:2px}
+.who a:hover{color:var(--ok);border-color:var(--ok)}
+@media (prefers-reduced-motion:reduce){.nudge::after{animation:none}}
+
+.deck{position:relative;min-height:0;display:grid;grid-template-rows:auto auto;align-content:center;
+ gap:clamp(10px,1.8vh,20px)}
+.scene{position:relative;min-height:0;display:grid;grid-template-rows:auto auto;
+ justify-items:center;align-items:end;gap:clamp(12px,2vh,22px);padding-inline:var(--gut)}
+.frame{position:relative;width:100%;min-height:0}
+.belt{position:relative}
+.card{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+ align-items:center;text-align:center;
+ opacity:0;visibility:hidden;transform:translateY(9px);
+ transition:opacity .4s ease,transform .52s cubic-bezier(.2,.7,.3,1),visibility .4s}
+.card.on{position:relative;inset:auto;opacity:1;visibility:visible;transform:none}
+.copy{max-width:min(680px,90vw)}
+/* headline and standfirst hold the same footprint on every step,
+   so nothing under them shifts as the copy changes */
+.copy h2{font-size:clamp(24px,3.4vw,46px);line-height:1.05;max-width:18ch;margin-inline:auto;
+ min-height:calc(2 * 1.05em)}
+.copy p{margin:0 auto;max-width:52ch;min-height:calc(3 * 1.55em)}
+.chips{min-height:33px;align-content:flex-start}
+.snum{justify-content:center}
+.chips{justify-content:center}
+.who{justify-content:center}
+.pathwrap{position:relative;height:clamp(74px,12vh,116px);overflow:hidden}
+.pathwrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.pathwrap .bed{fill:none;stroke:var(--line2);stroke-width:1.6;opacity:.65}
+.pathwrap .lit{fill:none;stroke:var(--ok);stroke-width:1.6;stroke-linecap:round;transition:stroke .6s}
+#wave.ease #track{transition:transform .5s cubic-bezier(.3,.75,.25,1)}
+#wave.ease .lit{transition:stroke .6s,stroke-dashoffset .5s cubic-bezier(.3,.75,.25,1)}
+.pathwrap .lit.bad{stroke:var(--bad)}
+.pathwrap .knot{fill:var(--void);stroke:var(--line2);stroke-width:1.6;cursor:pointer;
+ transition:stroke .45s,fill .45s,r .3s}
+.pathwrap .hit{fill:transparent;cursor:pointer}
+.pathwrap .knot.past{fill:var(--line2)}
+.pathwrap .knot.here{stroke:var(--ok);stroke-width:2.2;fill:var(--void)}
+.pathwrap .knot.here.bad{stroke:var(--bad)}
+.pathwrap .halo{fill:none;stroke:var(--ok);stroke-width:1;opacity:.22}
+.pathwrap .halo.bad{stroke:var(--bad)}
+.pathwrap .lbl{font-family:var(--m);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;
+ fill:var(--slate);text-anchor:middle}
+.pathwrap .tx{fill:var(--bad);transition:fill .7s;filter:drop-shadow(0 0 9px currentColor);color:var(--bad)}
+.pathwrap .tx.ok{fill:var(--ok);color:var(--ok)}
+@media (max-width:900px){
+  .scene{padding-inline:var(--gut)}
+  .copy h2{font-size:clamp(24px,7vw,34px)}
+  .copy p{font-size:15.5px}
+}
+/* on a phone the receipt keeps its shape and shrinks, it does not stretch
+   to the gutters, so the card still fits under the header */
+@media (max-width:640px){
+  /* a phone is short before it is narrow. the reading text keeps its size,
+     everything around it is rebuilt at phone scale so it stops competing */
+  .app{padding:11px 0 9px}
+  .bar{align-items:center;gap:12px}
+  .logo{font-size:11px;letter-spacing:.2em}
+  .bar .btn{display:none}
+  .deck{gap:10px}
+  .scene{row-gap:14px}
+  .copy p{font-size:14px}
+  .snum{font-size:9px;letter-spacing:.24em;margin-bottom:8px;gap:9px}
+  .snum::before{width:5px;height:5px}
+  .conc{min-height:0}
+  .conc .ck{font-size:8px;margin-top:6px}
+  .conc .cv{font-size:10.5px;line-height:1.55}
+  .pathwrap{height:clamp(60px,9.5vh,86px)}
+  .pathwrap .lbl{font-size:7.5px;letter-spacing:.16em}
+  .rail{gap:12px}
+  .count{font-size:10px}
+  .hint{font-size:8.5px;gap:7px}
+  .hint kbd{font-size:8px;padding:1px 4px}
+  .arrows button{width:32px;height:32px;font-size:13px}
+  .arrows{gap:7px}
+  /* the receipt is a diagram, not reading text, so it takes the deepest cut */
+  .slot{min-height:0}
+  .sheet,.perm{width:min(262px,calc(100vw - var(--gut)*2))}
+  .sheet .sh{padding:8px 11px;font-size:8.5px;gap:7px}
+  .sheet .sh i{width:14px;height:14px;border-radius:4px}
+  .sheet .sh b svg{width:11px;height:11px}
+  .sheet .sb{padding:11px 11px 11px}
+  .sheet h3{font-size:13.5px;margin-bottom:5px}
+  .sheet small{font-size:10.5px;margin-bottom:10px}
+  .oneb{padding:9px;font-size:11.5px;border-radius:9px}
+  .onenote{font-size:7.5px;margin-top:8px}
+  .perm{--tw:8px;--th:4px}
+  .rhead{padding:8px 11px 5px}
+  .rhead .rt{font-size:7.5px;letter-spacing:.26em}
+  .rhead .rs{font-size:6px;margin-top:4px;gap:4px}
+  .rhead .rs::before{width:3px;height:3px}
+  .rbody{padding:0 11px 3px}
+  .prow{padding:2.5px 0}
+  .prow dt{font-size:7px;letter-spacing:.08em;gap:5px}
+  .prow dd{font-size:9px;padding-left:6px}
+  .prow.lead{padding:4px 0 5px;margin-bottom:3px}
+  .prow.lead dd{font-size:13.5px;padding-left:7px}
+  .rfoot{padding:4px 11px 8px;font-size:6px;letter-spacing:.12em}
+  .rfoot span+span{margin-top:3px}
+}
+/* a short phone, or a phone held with the browser bars showing.
+   this is a container query on purpose. a media query reads the large viewport,
+   so an iPhone reports 852 while only about 659 is on screen, and a max-height
+   media rule would never fire on the device that needs it. the container is
+   .app, which is 100svh, so this reads the height that actually exists. */
+@container (max-width:640px) and (max-height:700px){
+  .copy h2{font-size:clamp(21px,6.2vw,28px)}
+  .copy p{font-size:13px}
+  .conc .cv{font-size:9.5px}
+  .sheet,.perm{width:min(248px,calc(100vw - var(--gut)*2))}
+  .prow dd{font-size:8.5px}
+  .prow.lead dd{font-size:12.5px}
+  .sheet h3{font-size:13px}
+  .oneb{padding:8px;font-size:11px}
+  .scene{row-gap:11px}
+  .deck{gap:8px}
+  .pathwrap{height:clamp(52px,8vh,66px)}
+  .prow{padding:2px 0}
+  .prow.lead dd{font-size:14px}
+  .rhead{padding:7px 13px 5px}
+  .rfoot{padding:4px 13px 7px}
+}
+
+/* ── the field: the calldata Sfera actually reads, drifting ── */
+.field{position:fixed;inset:-8%;z-index:0;pointer-events:none;overflow:hidden}
+.field b{position:absolute;inset:-30%;display:block;background-repeat:repeat;
+ background-size:440px 352px;opacity:0;transition:opacity 1.1s ease;
+ -webkit-mask:radial-gradient(120% 78% at 50% 46%,#0000 12%,#000 74%);
+ mask:radial-gradient(120% 78% at 50% 46%,#0000 12%,#000 74%);
+ animation:drift 96s linear infinite;will-change:transform}
+.field .unbound{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22440%22%20height%3D%22352%22%3E%3Crect%20width%3D%22440%22%20height%3D%22352%22%20fill%3D%22none%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2226%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eapprove%280x7a3f%E2%80%A619c4%2C%202%5E256-1%29%3C%2Ftext%3E%3Ctext%20x%3D%22188%22%20y%3D%2258%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3E0x095ea7b3%20%20ffffffff%E2%80%A6ffffffff%3C%2Ftext%3E%3Ctext%20x%3D%2234%22%20y%3D%2292%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3EsetApprovalForAll%280x4b1e%E2%80%A6%2C%20true%29%3C%2Ftext%3E%3Ctext%20x%3D%22246%22%20y%3D%22124%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Epermit%28spender%2C%20value%3Dunlimited%29%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22158%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eexpiry%3A%20none%20%20%20nonce%3A%200%20%20%20scope%3A%20%2A%3C%2Ftext%3E%3Ctext%20x%3D%22176%22%20y%3D%22190%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eallowance%28owner%2C%20spender%29%20%E2%86%92%20%E2%88%9E%3C%2Ftext%3E%3Ctext%20x%3D%2258%22%20y%3D%22222%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3EspendPermission%7B%20token%2C%20allowance%20%7D%3C%2Ftext%3E%3Ctext%20x%3D%22222%22%20y%3D%22254%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3E0xff%E2%80%A6ff%20%20reach%3A%20entire%20balance%3C%2Ftext%3E%3Ctext%20x%3D%2214%22%20y%3D%22288%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eeth_signTypedData_v4%20%20%C2%B7%20%20chainId%208453%3C%2Ftext%3E%3Ctext%20x%3D%22200%22%20y%3D%22320%22%20fill%3D%22%2523FF5F4E%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eapprove%280x2c6f%E2%80%A6e8a1%2C%202%5E256-1%29%3C%2Ftext%3E%3C%2Fsvg%3E");opacity:.085}
+.field .bound{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22440%22%20height%3D%22352%22%3E%3Crect%20width%3D%22440%22%20height%3D%22352%22%20fill%3D%22none%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2226%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eapprove%280x7a3f%E2%80%A619c4%2C%202%5E256-1%29%3C%2Ftext%3E%3Ctext%20x%3D%22188%22%20y%3D%2258%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3E0x095ea7b3%20%20ffffffff%E2%80%A6ffffffff%3C%2Ftext%3E%3Ctext%20x%3D%2234%22%20y%3D%2292%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3EsetApprovalForAll%280x4b1e%E2%80%A6%2C%20true%29%3C%2Ftext%3E%3Ctext%20x%3D%22246%22%20y%3D%22124%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Epermit%28spender%2C%20value%3Dunlimited%29%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22158%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eexpiry%3A%20none%20%20%20nonce%3A%200%20%20%20scope%3A%20%2A%3C%2Ftext%3E%3Ctext%20x%3D%22176%22%20y%3D%22190%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eallowance%28owner%2C%20spender%29%20%E2%86%92%20%E2%88%9E%3C%2Ftext%3E%3Ctext%20x%3D%2258%22%20y%3D%22222%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3EspendPermission%7B%20token%2C%20allowance%20%7D%3C%2Ftext%3E%3Ctext%20x%3D%22222%22%20y%3D%22254%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3E0xff%E2%80%A6ff%20%20reach%3A%20entire%20balance%3C%2Ftext%3E%3Ctext%20x%3D%2214%22%20y%3D%22288%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eeth_signTypedData_v4%20%20%C2%B7%20%20chainId%208453%3C%2Ftext%3E%3Ctext%20x%3D%22200%22%20y%3D%22320%22%20fill%3D%22%25232FE0BC%22%20fill-opacity%3D%22.85%22%20font-family%3D%22ui-monospace%2Cmonospace%22%20font-size%3D%2211%22%20letter-spacing%3D%220.6%22%3Eapprove%280x2c6f%E2%80%A6e8a1%2C%202%5E256-1%29%3C%2Ftext%3E%3C%2Fsvg%3E")}
+.app.bounded .field .unbound{opacity:0}
+.app.bounded .field .bound{opacity:.085}
+@keyframes drift{to{transform:translate3d(-440px,-352px,0)}}
+/* a faint lattice, the boundaries themselves */
+.field .grid{position:absolute;inset:0;opacity:.55;
+ background-image:linear-gradient(var(--line) 1px,transparent 1px),
+   linear-gradient(90deg,var(--line) 1px,transparent 1px);
+ background-size:88px 88px;animation:none;
+ -webkit-mask:radial-gradient(105% 72% at 50% 44%,#0000 20%,#000 82%);
+ mask:radial-gradient(105% 72% at 50% 44%,#0000 20%,#000 82%)}
+.app>*:not(.field){position:relative;z-index:1}
+@media (prefers-reduced-motion:reduce){.field b{animation:none}}
+</style>
+<div class="app" id="app">
+  <div class="field" aria-hidden="true"><b class="grid"></b><b class="unbound"></b><b class="bound"></b></div>
+  <header class="bar">
+    <div class="logo">Sfera<i>Onchain</i></div>
+    <a class="btn" href="https://www.linkedin.com/in/khumalo-leslie/">Get in touch</a>
+  </header>
+  <main class="deck">
+    <div class="scene">
+      <div class="frame"><div class="belt" id="belt">
+        <div class="card"><div class="copy"><div class="snum">Transaction control</div><h2>Know what you <em>sign.</em></h2><p>An application asks for permission to spend your tokens. Your wallet shows you one button. We read what is really being requested, and rewrite it to fit what you were doing.</p></div></div>
+        <div class="card"><div class="copy"><div class="snum">01 &middot; Intent</div><h2>What were you doing?</h2><p>The action you started, before anyone asked you to approve anything.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">Swap <b>100 USDC</b> with app.example.xyz</span></div></div></div>
+        <div class="card"><div class="copy"><div class="snum">02 &middot; Inspect</div><h2>What is it <em>asking</em> for?</h2><p>The raw call decoded into the authority it creates. Not the label on the button, the object underneath it.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">approve(spender, <em>2^256&minus;1</em>) &middot; ERC-20 &middot; no expiry field</span></div></div></div>
+        <div class="card bad"><div class="copy"><div class="snum">03 &middot; Decide</div><h2>Far <em>wider</em> than needed.</h2><p>You are spending a hundred. The request reaches your whole balance and every deposit you make after it, permanently.</p><div class="conc"><span class="ck">Concludes</span><span class="cv"><em>Over-requested.</em> The action needs 100. The request reaches the entire balance and every future deposit.</span></div></div></div>
+        <div class="card"><div class="copy"><div class="snum">04 &middot; Fix</div><h2>So we <em>rewrite</em> it.</h2><p>The smallest permission that still completes what you wanted, with an expiry attached where none existed.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">approve(spender, <b>100 USDC</b>) &middot; expires in 30 minutes</span></div></div></div>
+        <div class="card"><div class="copy"><div class="snum">05 &middot; Authorize</div><h2>Your wallet. <em>Never ours.</em></h2><p>We hand over an unsigned payload and stop. Accept the correction, keep the original, or walk away.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">Unsigned payload handed to your wallet. <b>You sign, or you refuse.</b></span></div></div></div>
+        <div class="card"><div class="copy"><div class="snum">06 &middot; Verify</div><h2>Confirm what <em>landed.</em></h2><p>Read the chain back. The stated intent and the resulting onchain state have to agree, or it is not done.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">allowance = <b>100 USDC</b> &middot; matches intent</span></div></div></div>
+        <div class="card"><div class="copy"><div class="snum">07 &middot; Monitor</div><h2>It <em>stays</em> visible.</h2><p>Standing authority stays visible for as long as it exists, and takes one action to revoke.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">1 open permission &middot; expires in 28 minutes</span></div></div></div>
+        <div class="card"><div class="copy"><div class="snum">Design partners</div><h2>Build it <em>with us.</em></h2><p>If your users are granting standing authority and you would rather they understood it, we want to build the first integration with you.</p><div class="who"><span>Leslie Khumalo &middot; <a href="https://www.linkedin.com/in/khumalo-leslie/">Engineering</a></span><span>Blagoja Mojsoski &middot; <a href="https://www.linkedin.com/in/blagoja-mojsoski-228b79b1/">Product and quality</a></span></div></div></div>
+      </div></div>
+      <div class="slot">
+        <div class="sheet off" id="sheet">
+          <div class="sh"><i></i>app.example.xyz<b><svg viewBox="0 0 1280 1280" role="img" aria-label="Base"><path d="M0,101.12c0-34.64,0-51.95,6.53-65.28,6.25-12.76,16.56-23.07,29.32-29.32C49.17,0,66.48,0,101.12,0h1077.76c34.63,0,51.96,0,65.28,6.53,12.75,6.25,23.06,16.56,29.32,29.32,6.52,13.32,6.52,30.64,6.52,65.28v1077.76c0,34.63,0,51.96-6.52,65.28-6.26,12.75-16.57,23.06-29.32,29.32-13.32,6.52-30.65,6.52-65.28,6.52H101.12c-34.64,0-51.95,0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z"/></svg></b></div>
+          <div class="sb">
+            <h3>Allow access to USDC?</h3>
+            <small>This site is requesting permission to spend your tokens.</small>
+            <span class="oneb">Approve</span>
+            <div class="onenote">One button. That is all you get.</div>
+          </div>
+        </div>
+
+        <aside class="perm off" id="perm" aria-live="polite">
+          <div class="rhead"><span class="rt">Access receipt</span><span class="rs" id="pSt">Unbounded</span></div>
+          <div class="rbody">
+            <dl class="prow lead"><dt>Amount</dt><dd id="pAmt">Unlimited</dd></dl>
+            <dl class="prow"><dt>Expires</dt><dd id="pExp">Never</dd></dl>
+            <dl class="prow"><dt>Reaches</dt><dd id="pRch">Entire balance</dd></dl>
+            <dl class="prow"><dt>Exposure</dt><dd id="pExo">8,420 USDC</dd></dl>
+          </div>
+          <div class="rfoot"><span>ERC-20 &middot; approve()</span><span id="pRef">as requested</span></div>
+        </aside>
+      </div>
+    </div>
+    <div class="pathwrap"><div class="peek" id="peek"><div class="pk"></div><ul class="chips"></ul></div><svg id="wave" aria-hidden="true"><g id="track"><path class="bed" id="bed"></path><path class="lit" id="lit"></path><g id="knots"></g></g><circle class="tx" id="tx" r="6"></circle></svg></div>
+  </main>
+
+  <footer class="rail">
+    <div class="count"><b id="cNow">01</b><s> / 09</s></div>
+    <div class="hint"><span class="nudge"></span>Scroll or <kbd>&rarr;</kbd></div>
+    <div class="arrows"><button id="prev" aria-label="Previous">&#8592;</button><button id="next" aria-label="Next">&#8594;</button></div>
+  </footer>
+</div>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const perm=$("#perm"), sheet=$("#sheet"), app=$("#app");
+const N=9, FIX=4;
+const BEFORE={amt:"Unlimited",exp:"Never",rch:"Entire balance",exo:"8,420 USDC",st:"Unbounded",ref:"as requested"};
+const AFTER ={amt:"100 USDC",exp:"30 minutes",rch:"One spender",exo:"100 USDC",st:"Bounded",ref:"rewritten by Sfera"};
+const BAD=[3];
+/* the receipt reads unbounded from Intent up to Fix, the wave says the same */
+const UNBOUND=k=>k>=1&&k<FIX;
+let i=0, fixed=false;
+
+function setPerm(to,instant){
+  const S=to?AFTER:BEFORE;
+  const write=()=>{$("#pAmt").textContent=S.amt;$("#pExp").textContent=S.exp;$("#pRch").textContent=S.rch;
+    $("#pExo").textContent=S.exo;$("#pSt").textContent=S.st;$("#pRef").textContent=S.ref;
+    perm.classList.remove("swap")};
+  perm.classList.toggle("ok",to);
+  app.classList.toggle("bounded",to);
+  if(instant||reduce){write();return}
+  perm.classList.add("swap"); setTimeout(write,280);
+}
+function chrome(){
+  $("#cNow").textContent=String(i+1).padStart(2,"0");
+  $("#prev").disabled=i===0; $("#next").disabled=i===N-1;
+  app.classList.toggle("warn",BAD.includes(i));
+  /* step 01 shows the one button, 02 onward shows what it actually meant */
+  /* the trap on the opening screen, then what it actually meant */
+  sheet.classList.toggle("off",i!==0);
+  perm.classList.toggle("off",i<1||i===N-1);
+  app.classList.toggle("bare",i===N-1);
+  const should=i>=FIX;
+  if(should!==fixed){fixed=should;setPerm(fixed)}
+}
+
+const cards=$$(".card"), wave=$("#wave"), bed=$("#bed"), lit=$("#lit"), tx=$("#tx"), knots=$("#knots");
+const belt=$("#belt"), track=$("#track");
+let L=0, pos=0, dragging=false;
+
+let pitch=200, cx0=0, mid=0;
+const CHECKS=[["Action and amount", "Counterparty", "Human or agent", "One time or standing"], ["ERC-20 · Permit2 · 7715", "Spend Permission fields", "Spender code and age", "Full simulation"], ["Wider than needed", "Reusable after this", "Never expires", "Reaches 8,420 USDC", "Reaches future deposits"], ["Minimum that works", "Expiry attached", "Scoped to one spender", "Rebuilt unsigned"], ["We hold no key", "We never submit", "Refuse and keep original"], ["Allowance equals intent", "No residual approval", "Receipt recorded"], ["Open permissions tracked", "Alert if exposure grows", "One action to revoke"]];
+const pk=document.querySelector("#peek");
+function peek(k){
+  const list=CHECKS[k]||[];
+  if(!list.length){ hidePeek(); return }
+  pk.querySelector(".pk").innerHTML=NAMES[k]+' &middot; <b>'+list.length+'</b> checks';
+  pk.querySelector(".chips").innerHTML=list.map(t=>'<li>'+t+'</li>').join("");
+  pk.classList.add("show");
+}
+function hidePeek(){ pk.classList.remove("show") }
+const NAMES=["Start","Intent","Inspect","Decide","Fix","Authorize","Verify","Monitor","Partners"];
+
+function build(){
+  const w=wave.clientWidth, h=wave.clientHeight;
+  wave.setAttribute("viewBox","0 0 "+w+" "+h);
+  pitch=Math.max(120,Math.min(230,w/3.6));
+  cx0=w/2; mid=h/2;
+  const amp=Math.min(h*0.34,28);
+  let d="M 0 "+mid;
+  for(let k=1;k<N;k++){
+    const x0=(k-1)*pitch, x1=k*pitch, dx=pitch;
+    const bow=mid+((k%2)?-amp:amp);
+    d+=" C "+(x0+dx*0.34)+" "+bow+" "+(x0+dx*0.66)+" "+bow+" "+x1+" "+mid;
+  }
+  bed.setAttribute("d",d); lit.setAttribute("d",d);
+  L=lit.getTotalLength(); lit.style.strokeDasharray=L;
+  knots.innerHTML=Array.from({length:N},(_,k)=>
+    '<circle class="halo" data-h="'+k+'" cx="'+(k*pitch)+'" cy="'+mid+'" r="12"/>'+
+    '<circle class="knot" data-k="'+k+'" cx="'+(k*pitch)+'" cy="'+mid+'" r="4.5"/>'+
+    '<text class="lbl" data-t="'+k+'" x="'+(k*pitch)+'" y="'+(mid+24)+'">'+NAMES[k]+'</text>'+
+    '<circle class="hit" data-j="'+k+'" cx="'+(k*pitch)+'" cy="'+mid+'" r="18"/>').join("");
+  $$("#knots .hit").forEach(c=>{
+    const k=+c.dataset.j;
+    c.addEventListener("click",()=>go(k));
+    c.addEventListener("pointerenter",()=>peek(k));
+    c.addEventListener("pointerleave",hidePeek);
+  });
+  render();
+}
+
+function render(){
+  /* the copy does not travel, it changes on whichever node is nearest */
+  const cur=Math.round(pos);
+  cards.forEach((c,k)=>c.classList.toggle("on",k===cur));
+  if(L){
+    /* the wave rides the same position, so the focused node sits at centre */
+    const shift=cx0-pos*pitch;
+    track.setAttribute("transform","translate("+shift+",0)");
+    lit.style.strokeDashoffset=L*(1-pos/(N-1));
+    const warn=UNBOUND(Math.round(pos));
+    lit.classList.toggle("bad",warn);
+    tx.classList.toggle("ok",pos>=FIX-0.5);
+    tx.setAttribute("cx",cx0); tx.setAttribute("cy",mid);
+    /* only visible when a node is actually under it, not while passing between */
+    const off=Math.abs(pos-Math.round(pos));
+    tx.style.opacity=Math.max(0,1-off*3.2).toFixed(3);
+    $$("#knots .knot").forEach((c,k)=>{
+      const d=Math.abs(k-pos), near=Math.max(0,1-d);
+      c.setAttribute("r",(4.5+near*3.6).toFixed(2));
+      c.classList.toggle("past",k<pos-0.5);
+      c.classList.toggle("here",d<0.22);
+      c.classList.toggle("bad",UNBOUND(k));
+    });
+    $$("#knots .halo").forEach((c,k)=>{
+      const near=Math.max(0,1-Math.abs(k-pos)*1.8);
+      c.setAttribute("r",(12+near*9).toFixed(2));
+      c.style.opacity=(near*0.5).toFixed(3);
+      c.classList.toggle("bad",UNBOUND(k));
+    });
+    $$("#knots .lbl").forEach((t,k)=>{
+      const near=Math.max(0,1-Math.abs(k-pos)*1.4);
+      t.style.opacity=near.toFixed(3);
+      t.style.fill=UNBOUND(k)?"var(--bad)":"var(--ok)";
+    });
+  }
+  if(cur!==i){ i=cur; chrome() }
+}
+let easeT=0;
+function go(n){
+  n=Math.max(0,Math.min(N-1,n));
+  wave.classList.add("ease");
+  pos=n; render();
+  clearTimeout(easeT);
+  easeT=setTimeout(()=>wave.classList.remove("ease"),540);
+}
+addEventListener("resize",build,{passive:true});
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
+build();
+$("#next").addEventListener("click",()=>go(i+1));
+$("#prev").addEventListener("click",()=>go(i-1));
+/* the wheel moves the belt itself, one to one, then it settles to the nearest step */
+/* the belt rests wherever you leave it, it is never pulled to a node */
+const STEP_PX=430;
+addEventListener("wheel",e=>{
+  e.preventDefault();
+  wave.classList.remove("ease");
+  pos=Math.max(0,Math.min(N-1,pos+e.deltaY/STEP_PX));
+  render();
+},{passive:false});
+
+addEventListener("keydown",e=>{
+  const k=e.key;
+  if(k==="ArrowRight"||k==="ArrowDown"||k===" "||k==="PageDown"){e.preventDefault();go(Math.round(pos)+1)}
+  else if(k==="ArrowLeft"||k==="ArrowUp"||k==="PageUp"){e.preventDefault();go(Math.round(pos)-1)}
+  else if(k==="Home"){e.preventDefault();go(0)} else if(k==="End"){e.preventDefault();go(N-1)}
+});
+
+/* touch drags the belt under the finger */
+let t0=null, p0=0;
+addEventListener("touchstart",e=>{
+  t0={x:e.touches[0].clientX,y:e.touches[0].clientY}; p0=pos;
+  wave.classList.remove("ease"); dragging=true;
+},{passive:true});
+addEventListener("touchmove",e=>{
+  if(!t0) return;
+  e.preventDefault();
+  const dx=t0.x-e.touches[0].clientX, dy=t0.y-e.touches[0].clientY;
+  const d=Math.abs(dx)>Math.abs(dy)?dx:dy;
+  pos=Math.max(0,Math.min(N-1,p0+d/Math.max(180,innerWidth*0.5)));
+  render();
+},{passive:false});
+addEventListener("touchend",()=>{ t0=null; dragging=false; },{passive:true});
+
+setPerm(false,true); i=-1; render();
+</script>
