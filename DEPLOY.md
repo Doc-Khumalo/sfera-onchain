@@ -91,35 +91,29 @@ gh api -X PUT repos/YOUR_GH_USER/sfera-onchain/collaborators/THEIR_GH_USER \
   -f permission=push
 ```
 
-## 3. Cloudflare, the zone
+## 3. Cloudflare Pages, before you touch DNS
 
-Sign up at dash.cloudflare.com. Free plan, no card needed.
+Do this first. It gives you a working `.pages.dev` URL in about a minute and
+proves the build succeeds on Cloudflare's machine. If something is wrong with the
+build you find out here, with your nameservers still untouched and the domain
+still serving its parking page. Nothing about this step is hard to undo.
 
-Use an address you and Blagoja can both reach. That account holds the DNS for the
-company domain and you do not want it behind one personal inbox. There is no
-email on sferaonchain.xyz yet, so it will have to be an outside address for now.
+Sign up at dash.cloudflare.com. Free plan, no card needed. Use an address you and
+Blagoja can both reach — that account will hold the DNS for the company domain and
+you do not want it behind one personal inbox.
 
-Add a site, `sferaonchain.xyz`, Free plan. Cloudflare scans the existing records
-and imports them.
+**The dashboard defaults to Workers, and Cloudflare's own docs lag it.** Going to
+`dash.cloudflare.com/?to=/:account/pages/new`, or to Workers & Pages and Create,
+lands you on a "Create a Worker / Ship something new" card. That is the wrong
+product.
 
-- **Delete** both A records. They point at the GoDaddy parking page.
-- **Keep** the \_dmarc TXT record.
+On that card, ignore the Connect GitHub button and click **Get started**, the link
+at the bottom beside "Looking to deploy Pages?". That is the Pages flow. Then
+**Connect to Git**, authorise GitHub, pick `sfera-onchain`.
 
-Cloudflare then shows you two nameservers, something like
-`xxx.ns.cloudflare.com`. Copy them.
-
-## 4. GoDaddy, the nameservers
-
-GoDaddy, My Products, the domain, Nameservers, Change, "I'll use my own
-nameservers". Paste the two Cloudflare ones. Save.
-
-`.xyz` propagates quickly, usually minutes rather than hours. Cloudflare emails
-you when the zone goes Active. Do not start step 5 before that.
-
-## 5. Cloudflare Pages
-
-Workers and Pages, Create, Pages, Connect to Git. Authorise GitHub, pick
-`sfera-onchain`.
+Workers with static assets would also host this site, but it is a different
+product with different settings, and Pages gives per-pull-request preview URLs
+without extra setup.
 
 - Framework preset **Astro**
 - Build command **`npm run build`**
@@ -128,7 +122,8 @@ Workers and Pages, Create, Pages, Connect to Git. Authorise GitHub, pick
 Cloudflare installs the dependencies and runs the build itself. Nothing is
 committed from `node_modules/` or `dist/` — both are gitignored.
 
-Save and Deploy. About twenty seconds. You get `sfera-onchain.pages.dev`.
+Save and Deploy. You get `sfera-onchain.pages.dev`. **Open it, on a phone as well
+as a laptop, and confirm it is right before going near DNS.**
 
 From here every push to `main` goes live, and every branch and pull request gets
 its own URL. That is the tester's environment and it needs no further setup.
@@ -141,6 +136,27 @@ npm run dev      # http://localhost:4321, live reload
 npm run build    # writes dist/
 npm run preview  # serve dist/ exactly as Cloudflare will
 ```
+
+## 4. Cloudflare, the zone
+
+Only once the `.pages.dev` URL looks right. Same Cloudflare account as step 3.
+
+Add a site, `sferaonchain.xyz`, Free plan. Cloudflare scans the existing records
+and imports them.
+
+- **Delete** both A records. They point at the GoDaddy parking page.
+- **Keep** the \_dmarc TXT record.
+
+Cloudflare then shows you two nameservers, something like
+`xxx.ns.cloudflare.com`. Copy them.
+
+## 5. GoDaddy, the nameservers
+
+GoDaddy, My Products, the domain, Nameservers, Change, "I'll use my own
+nameservers". Paste the two Cloudflare ones. Save.
+
+`.xyz` propagates quickly, usually minutes rather than hours. Cloudflare emails
+you when the zone goes Active. Do not start step 5 before that.
 
 ## 6. The domain on the site
 
