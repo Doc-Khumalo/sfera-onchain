@@ -1,22 +1,55 @@
-import { CONTACT } from '../../data/site.js';
 import Receipt from '../Receipt.jsx';
 
+/**
+ * The hook, not the pitch.
+ *
+ * The previous hero described the product, which requires a reader to already
+ * believe they have a problem. Nobody arrives believing that. So this asks a
+ * question they cannot answer about their own wallet, and then offers to
+ * answer it in the same breath.
+ *
+ * The input is the whole idea. The strongest thing this company owns is a page
+ * that reads a real wallet and finds authority the owner forgot granting, and
+ * burying that behind a nav link wastes it. Show first, explain second.
+ *
+ * It is a plain form with a GET action, so it works before any JavaScript
+ * loads and keeps working if none ever does.
+ */
 export default function Hero() {
   return (
     <section className="hero">
       <div className="hero-type">
-        <p className="filed">TX Guard — transaction control</p>
-        <h1>Control what happens before you sign.</h1>
+        <p className="filed">Sfera Onchain · TX Guard</p>
+
+        <h1>
+          You have approved things<br />
+          you cannot remember.
+        </h1>
+
         <p className="lede">
-          An application asks for permission to spend your tokens. We show what
-          it really wants, and cut it down to what you were doing.
+          Every <em>Approve</em> you have ever tapped may still be live. Reusable,
+          unlimited, and with no expiry date. Most people have never seen the
+          list.
         </p>
-        <div className="links">
-          <a className="btn" href={CONTACT} target="_blank" rel="noopener">
-            Get in touch
-          </a>
-          <a className="btn ghost" href="#how">How it works</a>
-        </div>
+
+        <form className="probe" method="GET" action="/demo">
+          <label htmlFor="hero-addr">See what a wallet can still lose</label>
+          <div className="probe-row">
+            <input
+              id="hero-addr"
+              name="address"
+              placeholder="Paste any wallet address"
+              spellCheck="false"
+              autoComplete="off"
+              aria-describedby="probe-note"
+            />
+            <button type="submit" className="btn">Read it</button>
+          </div>
+          <p id="probe-note" className="probe-note">
+            Read-only, and no wallet needed. Fifteen chains. Nothing is signed,
+            stored, or sent anywhere.
+          </p>
+        </form>
       </div>
 
       <div className="hero-art">

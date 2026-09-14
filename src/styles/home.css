@@ -1235,3 +1235,62 @@ main h2 {
   text-transform: uppercase;
   color: var(--slate);
 }
+
+/* ---- the probe, the hero's whole point --------------------------- */
+
+.probe {
+  margin-top: clamp(30px, 4vh, 44px);
+  max-width: 480px;
+}
+
+.probe label {
+  display: block;
+  margin-bottom: 11px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ok);
+}
+
+.probe-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* A line to write on rather than a box to fill in. The rule brightens on
+   focus so the field reads as the live thing on the page. */
+.probe input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 13px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--line2);
+  background: none;
+  color: var(--ice);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  transition: border-color 0.16s;
+}
+
+.probe input::placeholder { color: var(--slate); }
+.probe input:focus { outline: none; border-bottom-color: var(--ok); }
+
+.probe-note {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--slate);
+}
+
+.hero h1 em,
+.lede em {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 0.9em;
+  color: var(--ice);
+  border-bottom: 1px solid var(--line2);
+}

@@ -1024,3 +1024,80 @@ main h2 {
 }
 
 .c-act { justify-self: end; }
+
+/* ---- the verdict -------------------------------------------------- */
+
+.verdict {
+  padding-top: clamp(30px, 5vh, 52px) !important;
+  padding-bottom: clamp(26px, 4vh, 40px) !important;
+}
+
+.v-kicker {
+  margin: 0 0 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+.v-line {
+  margin: 0;
+  max-width: 21ch;
+  font: 800 clamp(30px, 5.2vw, 56px)/1.04 var(--display);
+  letter-spacing: -0.04em;
+}
+
+/* The count is the fact. It carries the accent, and only when there is
+   something to be concerned about. */
+.verdict.bad .v-line b { color: var(--bad); font-weight: 800; }
+.verdict.ok .v-line { max-width: 26ch; }
+
+.v-amounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: clamp(26px, 4vh, 38px) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.v-amounts li {
+  flex: 1 1 210px;
+  padding: 18px 26px 18px 0;
+  border-right: 1px solid var(--line);
+}
+
+.v-amounts li:last-child { border-right: 0; }
+.v-amounts li + li { padding-left: 26px; }
+
+.va-n {
+  display: block;
+  font: 700 clamp(19px, 2.3vw, 26px)/1.1 var(--mono);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--bad);
+}
+
+.va-l {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--mist);
+}
+
+.v-sub {
+  margin: 26px 0 0;
+  max-width: 58ch;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--mist);
+}
+
+@media (max-width: 720px) {
+  .v-amounts li { flex: 1 1 100%; border-right: 0; border-bottom: 1px solid var(--line); padding-left: 0 !important; }
+}

@@ -8,6 +8,7 @@ import Ledger from './Ledger.jsx';
 import Detail from './Detail.jsx';
 import Handoff from './Handoff.jsx';
 import HowItReads from './HowItReads.jsx';
+import Verdict from './Verdict.jsx';
 
 /** A public address carrying unbounded approvals against a real balance.
     Verified before being written down, so the page has something honest to
@@ -54,7 +55,20 @@ export default function Dashboard() {
 
   useEffect(() => {
     discover().then(setWallets);
-    fetchChains().then(setSupported).catch(() => setSupported([]));
+    fetchChains()
+      .then((cs) => {
+        setSupported(cs);
+        /* The homepage hands an address over in the query string. Completing
+           the read here rather than presenting an empty form is the point of
+           asking for it there. */
+        const handed = new URLSearchParams(window.location.search).get('address');
+        if (handed && isAddress(handed.trim())) {
+          setMode('lookup');
+          setAddress(handed.trim());
+          setChainId(EXAMPLE.chainId);
+        }
+      })
+      .catch(() => setSupported([]));
   }, []);
 
   const refresh = useCallback(async () => {
@@ -250,22 +264,11 @@ export default function Dashboard() {
 
       {chain && status !== 'error' && (
         <>
-          <section className="summary">
-            <dl>
-              {[
-                { k: 'Live permissions', v: perms.length, note: result?.readAt ? `Read ${new Date(result.readAt).toLocaleTimeString()}` : 'Read from the chain' },
-                { k: 'Unbounded', v: unbounded, note: 'No limit, no expiry' },
-                { k: 'Needs attention', v: attention, note: 'Unbounded, over-wide or unreadable' },
-                { k: 'Applications', v: apps, note: 'Able to act again' },
-              ].map(({ k, v, note }) => (
-                <div key={k}>
-                  <dt>{k}</dt>
-                  <dd>{status === 'scanning' ? '—' : v}</dd>
-                  <dd className="s-note">{note}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
+          <Verdict
+            perms={perms}
+            readAt={result?.readAt}
+            scanning={status === 'scanning'}
+          />
 
           <HowItReads
             checked={result?.checked}
