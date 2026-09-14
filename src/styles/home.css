@@ -1850,14 +1850,14 @@ main h2 {
  */
 .lp-verdict {
   display: grid;
-  margin-top: 9px;
-  max-width: 44ch;
+  margin-top: 7px;
+  max-width: 48ch;
 }
 .lp-verdict > span {
   grid-area: 1 / 1;
-  font: 600 clamp(17px, 1.75vw, 21px)/1.28 var(--display);
-  letter-spacing: -0.02em;
-  color: var(--paper);
+  font: 400 13.5px/1.4 var(--display);
+  letter-spacing: 0;
+  color: var(--mist);
 }
 .lp-verdict .was { animation: lpVerdictWas var(--loop) linear infinite; }
 .lp-verdict .now { opacity: 0; animation: lpVerdictNow var(--loop) linear infinite; }
@@ -1874,20 +1874,24 @@ main h2 {
 /* Counts down as each permission is corrected. An integer, not a currency:
    the currency is stated once, beside it, and marked indicative. */
 .lp-count {
-  font-weight: 700;
-  color: var(--bad);
+  font-weight: 600;
+  color: var(--paper);
   counter-reset: lpn var(--lp-n);
   animation: lpCount var(--loop) linear infinite;
 }
 
 .lp-count::after { content: counter(lpn); }
 
+/* Steps with the rows, and never between them. Each hold ends a hundredth of
+   a percent before the next begins: sharing an offset would let the later
+   declaration win and turn every step into a slow interpolation, so the
+   count would read 2 while two permissions were still unbounded. */
 @keyframes lpCount {
-  0%, 7%    { --lp-n: 0; color: var(--slate); }
-  9%, 26%   { --lp-n: 3; color: var(--bad); }
-  30%, 38%  { --lp-n: 2; color: var(--bad); }
-  42%, 50%  { --lp-n: 1; color: var(--bad); }
-  54%, 100% { --lp-n: 0; color: var(--bad); }
+  0%, 8.99%     { --lp-n: 0; color: var(--slate); }
+  9%, 29.99%    { --lp-n: 3; color: var(--bad); }
+  30%, 41.99%   { --lp-n: 2; color: var(--bad); }
+  42%, 53.99%   { --lp-n: 1; color: var(--bad); }
+  54%, 100%     { --lp-n: 0; color: var(--paper); }
 }
 
 .lp-scan {
@@ -1902,6 +1906,138 @@ main h2 {
   0%        { transform: translateX(-110%); opacity: 1; }
   7%        { transform: translateX(360%); opacity: 1; }
   8%, 100%  { transform: translateX(360%); opacity: 0; }
+}
+
+/* Roll machinery lives in global.css; both entry pages use it. */
+.roll-a1 { animation: rlA1 var(--loop) linear infinite; }
+.roll-a1 .g { animation: rlA1G var(--loop) linear infinite; }
+.roll-a1 .p { animation: rlA1P var(--loop) linear infinite; }
+.roll-u1 { animation: rlU1 var(--loop) linear infinite; }
+.roll-u1 .g { animation: rlU1G var(--loop) linear infinite; }
+.roll-u1 .p { animation: rlU1P var(--loop) linear infinite; }
+/* Never reaches a thousand, so its grouped spelling would only add width.
+   See the note in alt.css. */
+.roll-a2 .g { display: none; }
+.roll-a2 { animation: rlA2 var(--loop) linear infinite; }
+.roll-a2 .g { animation: rlA2G var(--loop) linear infinite; }
+.roll-a2 .p { animation: rlA2P var(--loop) linear infinite; }
+.roll-u2 { animation: rlU2 var(--loop) linear infinite; }
+.roll-u2 .g { animation: rlU2G var(--loop) linear infinite; }
+.roll-u2 .p { animation: rlU2P var(--loop) linear infinite; }
+.roll-a3 { animation: rlA3 var(--loop) linear infinite; }
+.roll-a3 .g { animation: rlA3G var(--loop) linear infinite; }
+.roll-a3 .p { animation: rlA3P var(--loop) linear infinite; }
+.roll-u3 { animation: rlU3 var(--loop) linear infinite; }
+.roll-u3 .g { animation: rlU3G var(--loop) linear infinite; }
+.roll-u3 .p { animation: rlU3P var(--loop) linear infinite; }
+.roll-sum { animation: rlSum var(--loop) linear infinite; }
+.roll-sum .g { animation: rlSumG var(--loop) linear infinite; }
+.roll-sum .p { animation: rlSumP var(--loop) linear infinite; }
+
+@keyframes rlA1 {
+  0%, 23% { --ti: 21; --lo: 339; --pl: 21339; --fr: 49; color: var(--bad); }
+  24.75% { --ti: 9; --lo: 63; --pl: 9063; --fr: 6; color: var(--bad); }
+  26.5% { --ti: 2; --lo: 754; --pl: 2754; --fr: 94; color: var(--bad); }
+  28.25% { --ti: 0; --lo: 439; --pl: 439; --fr: 83; color: var(--bad); }
+  30% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; color: var(--ok); }
+  99%   { --ti: 0; --lo: 100; --pl: 100; --fr: 0; color: var(--ok); }
+  99.01%, 100% { --ti: 21; --lo: 339; --pl: 21339; --fr: 49; color: var(--bad); }
+}
+@keyframes rlA1G { 0%, 28.24% { opacity: 1; } 28.25%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes rlA1P { 0%, 28.24% { opacity: 0; } 28.25%, 99% { opacity: 1; } 99.01%, 100% { opacity: 0; } }
+@keyframes rlU1 {
+  0%, 23% { --ti: 21; --lo: 339; --pl: 21339; --fr: 0; color: var(--slate); }
+  24.75% { --ti: 9; --lo: 63; --pl: 9063; --fr: 0; color: var(--slate); }
+  26.5% { --ti: 2; --lo: 755; --pl: 2755; --fr: 0; color: var(--slate); }
+  28.25% { --ti: 0; --lo: 440; --pl: 440; --fr: 0; color: var(--slate); }
+  30% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; color: var(--slate); }
+  99%   { --ti: 0; --lo: 100; --pl: 100; --fr: 0; color: var(--slate); }
+  99.01%, 100% { --ti: 21; --lo: 339; --pl: 21339; --fr: 0; color: var(--slate); }
+}
+@keyframes rlU1G { 0%, 28.24% { opacity: 1; } 28.25%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes rlU1P { 0%, 28.24% { opacity: 0; } 28.25%, 99% { opacity: 1; } 99.01%, 100% { opacity: 0; } }
+@keyframes rlA2 {
+  0%, 35% { --ti: 0; --lo: 2; --pl: 2; --fr: 4816; color: var(--bad); }
+  36.75% { --ti: 0; --lo: 1; --pl: 1; --fr: 472; color: var(--bad); }
+  38.5% { --ti: 0; --lo: 0; --pl: 0; --fr: 3102; color: var(--bad); }
+  40.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 397; color: var(--bad); }
+  42% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; color: var(--mist); }
+  99%   { --ti: 0; --lo: 0; --pl: 0; --fr: 0; color: var(--mist); }
+  99.01%, 100% { --ti: 0; --lo: 2; --pl: 2; --fr: 4816; color: var(--bad); }
+}
+@keyframes rlA2G { 0%, 34.99% { opacity: 0; } 35%, 99% { opacity: 0; } 99.01%, 100% { opacity: 0; } }
+@keyframes rlA2P { 0%, 34.99% { opacity: 1; } 35%, 99% { opacity: 1; } 99.01%, 100% { opacity: 1; } }
+@keyframes rlU2 {
+  0%, 35% { --ti: 9; --lo: 432; --pl: 9432; --fr: 0; color: var(--slate); }
+  36.75% { --ti: 3; --lo: 980; --pl: 3980; --fr: 0; color: var(--slate); }
+  38.5% { --ti: 1; --lo: 179; --pl: 1179; --fr: 0; color: var(--slate); }
+  40.25% { --ti: 0; --lo: 151; --pl: 151; --fr: 0; color: var(--slate); }
+  42% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; color: var(--slate); }
+  99%   { --ti: 0; --lo: 0; --pl: 0; --fr: 0; color: var(--slate); }
+  99.01%, 100% { --ti: 9; --lo: 432; --pl: 9432; --fr: 0; color: var(--slate); }
+}
+@keyframes rlU2G { 0%, 40.24% { opacity: 1; } 40.25%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes rlU2P { 0%, 40.24% { opacity: 0; } 40.25%, 99% { opacity: 1; } 99.01%, 100% { opacity: 0; } }
+@keyframes rlA3 {
+  0%, 47% { --ti: 7; --lo: 204; --pl: 7204; --fr: 0; color: var(--bad); }
+  48.75% { --ti: 3; --lo: 184; --pl: 3184; --fr: 59; color: var(--bad); }
+  50.5% { --ti: 1; --lo: 119; --pl: 1119; --fr: 25; color: var(--bad); }
+  52.25% { --ti: 0; --lo: 361; --pl: 361; --fr: 26; color: var(--bad); }
+  54% { --ti: 0; --lo: 250; --pl: 250; --fr: 0; color: var(--ok); }
+  99%   { --ti: 0; --lo: 250; --pl: 250; --fr: 0; color: var(--ok); }
+  99.01%, 100% { --ti: 7; --lo: 204; --pl: 7204; --fr: 0; color: var(--bad); }
+}
+@keyframes rlA3G { 0%, 52.24% { opacity: 1; } 52.25%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes rlA3P { 0%, 52.24% { opacity: 0; } 52.25%, 99% { opacity: 1; } 99.01%, 100% { opacity: 0; } }
+@keyframes rlU3 {
+  0%, 47% { --ti: 7; --lo: 204; --pl: 7204; --fr: 0; color: var(--slate); }
+  48.75% { --ti: 3; --lo: 185; --pl: 3185; --fr: 0; color: var(--slate); }
+  50.5% { --ti: 1; --lo: 119; --pl: 1119; --fr: 0; color: var(--slate); }
+  52.25% { --ti: 0; --lo: 361; --pl: 361; --fr: 0; color: var(--slate); }
+  54% { --ti: 0; --lo: 250; --pl: 250; --fr: 0; color: var(--slate); }
+  99%   { --ti: 0; --lo: 250; --pl: 250; --fr: 0; color: var(--slate); }
+  99.01%, 100% { --ti: 7; --lo: 204; --pl: 7204; --fr: 0; color: var(--slate); }
+}
+@keyframes rlU3G { 0%, 52.24% { opacity: 1; } 52.25%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes rlU3P { 0%, 52.24% { opacity: 0; } 52.25%, 99% { opacity: 1; } 99.01%, 100% { opacity: 0; } }
+@keyframes rlSum {
+  0%, 51% { --ti: 37; --lo: 975; --pl: 37975; --fr: 0; color: var(--bad); }
+  52.75% { --ti: 16; --lo: 228; --pl: 16228; --fr: 0; color: var(--bad); }
+  54.5% { --ti: 5; --lo: 53; --pl: 5053; --fr: 0; color: var(--bad); }
+  56.25% { --ti: 0; --lo: 952; --pl: 952; --fr: 0; color: var(--bad); }
+  58% { --ti: 0; --lo: 350; --pl: 350; --fr: 0; color: var(--ok); }
+  99%   { --ti: 0; --lo: 350; --pl: 350; --fr: 0; color: var(--ok); }
+  99.01%, 100% { --ti: 37; --lo: 975; --pl: 37975; --fr: 0; color: var(--bad); }
+}
+@keyframes rlSumG { 0%, 56.24% { opacity: 1; } 56.25%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes rlSumP { 0%, 56.24% { opacity: 0; } 56.25%, 99% { opacity: 1; } 99.01%, 100% { opacity: 0; } }
+
+
+/* The headline figure is the whole argument in one number, so it persists
+   and falls rather than being replaced by a different sentence. */
+.lp-sum {
+  margin-top: 7px;
+  font: 700 clamp(30px, 3.4vw, 42px)/1 var(--display);
+  letter-spacing: -0.035em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roll, .roll * { animation: none !important; }
+  /* With the animation off, every figure still has to be a real number.
+     The registered initial value is 0, which would render every amount as
+     zero and state the opposite of what the panel found, so each roll pins
+     its found state and shows the spelling that fits it. */
+  .roll .g, .roll .p { opacity: 0; }
+  .roll-a1 { --ti: 21; --lo: 339; --fr: 49; }
+  .roll-u1 { --ti: 21; --lo: 339; }
+  .roll-a2 { --pl: 2;  --fr: 4816; }
+  .roll-u2 { --ti: 9;  --lo: 432; }
+  .roll-a3 { --ti: 7;  --lo: 204; --fr: 0; }
+  .roll-u3 { --ti: 7;  --lo: 204; }
+  .roll-sum { --ti: 37; --lo: 975; }
+  .roll-a1 .g, .roll-u1 .g, .roll-u2 .g,
+  .roll-a3 .g, .roll-u3 .g, .roll-sum .g { opacity: 1; }
+  .roll-a2 .p { opacity: 1; }
 }
 
 .lp-cols,
@@ -1972,10 +2108,13 @@ main h2 {
 
 /* Token amount over its dollar value. The dollar line is deliberately quiet
    and never takes the row's outcome colour: it conveys scale, and no reading
-   is derived from it. */
-.lp-amt > span { display: grid; gap: 4px; line-height: 1; }
-.lp-amt b { font: inherit; font-weight: 400; }
-.lp-amt i { font: 400 11px/1 var(--mono); font-style: normal; color: var(--slate); }
+   is derived from it.
+
+   The cell stacks two rolls; neither roll may wrap internally, or a figure
+   mid-count breaks across lines as its digits change width. */
+.lp-amt { display: grid; gap: 4px; justify-items: start; line-height: 1; }
+.lp-amt .roll { font: 400 12.5px/1 var(--mono); white-space: nowrap; }
+.lp-amt .roll.usd { font-size: 11px; color: var(--slate); }
 .lp-swap .was { color: var(--bad); }
 .lp-swap .now { color: var(--ok); }
 
@@ -2024,11 +2163,11 @@ main h2 {
 .lp-r3 .now { animation: lpNow3 var(--loop) linear infinite; }
 
 @keyframes lpWas1 { 0%, 23% { opacity: 1; } 26%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
-@keyframes lpNow1 { 0%, 26% { opacity: 0; transform: translateY(4px); } 30%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
+@keyframes lpNow1 { 0%, 26% { opacity: 0; transform: translateY(4px); } 27.5%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
 @keyframes lpWas2 { 0%, 35% { opacity: 1; } 38%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
-@keyframes lpNow2 { 0%, 38% { opacity: 0; transform: translateY(4px); } 42%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
+@keyframes lpNow2 { 0%, 38% { opacity: 0; transform: translateY(4px); } 39.5%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
 @keyframes lpWas3 { 0%, 47% { opacity: 1; } 50%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
-@keyframes lpNow3 { 0%, 50% { opacity: 0; transform: translateY(4px); } 54%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
+@keyframes lpNow3 { 0%, 50% { opacity: 0; transform: translateY(4px); } 51.5%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
 
 /* the strike, travelling across the granted value only */
 .lp-row > .lp-swap:first-of-type::after {

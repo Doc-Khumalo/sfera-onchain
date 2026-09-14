@@ -89,3 +89,50 @@ a { color: inherit; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ---- Rolling numbers -------------------------------------------------
+ *
+ * Numbers must not blink out and reappear. A figure falling from 21,339 to
+ * 100 is the argument this panel makes, and a reader should watch it fall
+ * rather than be shown two unrelated states.
+ *
+ * The homepage ships no JavaScript, so this is CSS: a custom property
+ * registered as <integer> is animatable, and counter() renders it.
+ *
+ * Thousands grouping is the awkward part, because CSS counters do not group
+ * and there is no conditional to notice when a thousands group reaches zero.
+ * Each figure therefore carries both spellings — grouped and plain — and they
+ * swap on the exact frame the thousands group empties. That frame is computed
+ * from the values themselves (scratchpad/genroll.py) rather than eyeballed,
+ * so the comma can never survive a frame longer than the digits it groups.
+ *
+ * Stops are eased, not linear: the roll moves fast and settles.
+ */
+@property --ti { syntax: '<integer>'; inherits: true; initial-value: 0; }
+@property --lo { syntax: '<integer>'; inherits: true; initial-value: 0; }
+@property --pl { syntax: '<integer>'; inherits: true; initial-value: 0; }
+@property --fr { syntax: '<integer>'; inherits: true; initial-value: 0; }
+
+@counter-style pad3 { system: numeric; symbols: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"; pad: 3 "0"; }
+@counter-style pad2 { system: numeric; symbols: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"; pad: 2 "0"; }
+@counter-style pad4 { system: numeric; symbols: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"; pad: 4 "0"; }
+
+.roll {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  counter-reset: ti var(--ti) lo var(--lo) pl var(--pl) fr var(--fr);
+  font-variant-numeric: tabular-nums;
+}
+/* Both spellings occupy one cell so the swap cannot shift the layout. */
+.roll .rnum { display: inline-grid; justify-items: start; }
+.roll .rnum > i { grid-area: 1 / 1; font-style: normal; }
+.roll .g::after { content: counter(ti) "," counter(lo, pad3); }
+.roll .p::after { content: counter(pl); }
+.roll.d2 .g::after { content: counter(ti) "," counter(lo, pad3) "." counter(fr, pad2); }
+.roll.d2 .p::after { content: counter(pl) "." counter(fr, pad2); }
+.roll.d4 .g::after { content: counter(ti) "," counter(lo, pad3) "." counter(fr, pad4); }
+.roll.d4 .p::after { content: counter(pl) "." counter(fr, pad4); }
+.roll.usd::before { content: "$"; }
+

@@ -247,6 +247,14 @@ one, Rollback. It is instant and does not need a git revert.
 - `how-it-works.html` renders blank with JavaScript disabled. The homepage does not.
 - No analytics. Cloudflare Web Analytics is free, needs no cookie banner, and is
   one script tag.
+- **Blocker before either entry page goes live.** The three market figures —
+  $17B stolen through scams and fraud in 2025 (Chainalysis), 741M own crypto
+  (Crypto.com), 40–70M use it onchain (a16z) — were flagged in review as not
+  matching their published sources. They now appear on both `/` and `/alt`,
+  beside real company marks, which turns a sourcing error into a
+  misattribution. Verify each against the Business Plan and the cited report,
+  then correct the figure or drop the claim. Do not ship either page with
+  these unverified.
 
 
 ## Live configuration, as built

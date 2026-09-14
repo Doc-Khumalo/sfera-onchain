@@ -1,0 +1,240 @@
+---
+/**
+ * Alternative entry point, for the co-founder to choose against `/`.
+ *
+ * Deliberately self-contained: its own stylesheet, its own markup, no shared
+ * section components. Whichever direction loses gets deleted in one commit
+ * rather than untangled, and neither can quietly drift into the other.
+ *
+ * Where `/` argues by sequence — a ledger that finds permissions and then
+ * corrects them over eighteen seconds — this one argues by tableau. One
+ * frozen moment showing the whole loop at once: the wallet's standing
+ * authority behind, the requested-versus-required comparison in front of it,
+ * and the on-chain read-back that proves the correction landed.
+ *
+ * Figures are the flagship case from the specification set: an application
+ * requesting unlimited USDC against 8,420 reachable, where the action needed
+ * 100, leaving 8,320 of excess to remove. Labelled as an example throughout,
+ * on example.xyz domains, because a marketing page showing invented wallet
+ * data must not be mistakable for a measurement.
+ *
+ * Ships no JavaScript, like `/`.
+ */
+import Base from '../layouts/Base.astro';
+import { CONTACT } from '../data/site.js';
+import '../styles/alt.css';
+
+const NAV = [
+  ['Product', '#loop'],
+  ['Coverage', '#coverage'],
+  ['Developers', '#developers'],
+  ['Terms', '#terms'],
+];
+
+/* The standing authority a wallet already carries, and what the product does
+   to it.
+
+   Two rows are the fault and both are corrected on screen, by different acts.
+   ExampleSwap still needs an allowance, so it is LIMITED to what the action
+   required. DemoMarket needs none, so it is REVOKED. The remaining three are
+   already bounded and are left alone, because a product that corrects what is
+   already correct is not reading anything.
+
+   The header totals are the sums of the reachable column, so the arithmetic
+   is checkable on screen:
+     8,420 + 1,920 + 2,500 + 100 + 1,200 = 14,140 before
+     less 8,320 limited, less 1,920 revoked  =  3,900 after 
+*/
+const LEDGER = [
+  {
+    app: 'ExampleSwap', host: 'app.example.xyz', asset: 'USDC',
+    grant: 'Unlimited', grantTo: '100.00 USDC', tone: 'bad', toneTo: 'ok',
+    roll: 'au-r1 d2', suffix: null, usd: null,
+    ends: 'never', endsTo: 'on use', fault: 1,
+  },
+  {
+    app: 'DemoMarket', host: 'market.example.xyz', asset: 'Collection',
+    grant: 'All items', grantTo: 'None', tone: 'bad', toneTo: 'gone',
+    roll: 'au-r2', suffix: 'NFTs', usd: 'au-r2u',
+    ends: 'never', endsTo: 'removed', fault: 2,
+  },
+  { app: 'ExampleBridge', host: 'bridge.example.xyz', asset: 'USDC', grant: '2,500.00',     tone: 'warn', roll: 'au-r3 d2', ends: '12 Sep' },
+  { app: 'ExamplePay',    host: 'pay.example.xyz',    asset: 'USDC', grant: '100.00 / day', tone: 'ok',   roll: 'au-r4 d2', ends: 'Fri 18:00' },
+  { app: 'ExampleYield',  host: 'yield.example.xyz',  asset: 'USDC', grant: '1,200.00 / mo',tone: 'ok',   roll: 'au-r5 d2', ends: 'ongoing' },
+];
+
+/* UX Specification §2. These light in order as the animation runs, so the
+   rail reports where in the loop the reader is rather than labelling it. */
+const LOOP = ['Inspect', 'Decide', 'Fix', 'Sign', 'Verify', 'Monitor'];
+
+const STATS = [
+  { n: '$17B',    l: 'stolen through crypto scams and fraud in 2025', src: 'Chainalysis', href: 'https://www.chainalysis.com/blog/crypto-crime-report-introduction/', tone: 'bad' },
+  { n: '741M',    l: 'own crypto',      src: 'Crypto.com', href: 'https://crypto.com/research' },
+  { n: '40–70M',  l: 'use it onchain',  src: 'a16z',       href: 'https://a16zcrypto.com/posts/article/state-of-crypto-report-2024/' },
+];
+---
+
+<Base title="Sfera Onchain — Control what happens before you sign.">
+  <div class="alt">
+    <header class="a-nav">
+      <a class="a-mark" href="/">Sfera <span>Onchain</span></a>
+      <nav>
+        {NAV.map(([label, href]) => <a href={href}>{label}</a>)}
+      </nav>
+      <a class="a-btn a-btn-solid" href={CONTACT} target="_blank" rel="noopener">Get in touch</a>
+    </header>
+
+    <section class="a-hero">
+      <p class="a-eyebrow"><span class="a-dot" aria-hidden="true"></span>Transaction control</p>
+      <h1>Control what happens<br />before you sign.</h1>
+      <p class="a-lede">
+        Most of this category warns. We read what an application is really
+        asking for, cut it to what you were doing, and keep the authority
+        visible for as long as it exists.
+      </p>
+      <div class="a-cta">
+        <a class="a-btn a-btn-mint" href={CONTACT} target="_blank" rel="noopener">Get in touch</a>
+        <a class="a-btn a-btn-ghost" href="#loop">How it works</a>
+      </div>
+    </section>
+
+    <section class="a-stage" aria-label="Example wallet and a correction in progress">
+      <div class="a-console">
+        <span class="a-scan" aria-hidden="true"></span>
+        <div class="a-console-head">
+          <span class="a-wallet">
+            <span class="a-avatar" aria-hidden="true"></span>
+            <b>0x7a3f…19c4</b>
+            <span class="a-chip">Base · 8453</span>
+            <span class="a-chip a-chip-quiet">Example wallet</span>
+          </span>
+          <span class="a-figs">
+            <span><em>Reachable now</em>
+              <b class="bad roll usd a-count au-exp"><span class="rnum"><i class="g" /><i class="p" /></span></b>
+              <i>what others can take today</i>
+            </span>
+            <span><em>Open</em>
+              <b class="roll a-count au-open"><span class="rnum"><i class="g" /><i class="p" /></span></b>
+              <i>live permissions</i>
+            </span>
+            {/* Named for what it is: authority removed, so money no longer at
+                risk. "Reduced $51,440" beside a currency symbol invites the
+                reading that something costs that much. */}
+            <span><em>Put beyond reach, 30d</em>
+              <b class="ok roll usd a-count au-red"><span class="rnum"><i class="g" /><i class="p" /></span></b>
+              <i>removed, not spent</i>
+            </span>
+          </span>
+        </div>
+
+        <table class="a-table">
+          <thead>
+            <tr>
+              <th>Application</th><th>Asset</th><th>Allowance</th>
+              <th>Reachable</th><th>Expires</th>
+            </tr>
+          </thead>
+          <tbody>
+            {LEDGER.map((r) => (
+              <tr class={r.fault ? `a-fault${r.fault}` : undefined}>
+                <td><b>{r.app}</b><em>{r.host}</em></td>
+                <td>{r.asset}</td>
+                <td>
+                  {r.grantTo ? (
+                    <span class={`a-sw a-r${r.fault}`}>
+                      <span class={`was ${r.tone}`}>{r.grant}</span>
+                      <span class={`now ${r.toneTo}`}>{r.grantTo}</span>
+                    </span>
+                  ) : <span class={r.tone}>{r.grant}</span>}
+                </td>
+                <td>
+                  <span class="a-reach">
+                    <span class="a-reach-n">
+                      <span class={`roll a-count ${r.roll}`}>
+                        <span class="rnum"><i class="g" /><i class="p" /></span>
+                      </span>
+                      {r.suffix && <span class="a-nfts">&nbsp;{r.suffix}</span>}
+                    </span>
+                    {/* The collection has no dollar figure of its own, and the
+                        header total is a sum, so its floor value is stated
+                        rather than folded in silently. */}
+                    {r.usd && (
+                      <span class={`roll usd a-count a-reach-usd ${r.usd}`}>
+                        <span class="rnum"><i class="g" /><i class="p" /></span>
+                      </span>
+                    )}
+                  </span>
+                </td>
+                <td class="quiet">
+                  {r.endsTo ? (
+                    <span class={`a-sw a-r${r.fault}`}>
+                      <span class="was">{r.ends}</span>
+                      <span class="now">{r.endsTo}</span>
+                    </span>
+                  ) : r.ends}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* The comparison is the product in one card: requested against
+          required, with the gap quantified and both remedies offered. */}
+      <div class="a-card a-card-bad">
+        <div class="a-card-head">
+          <span>Requested versus required</span>
+          <span class="a-tag a-tag-bad">Limit</span>
+        </div>
+        <div class="a-versus">
+          <span><em>You needed</em>
+            <b class="ok roll d2 a-count au-need"><span class="rnum"><i class="g" /><i class="p" /></span></b>
+          </span>
+          <span><em>It asked for</em><b class="bad">Unlimited</b></span>
+        </div>
+        <p class="a-meta">
+          approve(address,uint256) · 0x095ea7b3<br />
+          USDC 0x8335…2913 · never expires
+        </p>
+        <div class="a-card-cta">
+          <span class="a-act a-btn-press">
+            <span class="was a-btn a-btn-mint a-btn-sm">Limit to 100</span>
+            <span class="now a-btn a-btn-mint a-btn-sm a-btn-done">Limited</span>
+          </span>
+          <span class="a-btn a-btn-ghost a-btn-sm a-alt-act">Revoke</span>
+        </div>
+      </div>
+
+      {/* Verify is the half nobody else ships. The claim is not that we sent
+          a transaction, it is that we read the chain back afterwards. */}
+      <div class="a-card a-card-ok">
+        <div class="a-card-head">
+          <span class="ok">✓ Verified onchain</span>
+        </div>
+        <p class="a-verified-l">Allowance now</p>
+        <p class="a-verified-n roll d2 a-count au-allow"><span class="rnum"><i class="g" /><i class="p" /></span></p>
+        <p class="a-meta">
+          read back at block 21,904,118<br />
+          expires on use · example figures
+        </p>
+      </div>
+    </section>
+
+    <section class="a-rail" id="loop">
+      <ol>
+        {LOOP.map((s) => <li>{s}</li>)}
+      </ol>
+      <p>SDK · Decision API · Widget — 18 formats, ERC-20 → EIP-8130</p>
+    </section>
+
+    <section class="a-stats">
+      {STATS.map((s) => (
+        <p>
+          <b class={s.tone === 'bad' ? 'bad' : undefined}>{s.n}</b>
+          <span>{s.l}</span>
+          <a href={s.href} target="_blank" rel="noopener">— {s.src}</a>
+        </p>
+      ))}
+    </section>
+  </div>
+</Base>

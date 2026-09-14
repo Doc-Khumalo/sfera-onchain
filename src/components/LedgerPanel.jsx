@@ -1,11 +1,15 @@
 /**
  * The ledger, working. The section this sits in is the one that has to land.
  *
- * MONEY IS ON THE ROWS. A permission reading 2.4816 WETH means nothing to a
- * reader who does not hold their balances in their head. The figure that lands
- * is the dollar one, so every amount carries its value underneath it, and the
- * panel totals what is reachable before and after. That total is the whole
- * argument in one number.
+ * MONEY IS ON THE ROWS, AND IT ROLLS. A permission reading 2.4816 WETH means
+ * nothing to a reader who does not hold their balances in their head, so every
+ * amount carries its dollar value underneath it and the panel totals what is
+ * reachable.
+ *
+ * Numbers fall rather than blink out. Showing a reader $37,975 and then, a
+ * frame later, $350 asks them to believe a claim. Letting the figure drop in
+ * front of them shows the claim being made. The roll is CSS — see the rolling
+ * numbers block in home.css — because this page ships no JavaScript.
  *
  * Valuations are marked as indicative and are not part of a decision. Engine
  * readings are derived from allowance and expiry only, never from price: a
@@ -60,15 +64,16 @@ export default function LedgerPanel({ chainStack = null }) {
         </div>
 
         <div className="lp-stat">
-          <span className="lp-read">Read from the chain</span>
+          <span className="lp-read">Reachable by others, right now</span>
+          <span className="roll usd lp-sum roll-sum">
+            <span className="rnum"><i className="g" /><i className="p" /></span>
+          </span>
           <span className="lp-verdict">
             <span className="was">
-              <b className="lp-count" /> permissions let others take{' '}
-              <b className="lp-fig bad">$37,975</b> from this wallet. Nothing expires.
+              across <b className="lp-count" /> permissions that never expire
             </span>
             <span className="now">
-              <b className="lp-fig ok">$350</b> reachable, and only on use.
-              Two limited, one removed.
+              two cut down to what the action needed, one removed
             </span>
           </span>
           <span className="lp-scan" />
@@ -98,12 +103,12 @@ export default function LedgerPanel({ chainStack = null }) {
               <span className="now">{r.outcome === 'revoke' ? 'None' : `${r.now} ${r.token}`}</span>
             </span>
 
-            <span className="lp-swap lp-amt">
-              <span className="was">
-                <b>{r.was}</b><i>{r.wasUsd}</i>
+            <span className="lp-amt">
+              <span className={`roll ${r.token === 'WETH' ? 'd4' : 'd2'} roll-a${i + 1}`}>
+                <span className="rnum"><i className="g" /><i className="p" /></span>
               </span>
-              <span className="now">
-                <b>{r.now}</b><i>{r.nowUsd}</i>
+              <span className={`roll usd roll-u${i + 1}`}>
+                <span className="rnum"><i className="g" /><i className="p" /></span>
               </span>
             </span>
 

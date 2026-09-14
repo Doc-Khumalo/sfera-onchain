@@ -1,0 +1,853 @@
+/**
+ * Alternative entry point.
+ *
+ * Reuses the palette and type tokens from global.css so both directions are
+ * recognisably the same company, and nothing else. Every selector is scoped
+ * under .alt so this file cannot reach the other page.
+ *
+ * The composition is a tableau rather than a sequence: one console carrying
+ * the wallet's standing authority, two cards in front of it carrying the
+ * correction and its proof. Depth does the work that eighteen seconds of
+ * animation does on `/`.
+ */
+
+.alt {
+  --mint: var(--ok);
+  --a-card: #0C1319;
+  background: var(--void);
+  color: var(--mist);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* A single wash behind the headline, so the type sits in light rather than
+   on flat black. Fixed, because it should not scroll away from the hero. */
+.alt::before {
+  content: '';
+  position: fixed;
+  inset: -20% 0 auto 0;
+  height: 90vh;
+  background:
+    radial-gradient(60% 55% at 50% 22%, rgba(47, 224, 188, 0.055), transparent 70%),
+    radial-gradient(45% 40% at 50% 8%, rgba(120, 160, 255, 0.04), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.alt > * { position: relative; z-index: 1; }
+
+/* ---- nav ---- */
+.a-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 22px var(--gutter);
+  border-bottom: 1px solid var(--line);
+}
+.a-mark {
+  font: 800 17px/1 var(--display);
+  letter-spacing: -0.03em;
+  color: var(--ice);
+  text-decoration: none;
+  margin-right: auto;
+}
+.a-mark span { color: var(--mint); }
+.a-nav nav { display: flex; gap: 30px; }
+.a-nav nav a {
+  font: 400 12.5px/1 var(--mono);
+  color: var(--mist);
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+.a-nav nav a:hover { color: var(--ice); }
+
+.a-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+  font: 400 12px/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.18s var(--ease-settle), box-shadow 0.18s ease,
+              background 0.18s ease, border-color 0.18s ease;
+}
+.a-btn-sm { padding: 9px 15px; letter-spacing: 0.04em; text-transform: none; font-size: 12px; }
+.a-btn-solid { background: var(--ice); color: var(--void); }
+.a-btn-mint  { background: var(--mint); color: #06231E; box-shadow: 0 0 0 rgba(47, 224, 188, 0); }
+.a-btn-ghost { border-color: var(--line2); color: var(--ice); background: rgba(255,255,255,0.02); }
+.a-btn-solid:hover { transform: translateY(-1px); }
+.a-btn-mint:hover  { transform: translateY(-1px); box-shadow: 0 8px 34px -6px rgba(47, 224, 188, 0.5); }
+.a-btn-ghost:hover { border-color: var(--mist); }
+
+/* ---- hero ---- */
+.a-hero {
+  /* Wide enough that "Control what happens" holds one line at the largest
+     step. The explicit break after it is then the only break, and the
+     headline reads as two deliberate lines rather than three ragged ones. */
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: clamp(70px, 11vh, 128px) var(--gutter) 0;
+  text-align: center;
+}
+.a-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 30px;
+  padding: 7px 16px 7px 13px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: rgba(47, 224, 188, 0.03);
+  font: 400 11px/1 var(--mono);
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.a-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 10px var(--mint);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .a-dot { animation: aPulse 2.6s var(--ease-loop) infinite; }
+  @keyframes aPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+}
+
+.a-hero h1 {
+  margin: 0;
+  font: 800 clamp(42px, 6.5vw, 84px)/0.99 var(--display);
+  letter-spacing: -0.045em;
+  color: var(--ice);
+  text-wrap: balance;
+}
+.a-lede {
+  max-width: 54ch;
+  margin: 28px auto 0;
+  font: 400 clamp(15px, 1.35vw, 17.5px)/1.62 var(--display);
+  color: var(--mist);
+  text-wrap: pretty;
+}
+.a-cta { display: flex; gap: 12px; justify-content: center; margin-top: 38px; }
+
+/* ---- the stage ---- */
+.a-stage {
+  position: relative;
+  max-width: var(--page);
+  margin: clamp(60px, 9vh, 104px) auto 0;
+  padding: 0 var(--gutter) clamp(90px, 13vh, 150px);
+}
+
+.a-console {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+  overflow: hidden;
+  /* The lower rows fade rather than stop. The console is context for the
+     cards in front of it, and a hard bottom edge competes with them. */
+  -webkit-mask-image: linear-gradient(180deg, #000 58%, transparent 99%);
+          mask-image: linear-gradient(180deg, #000 58%, transparent 99%);
+}
+
+.a-console-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,0.012);
+}
+.a-wallet { display: flex; align-items: center; gap: 10px; }
+.a-avatar {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--mint), #1C8C9E);
+}
+.a-wallet b { font: 400 13px/1 var(--mono); color: var(--ice); }
+.a-chip {
+  padding: 4px 9px;
+  border: 1px solid var(--line2);
+  border-radius: 5px;
+  font: 400 11px/1 var(--mono);
+  color: var(--mist);
+}
+.a-chip-quiet { border-style: dashed; color: var(--slate); }
+
+.a-figs { display: flex; gap: 34px; }
+.a-figs span { display: grid; gap: 5px; justify-items: end; }
+/* A caption under each figure. The third one needs it most: a dollar amount
+   beside a bare word like "reduced" reads as money owed, when it is the
+   opposite — authority taken out of reach, and so money NOT at risk. */
+/* Direct child only: the rolls carry their own <i> spellings, and a loose
+   descendant selector restyles the digits instead of the caption. */
+.a-figs > span > i {
+  font: 400 9.5px/1.25 var(--display);
+  font-style: normal;
+  color: var(--slate);
+  max-width: 18ch;
+  text-align: right;
+  text-wrap: balance;
+}
+.a-figs em {
+  font: 400 9.5px/1 var(--mono);
+  font-style: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.a-figs b {
+  font: 700 17px/1 var(--mono);
+  color: var(--ice);
+  font-variant-numeric: tabular-nums;
+}
+.a-figs .bad { color: var(--bad); }
+.a-figs .ok  { color: var(--mint); }
+
+.a-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+/* Fixed columns. Left to itself the browser gives the application column
+   everything, because its cells are the only ones with two lines, and the
+   figures that matter end up scattered at the far edge. */
+.a-table th:nth-child(1) { width: 27%; }
+.a-table th:nth-child(2) { width: 14%; }
+.a-table th:nth-child(3) { width: 20%; }
+.a-table th:nth-child(4) { width: 20%; }
+.a-table th:nth-child(5) { width: 19%; }
+.a-table th {
+  padding: 13px 24px;
+  text-align: left;
+  font: 400 9.5px/1 var(--mono);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--slate);
+  border-bottom: 1px solid var(--line);
+}
+.a-table td {
+  padding: 15px 24px;
+  border-bottom: 1px solid var(--line);
+  font: 400 13px/1.3 var(--mono);
+  color: var(--mist);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.a-table tbody tr:last-child td { border-bottom: 0; }
+.a-table td b { display: block; font: 600 14px/1.2 var(--display); color: var(--ice); }
+.a-table td em {
+  display: block;
+  margin-top: 3px;
+  font: 400 11.5px/1 var(--mono);
+  font-style: normal;
+  color: var(--slate);
+}
+.a-table td.bad   { color: var(--bad); }
+.a-table td.warn  { color: #E8B75B; }
+.a-table td.ok    { color: var(--mint); }
+.a-table td.quiet { color: var(--slate); }
+
+/* The first two rows carry the fault, so they carry a trace of it. */
+.a-table tbody tr:nth-child(-n+2) { background: linear-gradient(90deg, rgba(255,95,78,0.045), transparent 55%); }
+.a-table tbody tr:nth-child(-n+2) td:first-child { box-shadow: inset 2px 0 0 rgba(255,95,78,0.45); }
+
+/* ---- the two cards in front ---- */
+.a-card {
+  position: absolute;
+  width: min(390px, 82vw);
+  padding: 20px 22px 22px;
+  border: 1px solid;
+  border-radius: 12px;
+  background: var(--a-card);
+  display: grid;
+  gap: 15px;
+}
+.a-card-bad {
+  left: max(var(--gutter), 3%);
+  bottom: clamp(56px, 8vh, 92px);
+  border-color: rgba(255, 95, 78, 0.42);
+  box-shadow: 0 30px 70px -28px rgba(255, 95, 78, 0.5), 0 0 60px -30px rgba(255, 95, 78, 0.6);
+  transform: rotate(-0.9deg);
+}
+.a-card-ok {
+  right: max(var(--gutter), 3%);
+  bottom: clamp(18px, 3vh, 40px);
+  width: min(340px, 78vw);
+  border-color: rgba(47, 224, 188, 0.42);
+  box-shadow: 0 30px 70px -28px rgba(47, 224, 188, 0.4), 0 0 60px -30px rgba(47, 224, 188, 0.5);
+  transform: rotate(0.7deg);
+}
+
+.a-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  font: 400 10px/1 var(--mono);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--bad);
+}
+.a-card-head .ok { color: var(--mint); }
+.a-tag {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font: 700 9px/1 var(--mono);
+  letter-spacing: 0.12em;
+}
+.a-tag-bad { background: rgba(255,95,78,0.15); color: var(--bad); }
+
+.a-versus { display: flex; gap: 30px; align-items: flex-start; }
+.a-versus span { display: grid; gap: 7px; }
+.a-versus em {
+  font: 400 9.5px/1 var(--mono);
+  font-style: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.a-versus b {
+  font: 700 clamp(24px, 2.4vw, 31px)/1 var(--display);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.a-versus .ok  { color: var(--mint); }
+.a-versus .bad { color: var(--bad); }
+
+.a-meta {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font: 400 11px/1.7 var(--mono);
+  color: var(--slate);
+}
+.a-card-cta { display: flex; gap: 9px; }
+.a-card-cta .a-btn-mint { flex: 1; }
+
+.a-verified-l {
+  margin: 0;
+  font: 400 9.5px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.a-verified-n {
+  margin: -6px 0 0;
+  font: 700 clamp(28px, 2.8vw, 36px)/1 var(--display);
+  letter-spacing: -0.035em;
+  color: var(--mint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- rail ---- */
+.a-rail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 20px var(--gutter);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.a-rail ol { display: flex; gap: 34px; margin: 0; padding: 0; list-style: none; }
+.a-rail li {
+  font: 400 11px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+/* Fix and Verify are lit because they are the two steps the rest of this
+   category does not take: a warning product stops at Decide. */
+.a-rail li.lit { color: var(--mint); }
+.a-rail p {
+  margin: 0;
+  font: 400 11px/1 var(--mono);
+  letter-spacing: 0.07em;
+  color: var(--slate);
+}
+
+/* ---- stats ---- */
+.a-stats {
+  display: flex;
+  gap: clamp(28px, 5vw, 74px);
+  flex-wrap: wrap;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 26px var(--gutter) 60px;
+}
+.a-stats p { margin: 0; display: flex; align-items: baseline; gap: 9px; font: 400 13px/1.4 var(--mono); }
+.a-stats b { font-weight: 700; color: var(--ice); }
+.a-stats b.bad { color: var(--bad); }
+.a-stats span { color: var(--mist); }
+.a-stats a { color: var(--slate); text-decoration: none; }
+.a-stats a:hover { color: var(--mist); }
+
+/* ---- narrow ----
+   Absolute cards stop being a tableau once they overlap the table they are
+   meant to sit in front of, so below the breakpoint they become blocks in
+   the flow and the console stops fading. */
+@media (max-width: 1080px) {
+  .a-card { position: static; width: auto; transform: none; margin-top: 18px; }
+  .a-stage { padding-bottom: 60px; }
+  .a-console { -webkit-mask-image: none; mask-image: none; }
+  .a-figs { gap: 22px; }
+}
+@media (max-width: 760px) {
+  .a-nav nav { display: none; }
+  /* Fixed columns squeeze the mono cells into each other well before the
+     text gets a chance to wrap, and it cannot wrap: these are figures and
+     addresses that must not break. So the table keeps its natural width and
+     the console scrolls under it. The mask goes too, or it would fade the
+     rows a reader has just scrolled to. */
+  .a-console { overflow: auto hidden; -webkit-mask-image: none; mask-image: none; }
+  .a-table { table-layout: auto; min-width: 680px; }
+  .a-console-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .a-figs span { justify-items: start; }
+  /* The header left-aligns here, so its captions must follow. */
+  .a-figs > span > i { text-align: left; }
+  .a-versus { gap: 20px; }
+  .a-rail ol { gap: 18px 20px; flex-wrap: wrap; }
+  /* Let the attribution fall under its figure rather than tearing the
+     sentence across a line break. */
+  .a-stats p { flex-wrap: wrap; row-gap: 2px; }
+  .a-stats a { flex-basis: 100%; }
+}
+
+
+/* The reachable cell stacks its figure over the floor value where the asset
+   is not itself a dollar amount. */
+.a-reach { display: grid; gap: 4px; justify-items: start; line-height: 1; }
+.a-reach-n { display: inline-flex; align-items: baseline; white-space: nowrap; }
+.a-reach-usd { font-size: 11px; color: var(--slate); }
+.a-nfts { color: inherit; }
+
+/* Revoked is not removed from the table: the asset is still yours and the
+   application still exists. Only the authority is gone, so it settles slate
+   rather than mint or red. */
+.a-table td .gone { color: var(--mist); }
+.a-btn-done { background: rgba(47,224,188,0.16); color: var(--ok); cursor: default; }
+
+/* The console is the positioning context for the read sweep. */
+.a-console { position: relative; }
+
+/* ================= The loop, run once =================================
+ *
+ * The earlier version of this page counted numbers up to arbitrary values and
+ * stopped, above a card offering to "Limit to 100" in a table where nothing
+ * was ever limited. The cards claimed a correction the ledger never showed.
+ *
+ * Now the animation is the loop, and every figure moves because the product
+ * acted. The arithmetic is checkable against the rows on screen:
+ *
+ *   reachable, before   8,420 + 1,920 + 2,500 + 100 + 1,200  =  14,140
+ *   limit ExampleSwap   unlimited USDC cut to 100, removing      -8,320
+ *   revoke DemoMarket   collection approval removed, releasing    -1,920
+ *   reachable, after                                          =   3,900
+ *
+ * 8,420 reachable against an action needing 100, leaving 8,320 of excess, is
+ * the specification's flagship case.
+ *
+ * It runs once and settles corrected. A page should not perpetually re-break
+ * the wallet it has just fixed, and a loop would put the reader back at the
+ * fault every few seconds with no way to stop it.
+ *
+ * Both outcomes are shown because they are different acts: ExampleSwap still
+ * needs an allowance, so it is cut to what the action required; DemoMarket
+ * needs none, so it is removed. Limited settles mint, revoked settles slate.
+ */
+/* One cycle: about five and a half seconds of work, then six and a half at
+   rest in the corrected state, which is what a reader mostly sees. The reset
+   is a single snap rather than a rewind — watching a wallet un-fix itself is
+   not something this product does. */
+.alt { --run: 12s; }
+
+.a-count, .a-count .g, .a-count .p {
+  animation-duration: var(--run);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes auExp {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0.8333% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  2.7083% { --ti: 8; --lo: 173; --pl: 8173; --fr: 0; }
+  4.5833% { --ti: 12; --lo: 372; --pl: 12372; --fr: 0; }
+  6.4583% { --ti: 13; --lo: 914; --pl: 13914; --fr: 0; }
+  8.3333% { --ti: 14; --lo: 140; --pl: 14140; --fr: 0; }
+  21.6667% { --ti: 14; --lo: 140; --pl: 14140; --fr: 0; }
+  23.3333% { --ti: 9; --lo: 331; --pl: 9331; --fr: 0; }
+  25% { --ti: 6; --lo: 860; --pl: 6860; --fr: 0; }
+  26.6667% { --ti: 5; --lo: 953; --pl: 5953; --fr: 0; }
+  28.3333% { --ti: 5; --lo: 820; --pl: 5820; --fr: 0; }
+  30% { --ti: 5; --lo: 820; --pl: 5820; --fr: 0; }
+  31.6667% { --ti: 4; --lo: 710; --pl: 4710; --fr: 0; }
+  33.3333% { --ti: 4; --lo: 140; --pl: 4140; --fr: 0; }
+  35% { --ti: 3; --lo: 931; --pl: 3931; --fr: 0; }
+  36.6667% { --ti: 3; --lo: 900; --pl: 3900; --fr: 0; }
+  99.1667% { --ti: 3; --lo: 900; --pl: 3900; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auExpG { 0%, 2.6983% { opacity: 0; } 2.7083%, 99.24% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
+@keyframes auExpP { 0%, 2.6983% { opacity: 1; } 2.7083%, 99.24% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
+@keyframes auExpC { 0% { color: var(--bad); } 21.6667% { color: var(--bad); } 28.3333% { color: var(--ice); } 99.1667% { color: var(--ice); } 99.25% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auOpen {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.5% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  3.2083% { --ti: 0; --lo: 3; --pl: 3; --fr: 0; }
+  4.9167% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  6.625% { --ti: 0; --lo: 5; --pl: 5; --fr: 0; }
+  8.3333% { --ti: 0; --lo: 5; --pl: 5; --fr: 0; }
+  30% { --ti: 0; --lo: 5; --pl: 5; --fr: 0; }
+  31.6667% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  33.3333% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  35% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  36.6667% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  99.1667% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auOpenG { 0%, 100% { opacity: 0; } }
+@keyframes auOpenP { 0%, 100% { opacity: 1; } }
+@keyframes auRed {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  2.1667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  3.7083% { --ti: 23; --lo: 814; --pl: 23814; --fr: 0; }
+  5.25% { --ti: 36; --lo: 50; --pl: 36050; --fr: 0; }
+  6.7917% { --ti: 40; --lo: 541; --pl: 40541; --fr: 0; }
+  8.3333% { --ti: 41; --lo: 200; --pl: 41200; --fr: 0; }
+  21.6667% { --ti: 41; --lo: 200; --pl: 41200; --fr: 0; }
+  23.3333% { --ti: 46; --lo: 9; --pl: 46009; --fr: 0; }
+  25% { --ti: 48; --lo: 480; --pl: 48480; --fr: 0; }
+  26.6667% { --ti: 49; --lo: 387; --pl: 49387; --fr: 0; }
+  28.3333% { --ti: 49; --lo: 520; --pl: 49520; --fr: 0; }
+  30% { --ti: 49; --lo: 520; --pl: 49520; --fr: 0; }
+  31.6667% { --ti: 50; --lo: 630; --pl: 50630; --fr: 0; }
+  33.3333% { --ti: 51; --lo: 200; --pl: 51200; --fr: 0; }
+  35% { --ti: 51; --lo: 409; --pl: 51409; --fr: 0; }
+  36.6667% { --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
+  99.1667% { --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auRedG { 0%, 3.6983% { opacity: 0; } 3.7083%, 99.24% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
+@keyframes auRedP { 0%, 3.6983% { opacity: 1; } 3.7083%, 99.24% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
+@keyframes auR1 {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  3.3333% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  4.7917% { --ti: 4; --lo: 866; --pl: 4866; --fr: 76; }
+  6.25% { --ti: 7; --lo: 367; --pl: 7367; --fr: 50; }
+  7.7083% { --ti: 8; --lo: 285; --pl: 8285; --fr: 28; }
+  9.1667% { --ti: 8; --lo: 420; --pl: 8420; --fr: 0; }
+  21.6667% { --ti: 8; --lo: 420; --pl: 8420; --fr: 0; }
+  23.3333% { --ti: 3; --lo: 611; --pl: 3611; --fr: 4; }
+  25% { --ti: 1; --lo: 140; --pl: 1140; --fr: 0; }
+  26.6667% { --ti: 0; --lo: 233; --pl: 233; --fr: 12; }
+  28.3333% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  99.1667% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auR1G { 0%, 4.7817% { opacity: 0; } 4.7917%, 26.6567% { opacity: 1; } 26.6667%, 100% { opacity: 0; } }
+@keyframes auR1P { 0%, 4.7817% { opacity: 1; } 4.7917%, 26.6567% { opacity: 0; } 26.6667%, 100% { opacity: 1; } }
+@keyframes auR1C { 0% { color: var(--bad); } 21.6667% { color: var(--bad); } 28.3333% { color: var(--ok); } 99.1667% { color: var(--ok); } 99.25% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auR2 {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  3.9167% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  5.3333% { --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
+  6.75% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  8.1667% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  9.5833% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  30% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  31.6667% { --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
+  33.3333% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  35% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  36.6667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.1667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auR2G { 0%, 100% { opacity: 0; } }
+@keyframes auR2P { 0%, 100% { opacity: 1; } }
+@keyframes auR2C { 0% { color: var(--bad); } 30% { color: var(--bad); } 36.6667% { color: var(--mist); } 99.1667% { color: var(--mist); } 99.25% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auR2u {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  3.9167% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  5.3333% { --ti: 1; --lo: 110; --pl: 1110; --fr: 0; }
+  6.75% { --ti: 1; --lo: 680; --pl: 1680; --fr: 0; }
+  8.1667% { --ti: 1; --lo: 889; --pl: 1889; --fr: 0; }
+  9.5833% { --ti: 1; --lo: 920; --pl: 1920; --fr: 0; }
+  30% { --ti: 1; --lo: 920; --pl: 1920; --fr: 0; }
+  31.6667% { --ti: 0; --lo: 810; --pl: 810; --fr: 0; }
+  33.3333% { --ti: 0; --lo: 240; --pl: 240; --fr: 0; }
+  35% { --ti: 0; --lo: 31; --pl: 31; --fr: 0; }
+  36.6667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.1667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auR2uG { 0%, 5.3233% { opacity: 0; } 5.3333%, 31.6567% { opacity: 1; } 31.6667%, 100% { opacity: 0; } }
+@keyframes auR2uP { 0%, 5.3233% { opacity: 1; } 5.3333%, 31.6567% { opacity: 0; } 31.6667%, 100% { opacity: 1; } }
+@keyframes auR3 {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  4.5% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  5.875% { --ti: 1; --lo: 445; --pl: 1445; --fr: 0; }
+  7.25% { --ti: 2; --lo: 187; --pl: 2187; --fr: 50; }
+  8.625% { --ti: 2; --lo: 460; --pl: 2460; --fr: 0; }
+  10% { --ti: 2; --lo: 500; --pl: 2500; --fr: 0; }
+  99.1667% { --ti: 2; --lo: 500; --pl: 2500; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auR3G { 0%, 5.865% { opacity: 0; } 5.875%, 99.24% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
+@keyframes auR3P { 0%, 5.865% { opacity: 1; } 5.875%, 99.24% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
+@keyframes auR4 {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  5.0833% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  6.4167% { --ti: 0; --lo: 57; --pl: 57; --fr: 80; }
+  7.75% { --ti: 0; --lo: 87; --pl: 87; --fr: 50; }
+  9.0833% { --ti: 0; --lo: 98; --pl: 98; --fr: 40; }
+  10.4167% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  99.1667% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auR4G { 0%, 100% { opacity: 0; } }
+@keyframes auR4P { 0%, 100% { opacity: 1; } }
+@keyframes auR5 {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  5.6667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  6.9583% { --ti: 0; --lo: 693; --pl: 693; --fr: 60; }
+  8.25% { --ti: 1; --lo: 50; --pl: 1050; --fr: 0; }
+  9.5417% { --ti: 1; --lo: 180; --pl: 1180; --fr: 80; }
+  10.8333% { --ti: 1; --lo: 200; --pl: 1200; --fr: 0; }
+  99.1667% { --ti: 1; --lo: 200; --pl: 1200; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auR5G { 0%, 8.24% { opacity: 0; } 8.25%, 99.24% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
+@keyframes auR5P { 0%, 8.24% { opacity: 1; } 8.25%, 99.24% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
+@keyframes auNeed {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  10.8333% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  11.875% { --ti: 0; --lo: 57; --pl: 57; --fr: 80; }
+  12.9167% { --ti: 0; --lo: 87; --pl: 87; --fr: 50; }
+  13.9583% { --ti: 0; --lo: 98; --pl: 98; --fr: 40; }
+  15% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  99.1667% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auNeedG { 0%, 100% { opacity: 0; } }
+@keyframes auNeedP { 0%, 100% { opacity: 1; } }
+@keyframes auAllow {
+  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  39.1667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  40.2083% { --ti: 0; --lo: 57; --pl: 57; --fr: 80; }
+  41.25% { --ti: 0; --lo: 87; --pl: 87; --fr: 50; }
+  42.2917% { --ti: 0; --lo: 98; --pl: 98; --fr: 40; }
+  43.3333% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  99.1667% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auAllowG { 0%, 100% { opacity: 0; } }
+@keyframes auAllowP { 0%, 100% { opacity: 1; } }
+
+.au-exp { animation-name: auExp, auExpC; }
+.au-exp .g { animation-name: auExpG; }
+.au-exp .p { animation-name: auExpP; }
+.au-open { animation-name: auOpen; }
+.au-open .g { animation-name: auOpenG; }
+.au-open .p { animation-name: auOpenP; }
+.au-red { animation-name: auRed; }
+.au-red .g { animation-name: auRedG; }
+.au-red .p { animation-name: auRedP; }
+.au-r1 { animation-name: auR1, auR1C; }
+.au-r1 .g { animation-name: auR1G; }
+.au-r1 .p { animation-name: auR1P; }
+.au-r2 { animation-name: auR2, auR2C; }
+.au-r2 .g { animation-name: auR2G; }
+.au-r2 .p { animation-name: auR2P; }
+.au-r2u { animation-name: auR2u; }
+.au-r2u .g { animation-name: auR2uG; }
+.au-r2u .p { animation-name: auR2uP; }
+.au-r3 { animation-name: auR3; }
+.au-r3 .g { animation-name: auR3G; }
+.au-r3 .p { animation-name: auR3P; }
+.au-r4 { animation-name: auR4; }
+.au-r4 .g { animation-name: auR4G; }
+.au-r4 .p { animation-name: auR4P; }
+.au-r5 { animation-name: auR5; }
+.au-r5 .g { animation-name: auR5G; }
+.au-r5 .p { animation-name: auR5P; }
+.au-need { animation-name: auNeed; }
+.au-need .g { animation-name: auNeedG; }
+.au-need .p { animation-name: auNeedP; }
+.au-allow { animation-name: auAllow; }
+.au-allow .g { animation-name: auAllowG; }
+.au-allow .p { animation-name: auAllowP; }
+
+@keyframes swOut1 { 0%, 23% { opacity: 1; } 25%, 99.1667% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
+@keyframes swIn1 { 0%, 25% { opacity: 0; transform: translateY(3px); } 27%, 99.1667% { opacity: 1; transform: none; } 99.25%, 100% { opacity: 0; transform: translateY(3px); } }
+@keyframes swOut2 { 0%, 31.3333% { opacity: 1; } 33.3333%, 99.1667% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
+@keyframes swIn2 { 0%, 33.3333% { opacity: 0; transform: translateY(3px); } 35.3333%, 99.1667% { opacity: 1; transform: none; } 99.25%, 100% { opacity: 0; transform: translateY(3px); } }
+
+/* The decision card arrives when there is a decision to make; the read-back
+   card when there is something to read back. */
+@keyframes cardIn1 {
+  0%, 10% { opacity: 0; transform: translateY(16px) rotate(-0.9deg); }
+  14.1667%, 99.1667% { opacity: 1; transform: translateY(0) rotate(-0.9deg); }
+  99.25%, 100% { opacity: 0; transform: translateY(16px) rotate(-0.9deg); }
+}
+@keyframes cardIn2 {
+  0%, 38.3333% { opacity: 0; transform: translateY(16px) rotate(0.7deg); }
+  45%, 99.1667% { opacity: 1; transform: translateY(0) rotate(0.7deg); }
+  99.25%, 100% { opacity: 0; transform: translateY(16px) rotate(0.7deg); }
+}
+@keyframes btnPress {
+  0%, 16.6667% { transform: none; }
+  17.6667%, 18.5% { transform: scale(0.955); }
+  19.6667%, 100% { transform: none; }
+}
+/* The label lands with the chain, not with the click. Pressing Limit does not
+   make a permission limited; the transaction settling does. A button reading
+   "Limited" above a ledger still reading Unlimited would be claiming the very
+   thing this product exists to stop other software claiming. */
+@keyframes btnOut { 0%, 23% { opacity: 1; } 25%, 99.1667% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
+@keyframes btnIn  { 0%, 25% { opacity: 0; } 27%, 99.1667% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
+@keyframes altOut { 0%, 19.1667% { opacity: 1; } 22.1667%, 99.1667% { opacity: 0.22; } 99.25%, 100% { opacity: 1; } }
+
+@keyframes rowF1 {
+  0%, 2.5% { background: transparent; }
+  5%, 21.6667% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); }
+  28.3333%, 99.1667% { background: rgba(47,224,188,0.055); }
+  99.25%, 100% { background: transparent; }
+}
+@keyframes rowF2 {
+  0%, 3% { background: transparent; }
+  5.5%, 30% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); }
+  36.6667%, 99.1667% { background: rgba(255,255,255,0.025); }
+  99.25%, 100% { background: transparent; }
+}
+@keyframes markF1 {
+  0%, 4.9167% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); }
+  5%, 21.6667% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); }
+  28.3333%, 99.1667% { box-shadow: inset 2px 0 0 rgba(47,224,188,0.55); }
+  99.25%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); }
+}
+@keyframes markF2 {
+  0%, 5.4167% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); }
+  5.5%, 30% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); }
+  36.6667%, 99.1667% { box-shadow: inset 2px 0 0 rgba(125,147,164,0.4); }
+  99.25%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); }
+}
+/* The read is work, not a spinner: the sweep is the engine moving through
+   pairs, and it runs only while the figures are arriving. */
+@keyframes aSweep {
+  0% { transform: translateX(-110%); opacity: 1; }
+  9.1667% { transform: translateX(400%); opacity: 1; }
+  10%, 100% { transform: translateX(400%); opacity: 0; }
+}
+
+@keyframes rail0 { 0%, 0.8233% { color: var(--slate); } 0.8333%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
+.a-rail li:nth-child(1) { animation: rail0 var(--run) linear infinite; }
+@keyframes rail1 { 0%, 9.99% { color: var(--slate); } 10%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
+.a-rail li:nth-child(2) { animation: rail1 var(--run) linear infinite; }
+@keyframes rail2 { 0%, 16.6567% { color: var(--slate); } 16.6667%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
+.a-rail li:nth-child(3) { animation: rail2 var(--run) linear infinite; }
+@keyframes rail3 { 0%, 21.6567% { color: var(--slate); } 21.6667%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
+.a-rail li:nth-child(4) { animation: rail3 var(--run) linear infinite; }
+@keyframes rail4 { 0%, 38.3233% { color: var(--slate); } 38.3333%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
+.a-rail li:nth-child(5) { animation: rail4 var(--run) linear infinite; }
+@keyframes rail5 { 0%, 46.6567% { color: var(--slate); } 46.6667%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
+.a-rail li:nth-child(6) { animation: rail5 var(--run) linear infinite; }
+/* Monitor is the only step that does not end. */
+@keyframes railPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.a-rail li:last-child { animation: rail5 var(--run) linear infinite, railPulse 3s var(--ease-loop) 5.6s infinite; }
+
+/* ---- what each element runs ---------------------------------------- */
+.a-sw { display: inline-grid; justify-items: start; }
+.a-sw > span { grid-area: 1 / 1; white-space: nowrap; }
+.a-sw .was, .a-sw .now {
+  animation-duration: var(--run); animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.a-r1 .was { animation-name: swOut1; }
+.a-r1 .now { animation-name: swIn1; }
+.a-r2 .was { animation-name: swOut2; }
+.a-r2 .now { animation-name: swIn2; }
+
+.a-fault1 { animation: rowF1 var(--run) linear infinite; }
+.a-fault2 { animation: rowF2 var(--run) linear infinite; }
+.a-fault1 > td:first-child { animation: markF1 var(--run) linear infinite; }
+.a-fault2 > td:first-child { animation: markF2 var(--run) linear infinite; }
+
+.a-scan {
+  position: absolute; inset-block: 0; width: 26%;
+  background: linear-gradient(90deg, transparent, rgba(47,224,188,0.09), transparent);
+  pointer-events: none;
+  animation: aSweep var(--run) linear infinite;
+}
+
+.a-card-bad { animation: cardIn1 var(--run) var(--ease-settle) infinite; }
+.a-card-ok  { animation: cardIn2 var(--run) var(--ease-settle) infinite; }
+
+.a-act { display: inline-grid; flex: 1; }
+.a-act > span {
+  grid-area: 1 / 1;
+  animation-duration: var(--run); animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.a-act .was { animation-name: btnOut; }
+.a-act .now { animation-name: btnIn; }
+.a-btn-press { animation: btnPress var(--run) var(--ease-settle) infinite; }
+/* Once a permission is limited, the alternative is spent. */
+.a-alt-act { animation: altOut var(--run) linear infinite; }
+
+/* A figure that never reaches a thousand has no grouped spelling to show, and
+   an invisible one still claims its share of the grid cell. */
+.au-open .g, .au-r2 .g { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Settle on the corrected state — that is the page's argument — rather than
+     the registered initial value of zero, which would claim a wallet with
+     nothing in it. */
+  .alt *, .alt *::before, .alt *::after { animation: none !important; }
+  .a-count .g, .a-count .p { opacity: 0; }
+  .a-sw .was { opacity: 0; }
+  .a-act .was { opacity: 0; }
+  .a-alt-act { opacity: 0.22; }
+  .a-scan { display: none; }
+  .a-rail li { color: var(--ok); }
+  .a-fault1 { background: rgba(47,224,188,0.055); }
+  .a-fault2 { background: rgba(255,255,255,0.025); }
+  .au-exp { --ti: 3; --lo: 900; --pl: 3900; --fr: 0; }
+  .au-exp .g { opacity: 1; }
+  .au-open { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  .au-open .p { opacity: 1; }
+  .au-red { --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
+  .au-red .g { opacity: 1; }
+  .au-r1 { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  .au-r1 .p { opacity: 1; }
+  .au-r2 { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  .au-r2 .p { opacity: 1; }
+  .au-r2u { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  .au-r2u .p { opacity: 1; }
+  .au-r3 { --ti: 2; --lo: 500; --pl: 2500; --fr: 0; }
+  .au-r3 .g { opacity: 1; }
+  .au-r4 { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  .au-r4 .p { opacity: 1; }
+  .au-r5 { --ti: 1; --lo: 200; --pl: 1200; --fr: 0; }
+  .au-r5 .g { opacity: 1; }
+  .au-need { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  .au-need .p { opacity: 1; }
+  .au-allow { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  .au-allow .p { opacity: 1; }
+}
