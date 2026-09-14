@@ -31,7 +31,7 @@ main h2 {
 .lede {
   margin: 0 0 clamp(28px, 4vh, 38px);
   max-width: 54ch;
-  color: var(--ink2);
+  color: var(--mist);
   font-size: clamp(15px, 1.3vw, 16.5px);
   line-height: 1.62;
 }
@@ -47,48 +47,28 @@ main h2 {
   gap: 20px;
   max-width: 1180px;
   margin-inline: auto;
-  padding: 20px var(--gutter) 16px;
+  padding: 18px var(--gutter) 16px;
 
-  /* The masthead always opposes the ground behind it. On the cream page it
-     is ink; over the dark spread it flips to paper. It is never the same
-     colour as what it sits on. */
-  background: var(--ink);
-  color: var(--paper);
-  transition: background 0.25s, color 0.25s;
+  /* It sits on the page rather than opposing it, and separates by a
+     hairline and a blur rather than by inverting. A bar that flips colour
+     mid-scroll draws the eye to itself, and nothing here is about the bar. */
+  background: color-mix(in srgb, var(--void) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+  color: var(--ice);
 }
-
-.bar .bar-nav a { color: rgba(242, 238, 230, 0.62); }
-.bar .bar-nav a:hover { color: var(--paper); border-bottom-color: var(--paper); }
-
-.bar .btn {
-  background: var(--paper);
-  border-color: var(--paper);
-  color: var(--ink);
-}
-
-.bar .btn:hover { background: var(--stamp); border-color: var(--stamp); color: var(--paper); }
-
-/* over the dark spread: flip to paper */
-.bar.over-dark {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.bar.over-dark .bar-nav a { color: var(--ink2); }
-.bar.over-dark .bar-nav a:hover { color: var(--ink); border-bottom-color: var(--ink); }
-
-.bar.over-dark .btn {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper);
-}
-
-.bar.over-dark .btn:hover { background: var(--stamp); border-color: var(--stamp); color: var(--paper); }
 
 .logo {
   margin: 0;
   font: 800 17px/1 var(--display);
   letter-spacing: -0.02em;
+}
+
+/* The second half of the name carries the accent, the way the deck sets it. */
+.logo em {
+  font-style: normal;
+  color: var(--ok);
 }
 
 .bar-nav {
@@ -100,36 +80,51 @@ main h2 {
 .bar-nav a {
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--ink2);
+  letter-spacing: 0.06em;
+  color: var(--mist);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   padding-bottom: 2px;
+  transition: color 0.15s, border-color 0.15s;
 }
 
-.bar-nav a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+.bar-nav a:hover { color: var(--ice); border-bottom-color: var(--ok); }
 
 /* ---- buttons ---------------------------------------------------- */
 
 .btn {
   display: inline-flex;
   align-items: center;
-  padding: 11px 18px;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--paper);
+  gap: 8px;
+  padding: 11px 20px;
+  border: 1px solid var(--ok);
+  background: var(--ok);
+  color: var(--void);
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.btn:hover { background: var(--stamp); border-color: var(--stamp); }
+.btn:hover { background: #54EDCE; border-color: #54EDCE; }
 
-.btn.ghost { background: none; color: var(--ink); }
-.btn.ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn.ghost {
+  background: none;
+  color: var(--ice);
+  border-color: var(--line2);
+}
+
+.btn.ghost:hover { border-color: var(--ok); color: var(--ok); background: none; }
+
+.btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 /* ---- hero ------------------------------------------------------- */
 
@@ -142,7 +137,7 @@ main h2 {
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .hero h1 {
@@ -162,7 +157,7 @@ main h2 {
   grid-template-columns: minmax(0, 1fr) clamp(300px, 30%, 400px);
   gap: clamp(32px, 5vw, 72px);
   align-items: start;
-  border-top: 1px solid var(--ink);
+  border-top: 1px solid var(--line);
 }
 
 .problem h2 { max-width: 20ch; }
@@ -174,15 +169,15 @@ main h2 {
 .receipt {
   --tear: var(--th);
   width: min(360px, 100%);
-  color: var(--ink);
+  color: var(--ice);
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0) 8%,
-                    rgba(0, 0, 0, 0) 92%, rgba(0, 0, 0, 0.06)),
-    #FBF8F2;
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 9%,
+                    rgba(255,255,255,0) 91%, rgba(255,255,255,0.04)),
+    var(--deck);
   rotate: -0.7deg;
   filter:
-    drop-shadow(0 1px 1px rgba(25, 28, 31, 0.16))
-    drop-shadow(0 16px 26px rgba(25, 28, 31, 0.18));
+    drop-shadow(0 0 0 rgba(0,0,0,0))
+    drop-shadow(0 18px 34px rgba(0, 0, 0, 0.6));
   -webkit-mask:
     linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
     conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
@@ -214,7 +209,7 @@ main h2 {
   font-family: var(--mono);
   font-size: 9.5px;
   letter-spacing: 0.1em;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .r-body { padding: 4px 20px 10px; border-top: 1px dashed var(--rule); }
@@ -240,7 +235,7 @@ main h2 {
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.04em;
-  color: var(--ink2);
+  color: var(--mist);
 }
 
 .row dt::after {
@@ -267,14 +262,14 @@ main h2 {
 /* the stamp: unbounded authority, overprinted */
 .row.stamped dd {
   position: relative;
-  color: var(--stamp);
+  color: var(--bad);
 }
 
 .row.stamped dd::after {
   content: "";
   position: absolute;
   inset: -5px -9px;
-  border: 2px solid var(--stamp);
+  border: 2px solid var(--bad);
   border-radius: 2px;
   rotate: -2.4deg;
   opacity: 0.72;
@@ -286,7 +281,7 @@ main h2 {
   font-size: 9px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .r-note {
@@ -295,7 +290,7 @@ main h2 {
   border-top: 1px dashed var(--rule);
   font-size: 12.5px;
   line-height: 1.55;
-  color: var(--ink2);
+  color: var(--mist);
 }
 
 .r-foot {
@@ -312,19 +307,19 @@ main h2 {
   font-size: 9px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .r-foot span + span {
   margin-top: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--seal);
+  color: var(--ok);
 }
 
 /* ---- the method: a ruled list, not five cards --------------------- */
 
-.how { border-top: 1px solid var(--ink); }
+.how { border-top: 1px solid var(--line); }
 
 .method { margin: 0; }
 
@@ -351,20 +346,20 @@ main h2 {
   margin-top: 5px;
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .m-row dd {
   margin: 0;
   max-width: 62ch;
-  color: var(--ink2);
+  color: var(--mist);
   font-size: 15.5px;
   line-height: 1.6;
 }
 
 /* ---- coverage: a schedule ----------------------------------------- */
 
-.coverage { border-top: 1px solid var(--ink); }
+.coverage { border-top: 1px solid var(--line); }
 
 .schedule { margin: 0; }
 
@@ -389,18 +384,18 @@ main h2 {
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.1em;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
-.s-status.in-build { color: var(--seal); }
-.s-status.experimental { color: var(--stamp); }
+.s-status.in-build { color: var(--ok); }
+.s-status.experimental { color: var(--bad); }
 
 .s-row dd {
   margin: 0;
   font-family: var(--mono);
   font-size: 12.5px;
   line-height: 2;
-  color: var(--ink2);
+  color: var(--mist);
 }
 
 /* ---- shared two-column section ------------------------------------
@@ -411,7 +406,7 @@ main h2 {
 .dev,
 .life,
 .horizon {
-  border-top: 1px solid var(--ink);
+  border-top: 1px solid var(--line);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: clamp(30px, 5vw, 72px);
@@ -427,7 +422,7 @@ main h2 {
   font-family: var(--mono);
   font-size: 11px;
   line-height: 1.8;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 /* ---- account abstraction: a two-entry ledger ------------------------ */
@@ -447,7 +442,7 @@ main h2 {
   font-size: 10.5px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .l-row dd {
@@ -456,13 +451,13 @@ main h2 {
   letter-spacing: -0.035em;
 }
 
-.l-row.stamped dd { color: var(--stamp); }
-.l-row.sealed dd { color: var(--seal); }
+.l-row.stamped dd { color: var(--bad); }
+.l-row.sealed dd { color: var(--ok); }
 
 .l-note {
   margin: 8px 0 0;
   font-size: 14px;
-  color: var(--ink2);
+  color: var(--mist);
 }
 
 /* ---- developers: the surface, as a spec table ----------------------- */
@@ -486,7 +481,7 @@ main h2 {
 
 .a-row dd {
   margin: 0;
-  color: var(--ink2);
+  color: var(--mist);
   font-family: var(--mono);
   font-size: 12.5px;
   line-height: 1.6;
@@ -499,7 +494,7 @@ main h2 {
   margin: 0 !important;
   padding: 0 !important;
   background: var(--void);
-  color: var(--paper);
+  color: var(--void);
   -webkit-mask:
     linear-gradient(#000 0 0) 0 var(--th) / 100% calc(100% - var(--th) * 2) no-repeat,
     conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--th) repeat-x,
@@ -516,8 +511,8 @@ main h2 {
   padding: clamp(58px, 8vh, 92px) var(--gutter);
 }
 
-.trust h2 { color: var(--paper); max-width: 14ch; }
-.trust .lede { color: rgba(242, 238, 230, 0.62); }
+.trust h2 { color: var(--void); max-width: 14ch; }
+.trust .lede { color: var(--mist); }
 
 .terms {
   margin: 0;
@@ -533,7 +528,7 @@ main h2 {
   counter-increment: term;
   break-inside: avoid;
   padding: 13px 0 13px 42px;
-  border-bottom: 1px dashed rgba(242, 238, 230, 0.2);
+  border-bottom: 1px dashed var(--rule);
   font-size: 14.5px;
   line-height: 1.5;
   position: relative;
@@ -546,7 +541,7 @@ main h2 {
   top: 14px;
   font-family: var(--mono);
   font-size: 11px;
-  color: rgba(242, 238, 230, 0.4);
+  color: var(--slate);
 }
 
 /* ---- ask --------------------------------------------------------------- */
@@ -560,7 +555,7 @@ main h2 {
   max-width: 1180px;
   margin-inline: auto;
   padding: clamp(28px, 4vh, 40px) var(--gutter) clamp(36px, 5vh, 56px);
-  border-top: 1px solid var(--ink);
+  border-top: 1px solid var(--line);
 }
 
 .who {
@@ -579,14 +574,14 @@ main h2 {
   padding-bottom: 2px;
 }
 
-.who a:hover { border-bottom-color: var(--ink); }
+.who a:hover { border-bottom-color: var(--ok); }
 
 .who span {
   display: block;
   margin-top: 5px;
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .foot-end {
@@ -596,11 +591,11 @@ main h2 {
   gap: 10px 20px;
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
-.foot-end a { color: var(--ink3); text-decoration: none; }
-.foot-end a:hover { color: var(--ink); }
+.foot-end a { color: var(--slate); text-decoration: none; }
+.foot-end a:hover { color: var(--ice); }
 
 /* ---- responsive ---------------------------------------------------------- */
 
@@ -630,7 +625,7 @@ main h2 {
   font-size: 9px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .alerts {
@@ -645,19 +640,19 @@ main h2 {
   border-left: 2px solid var(--rule);
   border-bottom: 1px dashed var(--rule);
   font-size: 14px;
-  color: var(--ink2);
+  color: var(--mist);
 }
 
 /* account-control events are the only ones that get the stamp colour */
 .alerts li.critical {
-  border-left-color: var(--stamp);
-  color: var(--ink);
+  border-left-color: var(--bad);
+  color: var(--ice);
 }
 
 /* the authority graph, set as a register */
 .graph {
   padding: 26px 28px 24px;
-  background: var(--paper2);
+  background: var(--deck2);
   border: 1px solid var(--rule);
 }
 
@@ -669,7 +664,7 @@ main h2 {
   font-size: 10px;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .graph dl { margin: 0; }
@@ -684,7 +679,7 @@ main h2 {
   border-top: 1px dashed var(--rule);
   font-size: 13.5px;
   line-height: 1.55;
-  color: var(--ink2);
+  color: var(--mist);
 }
 
 /* ---- horizon: staged, never claimed --------------------------------- */
@@ -712,11 +707,11 @@ main h2 {
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--slate);
   padding-top: 4px;
 }
 
-.stages li.in-build .st-when { color: var(--seal); }
+.stages li.in-build .st-when { color: var(--ok); }
 
 .st-name {
   font: 700 17px/1.3 var(--display);
@@ -726,12 +721,12 @@ main h2 {
 .st-q {
   font-size: 13.5px;
   line-height: 1.55;
-  color: var(--ink2);
+  color: var(--mist);
 }
 
 /* what is not yet built reads quieter than what is */
 .stages li.later .st-name,
-.stages li.later .st-q { color: var(--ink3); }
+.stages li.later .st-q { color: var(--slate); }
 
 /* =================================================================
    Motion and finish
@@ -779,8 +774,8 @@ main h2 {
 .receipt:hover {
   transform: rotate(0deg) translateY(-4px);
   filter:
-    drop-shadow(0 2px 2px rgba(25, 28, 31, 0.18))
-    drop-shadow(0 26px 40px rgba(25, 28, 31, 0.24));
+    drop-shadow(0 0 0 rgba(0, 0, 0, 0))
+    drop-shadow(0 26px 46px rgba(0, 0, 0, 0.66));
 }
 
 /* two states stacked in the same cell, cross-faded on a loop */
@@ -796,8 +791,8 @@ main h2 {
   text-align: right;
 }
 
-.was { color: var(--stamp); animation: showWas 9s ease-in-out infinite; }
-.now { color: var(--seal); animation: showNow 9s ease-in-out infinite; }
+.was { color: var(--bad); animation: showWas 9s ease-in-out infinite; }
+.now { color: var(--ok); animation: showNow 9s ease-in-out infinite; }
 
 @keyframes showWas {
   0%, 42% { opacity: 1; }
@@ -816,7 +811,7 @@ main h2 {
   content: "";
   position: absolute;
   inset: -5px -9px;
-  border: 2px solid var(--stamp);
+  border: 2px solid var(--bad);
   border-radius: 2px;
   rotate: -2.4deg;
   animation: showWas 9s ease-in-out infinite;
@@ -835,9 +830,9 @@ main h2 {
 .standards {
   max-width: none !important;
   padding: 30px 0 !important;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--ink);
-  background: var(--paper2);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--deck2);
   overflow: hidden;
 }
 
@@ -849,7 +844,7 @@ main h2 {
   font-size: 9px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .marquee {
@@ -871,11 +866,11 @@ main h2 {
   padding: 9px 15px;
   border: 1px solid var(--rule);
   border-radius: 2px;
-  background: var(--paper);
+  background: var(--void);
   font-family: var(--mono);
   font-size: 12px;
   white-space: nowrap;
-  color: var(--ink2);
+  color: var(--mist);
 }
 
 @keyframes slide {
@@ -892,7 +887,7 @@ main h2 {
 .graph {
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 12px 24px -18px rgba(25, 28, 31, 0.4);
+    0 12px 28px -16px rgba(0, 0, 0, 0.8);
 }
 
 .btn { transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s; }
@@ -903,7 +898,7 @@ main h2 {
 }
 
 .m-row:hover, .s-row:hover, .a-row:hover, .stages li:hover {
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
+  background: color-mix(in srgb, var(--ice) 3%, transparent);
 }
 
 /* =================================================================
@@ -933,10 +928,10 @@ main h2 {
 .stats {
   max-width: none !important;
   padding: 0 !important;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--paper);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--deck);
+  color: var(--ice);
 }
 
 .stats dl {
@@ -945,12 +940,12 @@ main h2 {
   gap: 1px;
   max-width: 1180px;
   margin: 0 auto;
-  background: rgba(242, 238, 230, 0.16);
+  background: var(--line);
 }
 
 .stats dl > div {
   padding: clamp(28px, 4vw, 40px) clamp(20px, 3vw, 36px);
-  background: var(--ink);
+  background: var(--deck);
 }
 
 .stats dt {
@@ -959,14 +954,14 @@ main h2 {
   font-variant-numeric: tabular-nums;
 }
 
-.stats dl > div:first-child dt { color: var(--stamp); }
+.stats dl > div:first-child dt { color: var(--bad); }
 
 .stats dd {
   margin: 10px 0 0;
   max-width: 26ch;
   font-size: 14px;
   line-height: 1.5;
-  color: rgba(242, 238, 230, 0.72);
+  color: var(--mist);
 }
 
 .stats dd.src {
@@ -975,7 +970,7 @@ main h2 {
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(242, 238, 230, 0.4);
+  color: var(--slate);
 }
 
 /* ---- the two prompts ---------------------------------------------- */
@@ -1004,7 +999,7 @@ main h2 {
   font-size: 10px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .p-body {
@@ -1012,10 +1007,10 @@ main h2 {
   min-height: 232px;
   border: 1px solid var(--rule);
   border-radius: 4px;
-  background: var(--paper2);
+  background: var(--deck2);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 14px 28px -22px rgba(25, 28, 31, 0.5);
+    0 14px 32px -20px rgba(0, 0, 0, 0.8);
 }
 
 .p-app {
@@ -1024,7 +1019,7 @@ main h2 {
   border-bottom: 1px solid var(--rule);
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--ink3);
+  color: var(--slate);
 }
 
 .p-ask {
@@ -1039,21 +1034,21 @@ main h2 {
   flex: 1;
   padding: 12px;
   text-align: center;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--line2);
   border-radius: 3px;
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 700;
 }
 
-.p-no { color: var(--ink2); border-color: var(--rule) !important; }
-.p-yes { background: var(--ink); color: var(--paper); }
+.p-no { color: var(--mist); border-color: var(--rule) !important; }
+.p-yes { background: var(--ok); color: var(--void); }
 
 /* the truth panel: same figures, stamp red */
-.prompt.real .p-body { background: var(--paper); }
+.prompt.real .p-body { background: var(--void); }
 .prompt.real .row { padding: 9px 0; }
 .prompt.real .row dt { font-size: 11px; }
-.prompt.real .row dd { font-size: 12.5px; color: var(--stamp); }
+.prompt.real .row dd { font-size: 12.5px; color: var(--bad); }
 
 /* ---- responsive ---------------------------------------------------- */
 

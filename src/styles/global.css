@@ -1,39 +1,41 @@
 /* ---------------------------------------------------------------
    Sfera Onchain — design tokens
 
-   The site is set as a printed document, because the product turns
-   unreadable calldata into something you can actually read. Cream stock,
-   ink type, dashed rules, leader dots, a red stamp. The palette and the
-   receipt treatment come from the deck's own permission receipt.
+   Lifted from the nine-step deck so every surface reads as one site.
+   Ink on a dark ground, a faint grid, and two accents that carry
+   meaning rather than decoration.
+
+   --ok and --bad are never used decoratively. --bad marks authority
+   that is unbounded or wider than the action required. --ok marks
+   authority that is bounded, corrected or verified. If a colour is
+   not saying one of those two things, it is not one of these.
    --------------------------------------------------------------- */
 
 :root {
-  /* stock */
-  --paper:  #F2EEE6;   /* page */
-  --paper2: #E9E3D8;   /* recessed panels */
-  --paper3: #DED7C9;   /* edges */
+  /* ground */
+  --void:   #05070A;   /* page */
+  --deck:   #0A0F15;   /* raised surface */
+  --deck2:  #0E151D;   /* recessed panel */
+  --line:   #16202B;   /* hairlines, the background grid */
+  --line2:  #263543;   /* stronger borders */
 
-  /* ink */
-  --ink:    #191C1F;   /* primary type */
-  --ink2:   #6F675C;   /* secondary type */
-  --ink3:   #9A9184;   /* labels, captions */
-  --rule:   rgba(25, 28, 31, 0.26);
+  /* type */
+  --ice:    #F2F6F9;   /* primary */
+  --mist:   #7D93A4;   /* secondary */
+  --slate:  #48606F;   /* labels, captions */
 
-  /* marks */
-  --stamp:  #C2342A;   /* unbounded, over-wide, the problem */
-  --seal:   #0F5F52;   /* bounded, corrected, verified */
+  /* marks, meaning only */
+  --bad:    #FF5F4E;   /* unbounded, over-wide, the problem */
+  --ok:     #2FE0BC;   /* bounded, corrected, verified */
+  --bad-dim: rgba(255, 95, 78, 0.12);
+  --ok-dim:  rgba(47, 224, 188, 0.12);
 
-  /* the one inversion */
-  --void:   #0B0D10;
-  --ice:    #F2EEE6;
+  /* a rule you can see on this ground */
+  --rule:   rgba(122, 147, 164, 0.22);
 
   /* type */
   --display: "Archivo", system-ui, -apple-system, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
-  /* torn edge */
-  --tw: 11px;
-  --th: 6px;
 
   --gutter: clamp(22px, 5vw, 76px);
 }
@@ -44,22 +46,31 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
+  min-height: 100svh;
+  background: var(--void);
+  color: var(--ice);
   font: 400 17px/1.6 var(--display);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a { color: inherit; }
 
 :focus-visible {
-  outline: 2px solid var(--stamp);
+  outline: 2px solid var(--ok);
   outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--ok);
+  color: var(--void);
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation: none !important;
     transition: none !important;
+    scroll-behavior: auto !important;
   }
 }
