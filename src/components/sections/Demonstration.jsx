@@ -1,3 +1,6 @@
+import LedgerPanel from '../LedgerPanel.jsx';
+import ChainStack from '../ChainStack.jsx';
+
 /**
  * The ledger, working.
  *
@@ -26,49 +29,16 @@ export default function Demonstration() {
   return (
     <section className="problem reveal field" id="problem">
       <h2>Found, then gone.</h2>
-      <p className="lede center">
+      <p className="lede">
         This is the ledger, reading a wallet and removing what it finds. Nothing
         is simulated except the wallet signature.
       </p>
 
-      <div className="demo-table lit-strong">
-        <div className="dt-head">
-          <span>Application</span>
-          <span>Access granted</span>
-          <span>Reading</span>
-          <span className="dt-right">Action</span>
-        </div>
-
-        {ROWS.map(({ app, token, colour, amount }, i) => (
-          <div className={`dt-row dt-${i + 1}`} key={token}>
-            <span className="dt-app">
-              <span className="dt-mark" style={{ background: colour }} aria-hidden="true">
-                {token}
-              </span>
-              <span>
-                <b>{app}</b>
-                <em>{token} · never expires</em>
-              </span>
-            </span>
-
-            <span className="dt-value">
-              <span className="dt-was">Unlimited</span>
-              <span className="dt-now">None</span>
-            </span>
-
-            <span className="dt-reading">
-              <span className="dt-badge dt-bad">UNBOUNDED</span>
-              <span className="dt-badge dt-ok">REMOVED</span>
-            </span>
-
-            <span className="dt-right">
-              <span className="dt-btn">Revoke</span>
-            </span>
-
-            <span className="dt-amount">{amount} {token} reachable</span>
-          </div>
-        ))}
-      </div>
+      {/* The one table on the page. It used to sit in the hero alongside a
+          second one here, which meant the site showed the same object twice
+          and the receipt, the more distinctive of the two, appeared nowhere.
+          The receipt is now the hero and this is its only table. */}
+      <LedgerPanel chainStack={<ChainStack total={15} label="chains" compact />} />
 
       <p className="demo-foot">
         Each correction is an unsigned transaction handed to your own wallet.

@@ -1,4 +1,4 @@
-import HeroPanel from '../HeroPanel.jsx';
+import Receipt from '../Receipt.jsx';
 import ChainStack from '../ChainStack.jsx';
 
 /**
@@ -53,7 +53,7 @@ You already said yes.
       </div>
 
       <div className="hero-art">
-        <HeroPanel />
+        <Receipt />
       </div>
     </section>
   );

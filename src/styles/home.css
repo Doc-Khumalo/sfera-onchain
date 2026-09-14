@@ -133,8 +133,9 @@ main h2 {
 
 .hero h1 {
   margin: 0 0 26px;
-  font: 800 clamp(34px, 5.4vw, 66px)/1.0 var(--display);
-  letter-spacing: -0.045em;
+  font: 700 clamp(30px, 4.2vw, 50px)/1.06 var(--display);
+  letter-spacing: -0.04em;
+  text-wrap: balance;
 }
 
 .hero .lede { font-size: clamp(16px, 1.5vw, 19px); max-width: 46ch; }
@@ -156,157 +157,6 @@ main h2 {
 
 .receipt-stage { padding-top: 6px; }
 
-/* the deck's own receipt: cream stock, torn top and bottom */
-.receipt {
-  --tear: var(--th);
-  width: min(360px, 100%);
-  color: var(--ice);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 9%,
-                    rgba(255,255,255,0) 91%, rgba(255,255,255,0.04)),
-    var(--deck);
-  rotate: -0.7deg;
-  filter:
-    drop-shadow(0 0 0 rgba(0,0,0,0))
-    drop-shadow(0 18px 34px rgba(0, 0, 0, 0.6));
-  -webkit-mask:
-    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
-    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
-    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--tear) repeat-x;
-  mask:
-    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
-    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
-    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--tear) repeat-x;
-}
-
-.r-head {
-  display: block;
-  padding: 22px 20px 12px;
-  text-align: center;
-}
-
-.r-title {
-  display: block;
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 10px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-}
-
-.r-sub {
-  display: block;
-  margin-top: 7px;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
-  color: var(--slate);
-}
-
-.r-body { padding: 4px 20px 10px; border-top: 1px dashed var(--rule); }
-
-.r-body dl { margin: 0; }
-
-/* leader-dot row: the page's signature device */
-.row {
-  display: flex;
-  align-items: baseline;
-  margin: 0;
-  padding: 6px 0;
-}
-
-.row dt {
-  display: flex;
-  align-items: baseline;
-  flex: 1 1 auto;
-  min-width: 0;
-  gap: 7px;
-  margin: 0;
-  white-space: nowrap;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  color: var(--mist);
-}
-
-.row dt::after {
-  content: "";
-  flex: 1 1 auto;
-  border-bottom: 1px dotted var(--rule);
-  transform: translateY(-3px);
-}
-
-.row dd {
-  flex: 0 0 auto;
-  margin: 0;
-  padding-left: 10px;
-  white-space: nowrap;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  font-variant-numeric: tabular-nums;
-}
-
-.row.lead { padding: 9px 0 11px; border-bottom: 4px double var(--rule); }
-.row.lead dt { font-size: 10.5px; }
-.row.lead dd { font-size: 21px; letter-spacing: -0.02em; }
-
-/* the stamp: unbounded authority, overprinted */
-.row.stamped dd {
-  position: relative;
-  color: var(--bad);
-}
-
-.row.stamped dd::after {
-  content: "";
-  position: absolute;
-  inset: -5px -9px;
-  border: 2px solid var(--bad);
-  border-radius: 2px;
-  rotate: -2.4deg;
-  opacity: 0.72;
-}
-
-.r-rule {
-  margin: 16px 0 8px;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-
-.r-note {
-  margin: 14px 0 0;
-  padding-top: 12px;
-  border-top: 1px dashed var(--rule);
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--mist);
-}
-
-.r-foot {
-  display: block;
-  padding: 14px 20px 24px;
-  border-top: 1px dashed var(--rule);
-  text-align: center;
-}
-
-.r-foot span { display: block; }
-
-.r-foot span:first-child {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-
-.r-foot span + span {
-  margin-top: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ok);
-}
 
 /* ---- the method: a ruled list, not five cards --------------------- */
 
@@ -769,108 +619,6 @@ main h2 {
     drop-shadow(0 26px 46px rgba(0, 0, 0, 0.66));
 }
 
-/* ---- the correction, as motion -----------------------------------
-
-   THE SIGNATURE MOVEMENT OF THIS PRODUCT, and the reason it is not a
-   crossfade. A fade says one value replaced another. A strike that
-   travels, followed by a value rising underneath, says something was
-   found, marked, and corrected in that order. The ledger uses the same
-   three beats when a real permission is revoked, so the homepage is
-   rehearsing the thing the product actually does rather than
-   illustrating it.
-
-   The exposure rows cascade behind the headline correction, because
-   the consequences follow the cause rather than arriving with it.
-   ------------------------------------------------------------------ */
-
-.swap dd,
-.exp dd {
-  position: relative;
-  display: inline-grid;
-}
-
-.swap dd > span,
-.exp dd > span {
-  grid-area: 1 / 1;
-  text-align: right;
-}
-
-.was { color: var(--bad); animation: showWas 9s var(--ease-loop) infinite; }
-.now { color: var(--ok); animation: showNow 9s var(--ease-loop) infinite; }
-
-:root { --ease-loop: cubic-bezier(0.22, 1, 0.36, 1); }
-
-@keyframes showWas {
-  0%, 38%  { opacity: 1; }
-  46%, 92% { opacity: 0; }
-  100%     { opacity: 1; }
-}
-
-@keyframes showNow {
-  0%, 40%  { opacity: 0; transform: translateY(5px); }
-  48%, 92% { opacity: 1; transform: none; }
-  100%     { opacity: 0; transform: translateY(5px); }
-}
-
-/* The line that does the correcting. It travels across the old value
-   rather than appearing over it, which is what makes it read as an act
-   rather than a state. */
-.swap dd::before,
-.exp dd::before {
-  content: "";
-  position: absolute;
-  left: -2px;
-  top: 50%;
-  height: 1px;
-  background: var(--bad);
-  animation: strikeLoop 9s var(--ease-loop) infinite;
-}
-
-@keyframes strikeLoop {
-  0%, 36%  { width: 0; opacity: 0; }
-  38%      { width: 0; opacity: 1; }
-  45%      { width: calc(100% + 4px); opacity: 1; }
-  52%, 92% { width: calc(100% + 4px); opacity: 0; }
-  100%     { width: 0; opacity: 0; }
-}
-
-/* the stamp belongs to the unbounded state only */
-.swap dd::after {
-  content: "";
-  position: absolute;
-  inset: -5px -9px;
-  border: 2px solid var(--bad);
-  border-radius: 2px;
-  rotate: -2.4deg;
-  animation: showWas 9s var(--ease-loop) infinite;
-}
-
-/* The consequences follow the cause. Each exposure row lags the one
-   above it, so the correction visibly propagates down the receipt. */
-.r-body .exp:nth-of-type(1) dd > span,
-.r-body .exp:nth-of-type(1) dd::before { animation-delay: 0.12s; }
-.r-body .exp:nth-of-type(2) dd > span,
-.r-body .exp:nth-of-type(2) dd::before { animation-delay: 0.24s; }
-.r-body .exp:nth-of-type(3) dd > span,
-.r-body .exp:nth-of-type(3) dd::before { animation-delay: 0.36s; }
-
-.exp dd .was,
-.exp dd .now { font-size: 11.5px; }
-
-/* The recommendation is the outcome, so it arrives last and stays. */
-.r-foot span:last-child { animation: recAppear 9s var(--ease-loop) infinite; }
-
-@keyframes recAppear {
-  0%, 44%  { opacity: 0.32; }
-  56%, 92% { opacity: 1; }
-  100%     { opacity: 0.32; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .was, .now, .swap dd::after, .swap dd::before, .exp dd::before,
-  .r-foot span:last-child { animation: none; }
-  .now { display: none; }
-}
 
 /* ---- standards marquee ----------------------------------------------- */
 
@@ -964,7 +712,7 @@ main h2 {
   padding-block: clamp(56px, 10vh, 116px) clamp(48px, 8vh, 92px);
 }
 
-.hero-type h1 { max-width: 13ch; }
+.hero-type h1 { max-width: 24ch; }
 .hero .lede { max-width: 40ch; margin-bottom: clamp(28px, 4vh, 40px); }
 
 .hero-art { display: flex; justify-content: flex-end; }
@@ -991,22 +739,21 @@ main h2 {
 }
 
 .stats dl > div {
-  padding: clamp(28px, 4vw, 40px) clamp(20px, 3vw, 36px);
+  padding: clamp(22px, 3vw, 30px) clamp(18px, 2.4vw, 28px);
   background: var(--deck);
 }
 
 .stats dt {
-  font: 800 clamp(30px, 4vw, 46px)/1 var(--display);
-  letter-spacing: -0.04em;
+  font: 700 clamp(25px, 2.9vw, 34px)/1 var(--display);
+  letter-spacing: -0.035em;
   font-variant-numeric: tabular-nums;
 }
 
 .stats dt.bad { color: var(--bad); }
 
 .stats dd {
-  margin: 10px 0 0;
-  max-width: 26ch;
-  font-size: 14px;
+  margin: 9px 0 0;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--mist);
 }
@@ -1016,9 +763,9 @@ main h2 {
 .stats dd.src a {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-family: var(--display);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.04em;
   color: var(--slate);
@@ -1053,12 +800,13 @@ main h2 {
 
 /* ---- the two prompts ---------------------------------------------- */
 
-.problem {
-  display: block;
-  text-align: center;
-}
-.problem h2 { margin-inline: auto; max-width: 18ch; }
-.lede.center { margin-inline: auto; text-align: center; max-width: 50ch; }
+/* Left aligned. The centring here was left over from when this section
+   held two wallet prompts side by side, where a centred heading sat
+   between them. It holds a table now, and a heading centred over a
+   left aligned table has nothing to align to. */
+.problem { display: block; }
+.problem h2 { max-width: 20ch; }
+.lede.center { max-width: 56ch; }
 
 .prompt-pair {
   display: grid;
@@ -1797,270 +1545,6 @@ main h2 {
   .cap-row.reverse .cap-copy { order: 0; }
 }
 
-/* ---- the hero panel, the loop performed ---------------------------
-
-   One 18s cycle in four acts, every beat a keyframe on a delay:
-
-     0-14%    ASKING     sweep runs, rows arrive staggered
-     14-30%   FOUND      three unbounded, flagged, counter reads 3
-     30-72%   CORRECTING each struck and removed in turn, counter drains
-     72-92%   DONE       nothing reachable, panel settles
-     92-100%  RESET
-
-   No JavaScript. The homepage ships none and that property outranks
-   any animation on it.
-   -------------------------------------------------------------------- */
-
-@property --hp-n {
-  syntax: '<integer>';
-  initial-value: 3;
-  inherits: false;
-}
-
-.hp { --loop: 18s; position: relative; }
-
-.hp-frame {
-  border: 1px solid var(--line2);
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.hp-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--line);
-}
-
-.hp-title { font: 600 15px/1 var(--display); }
-
-.hp-chain {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border: 1px solid var(--line2);
-  border-radius: 999px;
-  font: 500 12px/1 var(--display);
-  color: var(--mist);
-}
-
-.hp-dot { width: 9px; height: 9px; border-radius: 50%; background: #0052FF; }
-
-/* the count, and the sweep that runs while it is being established */
-.hp-stat {
-  position: relative;
-  padding: 20px 20px 22px;
-  border-bottom: 1px solid var(--line);
-  overflow: hidden;
-}
-
-.hp-stat-label {
-  display: block;
-  font: 500 12px/1 var(--display);
-  letter-spacing: 0.04em;
-  color: var(--mist);
-}
-
-/* An integer counted down with @property, because a count is honest and
-   a converted currency total would need a price feed we do not have. */
-.hp-count {
-  display: block;
-  margin-top: 10px;
-  font: 700 clamp(34px, 4vw, 46px)/1 var(--display);
-  letter-spacing: -0.04em;
-  color: var(--bad);
-  counter-reset: hpn var(--hp-n);
-  animation: hpCount var(--loop) linear infinite;
-}
-
-.hp-count::after { content: counter(hpn); }
-
-.hp-count::before {
-  content: "";
-  display: inline-block;
-}
-
-@keyframes hpCount {
-  0%, 14%   { --hp-n: 0; color: var(--slate); }
-  16%, 33%  { --hp-n: 3; color: var(--bad); }
-  38%, 45%  { --hp-n: 2; color: var(--bad); }
-  50%, 57%  { --hp-n: 1; color: var(--bad); }
-  62%, 93%  { --hp-n: 0; color: var(--ok); }
-  100%      { --hp-n: 0; color: var(--slate); }
-}
-
-.hp-scan {
-  position: absolute;
-  inset-block: 0;
-  width: 30%;
-  background: linear-gradient(90deg, transparent, rgba(47,224,188,0.10), transparent);
-  animation: hpSweep var(--loop) linear infinite;
-}
-
-@keyframes hpSweep {
-  0%       { transform: translateX(-110%); opacity: 1; }
-  12%      { transform: translateX(360%); opacity: 1; }
-  13%, 100% { transform: translateX(360%); opacity: 0; }
-}
-
-/* Rows arrive together and are corrected in sequence.
-   
-   The first version used one animation-delay for both, which shifts a
-   row's whole lifecycle rather than only its correction, so rows sat in
-   unrelated phases and the panel read as broken. Arrival is a small
-   shared stagger; the correction window is written per row into the
-   keyframes themselves, which is the only way to sequence one act
-   without moving the others. */
-
-.hp-row {
-  display: grid;
-  grid-template-columns: 30px 1fr auto auto;
-  gap: 12px;
-  align-items: center;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--line);
-  opacity: 0;
-}
-
-.hp-rows > .hp-row:last-child { border-bottom: 0; }
-
-.hp-r1 { animation: hpRow1 var(--loop) linear infinite; }
-.hp-r2 { animation: hpRow2 var(--loop) linear infinite; }
-.hp-r3 { animation: hpRow3 var(--loop) linear infinite; }
-
-@keyframes hpRow1 {
-  0%        { opacity: 0; transform: translateY(6px); background: transparent; }
-  5%, 15%   { opacity: 1; transform: none; background: transparent; }
-  17%, 30%  { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
-  34%, 40%  { background: rgba(47,224,188,0.10); opacity: 1; }
-  46%, 92%  { background: transparent; opacity: 0.5; }
-  97%, 100% { opacity: 0; transform: translateY(6px); }
-}
-@keyframes hpRow2 {
-  0%        { opacity: 0; transform: translateY(6px); background: transparent; }
-  8%, 15%   { opacity: 1; transform: none; background: transparent; }
-  17%, 42%  { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
-  46%, 52%  { background: rgba(47,224,188,0.10); opacity: 1; }
-  58%, 92%  { background: transparent; opacity: 0.5; }
-  97%, 100% { opacity: 0; transform: translateY(6px); }
-}
-@keyframes hpRow3 {
-  0%        { opacity: 0; transform: translateY(6px); background: transparent; }
-  11%, 15%  { opacity: 1; transform: none; background: transparent; }
-  17%, 54%  { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
-  58%, 64%  { background: rgba(47,224,188,0.10); opacity: 1; }
-  70%, 92%  { background: transparent; opacity: 0.5; }
-  97%, 100% { opacity: 0; transform: translateY(6px); }
-}
-
-.hp-tok {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px; border-radius: 50%;
-  font: 700 8.5px/1 var(--mono); color: #fff;
-}
-
-.hp-who b { display: block; font: 600 14.5px/1.2 var(--display); }
-.hp-who em {
-  display: block; margin-top: 3px; font-style: normal;
-  font: 400 12px/1 var(--display); color: var(--mist); white-space: nowrap;
-}
-
-.hp-val { position: relative; display: inline-grid; justify-items: end; }
-.hp-val > span { grid-area: 1 / 1; font: 400 13px/1 var(--mono); white-space: nowrap; }
-.hp-act { position: relative; display: inline-grid; justify-items: end; }
-
-.hp-badge {
-  grid-area: 1 / 1;
-  display: inline-flex; align-items: center;
-  padding: 4px 10px; border-radius: 999px;
-  font: 700 8.5px/1 var(--mono); letter-spacing: 0.1em;
-  white-space: nowrap;
-}
-
-.hp-was, .hp-bad { color: var(--bad); }
-.hp-now, .hp-ok  { color: var(--ok); }
-.hp-bad { background: rgba(255,95,78,0.15); }
-.hp-ok  { background: rgba(47,224,188,0.12); }
-
-.hp-r1 .hp-was, .hp-r1 .hp-bad { animation: hpWas1 var(--loop) linear infinite; }
-.hp-r1 .hp-now, .hp-r1 .hp-ok  { animation: hpNow1 var(--loop) linear infinite; }
-.hp-r2 .hp-was, .hp-r2 .hp-bad { animation: hpWas2 var(--loop) linear infinite; }
-.hp-r2 .hp-now, .hp-r2 .hp-ok  { animation: hpNow2 var(--loop) linear infinite; }
-.hp-r3 .hp-was, .hp-r3 .hp-bad { animation: hpWas3 var(--loop) linear infinite; }
-.hp-r3 .hp-now, .hp-r3 .hp-ok  { animation: hpNow3 var(--loop) linear infinite; }
-
-@keyframes hpWas1 { 0%, 31% { opacity: 1; } 35%, 100% { opacity: 0; } }
-@keyframes hpNow1 { 0%, 33% { opacity: 0; transform: translateY(4px); } 38%, 93% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
-@keyframes hpWas2 { 0%, 43% { opacity: 1; } 47%, 100% { opacity: 0; } }
-@keyframes hpNow2 { 0%, 45% { opacity: 0; transform: translateY(4px); } 50%, 93% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
-@keyframes hpWas3 { 0%, 55% { opacity: 1; } 59%, 100% { opacity: 0; } }
-@keyframes hpNow3 { 0%, 57% { opacity: 0; transform: translateY(4px); } 62%, 93% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
-
-/* the line that does the correcting, travelling rather than appearing */
-.hp-val::after {
-  content: "";
-  position: absolute;
-  left: -3px; top: 50%;
-  height: 1px;
-  background: var(--bad);
-  width: 0;
-  opacity: 0;
-}
-
-.hp-r1 .hp-val::after { animation: hpStrike1 var(--loop) linear infinite; }
-.hp-r2 .hp-val::after { animation: hpStrike2 var(--loop) linear infinite; }
-.hp-r3 .hp-val::after { animation: hpStrike3 var(--loop) linear infinite; }
-
-@keyframes hpStrike1 {
-  0%, 29% { width: 0; opacity: 0; }
-  30%     { width: 0; opacity: 1; }
-  34%     { width: calc(100% + 6px); opacity: 1; }
-  38%, 100% { width: calc(100% + 6px); opacity: 0; }
-}
-@keyframes hpStrike2 {
-  0%, 41% { width: 0; opacity: 0; }
-  42%     { width: 0; opacity: 1; }
-  46%     { width: calc(100% + 6px); opacity: 1; }
-  50%, 100% { width: calc(100% + 6px); opacity: 0; }
-}
-@keyframes hpStrike3 {
-  0%, 53% { width: 0; opacity: 0; }
-  54%     { width: 0; opacity: 1; }
-  58%     { width: calc(100% + 6px); opacity: 1; }
-  62%, 100% { width: calc(100% + 6px); opacity: 0; }
-}
-
-.hp-foot {
-  position: relative;
-  display: grid;
-  padding: 14px 20px;
-  border-top: 1px solid var(--line);
-  min-height: 46px;
-}
-
-.hp-foot > span {
-  grid-area: 1 / 1;
-  align-self: center;
-  font: 400 12.5px/1.4 var(--display);
-  color: var(--slate);
-}
-
-.hp-foot-a { animation: hpFootA var(--loop) linear infinite; }
-.hp-foot-b { animation: hpFootB var(--loop) linear infinite; color: var(--ok) !important; }
-
-@keyframes hpFootA { 0%, 12% { opacity: 1; } 16%, 100% { opacity: 0; } }
-@keyframes hpFootB { 0%, 68% { opacity: 0; } 74%, 92% { opacity: 1; } 96%, 100% { opacity: 0; } }
-
-@media (prefers-reduced-motion: reduce) {
-  .hp-count, .hp-scan, .hp-row, .hp-was, .hp-now, .hp-val::after,
-  .hp-bad, .hp-ok, .hp-foot-a, .hp-foot-b { animation: none; }
-  .hp-now, .hp-ok, .hp-foot-b { display: none; }
-  .hp-row { opacity: 1; transform: none; }
-  .hp-count { color: var(--bad); }
-}
-
 /* ---- the chain stack ----------------------------------------------- */
 
 .cstack {
@@ -2080,7 +1564,7 @@ main h2 {
   transition: transform 0.16s var(--ease-loop);
 }
 
-.cs-marks img + img { margin-left: -9px; }
+.cs-marks img + img { margin-left: -8px; }
 .compact .cs-marks img + img { margin-left: -7px; }
 
 /* Reading order is left to right, so the stack reads that way too. */
@@ -2099,7 +1583,7 @@ main h2 {
 .cstack:hover .cs-marks img:nth-child(6) { transition-delay: 125ms; }
 
 .cs-label {
-  font: 400 13.5px/1 var(--display);
+  font: 400 12.5px/1 var(--display);
   color: var(--mist);
   white-space: nowrap;
 }
@@ -2110,4 +1594,504 @@ main h2 {
 
 @media (prefers-reduced-motion: reduce) {
   .cstack:hover .cs-marks img { transform: none; }
+}
+
+
+/* ---- the Access Receipt, printed on paper --------------------------
+
+   Lifted from the nine-step deck, where this object was first drawn.
+   Cream stock on a dark ground with a torn top and bottom, which is the
+   one surface on this site that is not another dark card. A page about
+   calldata should read as a document.
+
+   It rewrites itself on a 9s loop: the request is struck, the
+   correction rises, and the exposure rows follow the headline rather
+   than arriving with it.
+   -------------------------------------------------------------------- */
+
+.perm {
+  --paper: #F2EEE6;
+  --pink: #191C1F;
+  --pink2: #8C8377;
+  --prule: rgba(25, 28, 31, 0.34);
+  --stamp: #C2342A;
+  --seal: #0F7355;
+  --tw: 9px;
+  --th: 5px;
+
+  width: min(330px, 100%);
+  color: var(--pink);
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.055), rgba(0,0,0,0) 9%, rgba(0,0,0,0) 90%, rgba(0,0,0,.07)),
+    var(--paper);
+  rotate: -0.7deg;
+  filter:
+    drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 22px 34px rgba(0, 0, 0, 0.62));
+  -webkit-mask:
+    linear-gradient(#000 0 0) 0 var(--th) / 100% calc(100% - var(--th) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--th) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--th) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) 0 var(--th) / 100% calc(100% - var(--th) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--th) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--th) repeat-x;
+}
+
+.rhead { display: block; text-align: center; padding: 14px 16px 9px; }
+
+.rhead .rt {
+  display: block;
+  font: 700 9px/1 var(--mono);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.rhead .rs {
+  position: relative;
+  display: inline-grid;
+  margin-top: 7px;
+  font: 700 7.5px/1 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.rhead .rs > span {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rhead .rs > span::before {
+  content: "";
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.rs-a { color: var(--stamp); animation: rWas 9s var(--ease-loop) infinite; }
+.rs-b { color: var(--seal); animation: rNow 9s var(--ease-loop) infinite; }
+
+.rbody { padding: 2px 16px 8px; border-top: 1px dashed var(--prule); }
+.rbody dl { margin: 0; }
+
+.prow { display: flex; align-items: baseline; margin: 0; padding: 5px 0; }
+
+.prow dt {
+  display: flex;
+  align-items: baseline;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 6px;
+  margin: 0;
+  white-space: nowrap;
+  font: 400 8.5px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pink2);
+}
+
+/* the leader dots that make a receipt a receipt */
+.prow dt::after {
+  content: "";
+  flex: 1 1 auto;
+  border-bottom: 1px dotted var(--prule);
+  transform: translateY(-2px);
+}
+
+.prow dd {
+  flex: 0 0 auto;
+  margin: 0;
+  padding-left: 8px;
+  white-space: nowrap;
+  font: 700 11.5px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--stamp);
+}
+
+.prow.lead { padding: 8px 0 10px; margin-bottom: 6px; border-bottom: 4px double var(--prule); }
+.prow.lead dd { font-size: 19px; letter-spacing: -0.01em; padding-left: 10px; }
+.prow.lead dd.fixed { color: var(--pink); }
+
+.rrule {
+  margin: 12px 0 4px;
+  font: 400 7.5px/1 var(--mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--pink2);
+}
+
+/* two states in one cell, the old one struck before the new one rises */
+.swap dd, .exp dd, .rfoot span > span { position: relative; display: inline-grid; }
+.swap dd > span, .exp dd > span, .rfoot span > span > span { grid-area: 1 / 1; text-align: right; }
+
+.perm .was { color: var(--stamp); animation: rWas 9s var(--ease-loop) infinite; }
+.perm .now { color: var(--seal); animation: rNow 9s var(--ease-loop) infinite; }
+
+@keyframes rWas { 0%, 38% { opacity: 1; } 46%, 92% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes rNow {
+  0%, 40%  { opacity: 0; transform: translateY(4px); }
+  48%, 92% { opacity: 1; transform: none; }
+  100%     { opacity: 0; transform: translateY(4px); }
+}
+
+/* the line that does the correcting */
+.swap dd::before, .exp dd::before {
+  content: "";
+  position: absolute;
+  left: -2px; top: 50%;
+  height: 1px;
+  background: var(--stamp);
+  animation: rStrike 9s var(--ease-loop) infinite;
+}
+
+@keyframes rStrike {
+  0%, 36%  { width: 0; opacity: 0; }
+  38%      { width: 0; opacity: 1; }
+  45%      { width: calc(100% + 4px); opacity: 1; }
+  52%, 92% { width: calc(100% + 4px); opacity: 0; }
+  100%     { width: 0; opacity: 0; }
+}
+
+/* Consequences follow the cause, staggered behind the headline
+   correction. Keyed by explicit class: nth-of-type counts div children
+   and the first two divs are .prow.lead, so an nth-of-type on .exp
+   matched nothing and every row ran in step with the headline. */
+.exp-1 dd > span, .exp-1 dd::before { animation-delay: 0.14s; }
+.exp-2 dd > span, .exp-2 dd::before { animation-delay: 0.28s; }
+.exp-3 dd > span, .exp-3 dd::before { animation-delay: 0.42s; }
+
+.exp dd { font-size: 10.5px; }
+
+.rfoot {
+  display: block;
+  text-align: center;
+  padding: 9px 16px 15px;
+  border-top: 1px dashed var(--prule);
+  font: 400 7.5px/1.5 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pink2);
+}
+
+.rfoot span { display: block; }
+.rfoot span + span { margin-top: 6px; font-weight: 700; }
+.rfoot .was { color: var(--stamp); }
+.rfoot .now { color: var(--seal); }
+
+@media (prefers-reduced-motion: reduce) {
+  .perm .was, .perm .now, .rs-a, .rs-b,
+  .swap dd::before, .exp dd::before { animation: none; }
+  .perm .now, .rs-b { display: none; }
+}
+
+/* ---- the ledger, working ------------------------------------------
+
+   One 18s cycle. Rows arrive, are flagged, then corrected one after
+   another, and then they STAY. An earlier version faded them out,
+   which left an empty panel and implied the assets vanish with the
+   permission. They do not: the wallet still holds the token and the
+   application still exists. Only the authority changes, so only the
+   state columns move.
+
+     0-8%     rows arrive
+     8-20%    found, unbounded, Revoke live
+     22-32%   row 1 corrected
+     34-44%   row 2 corrected
+     46-56%   row 3 corrected
+     56-90%   all corrected and still listed
+     90-100%  reset
+
+   Pure CSS. The homepage ships no JavaScript.
+   -------------------------------------------------------------------- */
+
+@property --lp-n {
+  syntax: '<integer>';
+  initial-value: 3;
+  inherits: false;
+}
+
+.lp { --loop: 18s; }
+
+.lp-frame { border: 1px solid var(--line2); border-radius: 16px; overflow: hidden; }
+
+.lp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.lp-title { font: 600 15px/1 var(--display); }
+
+.lp-stat { position: relative; padding: 16px 20px 19px; border-bottom: 1px solid var(--line); overflow: hidden; }
+
+.lp-read {
+  display: block;
+  font: 500 10px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+/* The verdict, condensed into the panel's own head.
+ *
+ * This sentence used to live only on the demo page, above a list of amounts.
+ * It is the line a person actually came for, so it belongs here too, on the
+ * one section of the homepage that has to land. Condensed to a single
+ * paragraph so it fits above the table instead of competing with it.
+ *
+ * It carries the money because the money is what conveys scale. An amount in
+ * WETH means nothing to a reader who does not hold their balances in their
+ * head; a dollar figure is understood immediately.
+ */
+.lp-verdict {
+  display: grid;
+  margin-top: 9px;
+  max-width: 44ch;
+}
+.lp-verdict > span {
+  grid-area: 1 / 1;
+  font: 600 clamp(17px, 1.75vw, 21px)/1.28 var(--display);
+  letter-spacing: -0.02em;
+  color: var(--paper);
+}
+.lp-verdict .was { animation: lpVerdictWas var(--loop) linear infinite; }
+.lp-verdict .now { opacity: 0; animation: lpVerdictNow var(--loop) linear infinite; }
+
+@keyframes lpVerdictWas { 0%, 51% { opacity: 1; } 54%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes lpVerdictNow { 0%, 54% { opacity: 0; transform: translateY(5px); } 58%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(5px); } }
+
+/* The figure is the argument. Red while it is reachable by someone else,
+   mint once it is only reachable by the amount the action needed. */
+.lp-fig { font-weight: 700; font-variant-numeric: tabular-nums; }
+.lp-fig.bad { color: var(--bad); }
+.lp-fig.ok  { color: var(--ok); }
+
+/* Counts down as each permission is corrected. An integer, not a currency:
+   the currency is stated once, beside it, and marked indicative. */
+.lp-count {
+  font-weight: 700;
+  color: var(--bad);
+  counter-reset: lpn var(--lp-n);
+  animation: lpCount var(--loop) linear infinite;
+}
+
+.lp-count::after { content: counter(lpn); }
+
+@keyframes lpCount {
+  0%, 7%    { --lp-n: 0; color: var(--slate); }
+  9%, 26%   { --lp-n: 3; color: var(--bad); }
+  30%, 38%  { --lp-n: 2; color: var(--bad); }
+  42%, 50%  { --lp-n: 1; color: var(--bad); }
+  54%, 100% { --lp-n: 0; color: var(--bad); }
+}
+
+.lp-scan {
+  position: absolute;
+  inset-block: 0;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgba(47,224,188,0.10), transparent);
+  animation: lpSweep var(--loop) linear infinite;
+}
+
+@keyframes lpSweep {
+  0%        { transform: translateX(-110%); opacity: 1; }
+  7%        { transform: translateX(360%); opacity: 1; }
+  8%, 100%  { transform: translateX(360%); opacity: 0; }
+}
+
+.lp-cols,
+.lp-row {
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr 1fr 0.8fr 1fr 178px;
+  gap: 14px;
+  align-items: center;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.lp-cols {
+  font: 500 10.5px/1 var(--display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+.lp-right { text-align: right; }
+
+/* Rows persist. Only the flag behind them moves. */
+.lp-row { opacity: 0; }
+.lp-r1 { animation: lpRow1 var(--loop) linear infinite; }
+.lp-r2 { animation: lpRow2 var(--loop) linear infinite; }
+.lp-r3 { animation: lpRow3 var(--loop) linear infinite; }
+
+@keyframes lpRow1 {
+  0%       { opacity: 0; transform: translateY(6px); }
+  4%, 9%   { opacity: 1; transform: none; background: transparent; }
+  11%, 22% { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
+  26%, 32% { background: rgba(47,224,188,0.10); }
+  38%, 100% { background: transparent; opacity: 1; }
+}
+@keyframes lpRow2 {
+  0%       { opacity: 0; transform: translateY(6px); }
+  6%, 9%   { opacity: 1; transform: none; background: transparent; }
+  11%, 34% { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
+  38%, 44% { background: rgba(255,255,255,0.045); }
+  50%, 100% { background: transparent; opacity: 1; }
+}
+@keyframes lpRow3 {
+  0%       { opacity: 0; transform: translateY(6px); }
+  8%, 9%   { opacity: 1; transform: none; background: transparent; }
+  11%, 46% { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
+  50%, 56% { background: rgba(47,224,188,0.10); }
+  62%, 100% { background: transparent; opacity: 1; }
+}
+
+.lp-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+.lp-tok {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 50%;
+  font: 700 8px/1 var(--mono); color: #fff;
+}
+
+.lp-who b { display: block; font: 600 14px/1.2 var(--display); }
+.lp-who em {
+  display: block; margin-top: 2px; font-style: normal;
+  font: 400 11.5px/1 var(--display); color: var(--mist); white-space: nowrap;
+}
+
+/* two states in one cell */
+.lp-swap { position: relative; display: inline-grid; justify-items: start; }
+.lp-swap > span { grid-area: 1 / 1; font: 400 12.5px/1 var(--mono); white-space: nowrap; }
+
+/* Token amount over its dollar value. The dollar line is deliberately quiet
+   and never takes the row's outcome colour: it conveys scale, and no reading
+   is derived from it. */
+.lp-amt > span { display: grid; gap: 4px; line-height: 1; }
+.lp-amt b { font: inherit; font-weight: 400; }
+.lp-amt i { font: 400 11px/1 var(--mono); font-style: normal; color: var(--slate); }
+.lp-swap .was { color: var(--bad); }
+.lp-swap .now { color: var(--ok); }
+
+.lp-badge {
+  display: inline-flex; align-items: center;
+  padding: 4px 9px; border-radius: 999px;
+  font: 700 8.5px/1 var(--mono); letter-spacing: 0.1em;
+}
+.lp-bad { background: rgba(255,95,78,0.15); color: var(--bad); }
+.lp-ok  { background: rgba(47,224,188,0.12); color: var(--ok); }
+
+/* Two outcomes, two looks. A limited permission is alive and now fits its
+   job, so it settles mint. A revoked one is switched off, so it settles
+   slate. Neither settles red: red belongs to the state they were rescued
+   from, and colouring a resolved row red would undo the whole sequence. */
+.lp-o-limit  .lp-res  { background: rgba(47,224,188,0.12); color: var(--ok); }
+.lp-o-revoke .lp-res  { background: rgba(255,255,255,0.05); color: var(--mist); }
+.lp-o-revoke .lp-amt .now b,
+.lp-o-revoke .lp-swap .now { color: var(--mist); }
+.lp-o-revoke .lp-done { background: rgba(255,255,255,0.06); color: var(--mist); }
+
+.lp-act { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.lp-act .lp-swap { justify-items: end; }
+
+.lp-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 7px 14px; border-radius: 999px;
+  font: 700 10.5px/1 var(--display); letter-spacing: 0.02em;
+  background: var(--ok); color: var(--void);
+  white-space: nowrap;
+}
+
+.lp-done { background: rgba(47,224,188,0.14); color: var(--ok); }
+
+/* Limiting and revoking are different acts with the same standing: the
+   authority now fits what the action required. Both wear --ok, and the
+   verb on the control is what distinguishes them. */
+.lp-ghost { background: none; border: 1px solid var(--line2); color: var(--ice); }
+
+/* per-row correction timing */
+.lp-r1 .was { animation: lpWas1 var(--loop) linear infinite; }
+.lp-r1 .now { animation: lpNow1 var(--loop) linear infinite; }
+.lp-r2 .was { animation: lpWas2 var(--loop) linear infinite; }
+.lp-r2 .now { animation: lpNow2 var(--loop) linear infinite; }
+.lp-r3 .was { animation: lpWas3 var(--loop) linear infinite; }
+.lp-r3 .now { animation: lpNow3 var(--loop) linear infinite; }
+
+@keyframes lpWas1 { 0%, 23% { opacity: 1; } 26%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes lpNow1 { 0%, 26% { opacity: 0; transform: translateY(4px); } 30%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
+@keyframes lpWas2 { 0%, 35% { opacity: 1; } 38%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes lpNow2 { 0%, 38% { opacity: 0; transform: translateY(4px); } 42%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
+@keyframes lpWas3 { 0%, 47% { opacity: 1; } 50%, 99% { opacity: 0; } 99.01%, 100% { opacity: 1; } }
+@keyframes lpNow3 { 0%, 50% { opacity: 0; transform: translateY(4px); } 54%, 99% { opacity: 1; transform: none; } 99.01%, 100% { opacity: 0; transform: translateY(4px); } }
+
+/* the strike, travelling across the granted value only */
+.lp-row > .lp-swap:first-of-type::after {
+  content: "";
+  position: absolute;
+  left: -3px; top: 50%;
+  height: 1px;
+  background: var(--bad);
+  width: 0;
+  opacity: 0;
+}
+
+.lp-r1 > .lp-swap:first-of-type::after { animation: lpStrike1 var(--loop) linear infinite; }
+.lp-r2 > .lp-swap:first-of-type::after { animation: lpStrike2 var(--loop) linear infinite; }
+.lp-r3 > .lp-swap:first-of-type::after { animation: lpStrike3 var(--loop) linear infinite; }
+
+@keyframes lpStrike1 {
+  0%, 21% { width: 0; opacity: 0; } 22% { width: 0; opacity: 1; }
+  26% { width: calc(100% + 6px); opacity: 1; } 30%, 100% { width: calc(100% + 6px); opacity: 0; }
+}
+@keyframes lpStrike2 {
+  0%, 33% { width: 0; opacity: 0; } 34% { width: 0; opacity: 1; }
+  38% { width: calc(100% + 6px); opacity: 1; } 42%, 100% { width: calc(100% + 6px); opacity: 0; }
+}
+@keyframes lpStrike3 {
+  0%, 45% { width: 0; opacity: 0; } 46% { width: 0; opacity: 1; }
+  50% { width: calc(100% + 6px); opacity: 1; } 54%, 100% { width: calc(100% + 6px); opacity: 0; }
+}
+
+/* the press that causes it */
+.lp-r1 .was.lp-btn { animation: lpWas1 var(--loop) linear infinite, lpPress1 var(--loop) linear infinite; }
+.lp-r2 .was.lp-btn { animation: lpWas2 var(--loop) linear infinite, lpPress2 var(--loop) linear infinite; }
+.lp-r3 .was.lp-btn { animation: lpWas3 var(--loop) linear infinite, lpPress3 var(--loop) linear infinite; }
+
+@keyframes lpPress1 { 0%, 20% { transform: none; } 22% { transform: scale(0.92); } 25%, 100% { transform: none; } }
+@keyframes lpPress2 { 0%, 32% { transform: none; } 34% { transform: scale(0.92); } 37%, 100% { transform: none; } }
+@keyframes lpPress3 { 0%, 44% { transform: none; } 46% { transform: scale(0.92); } 49%, 100% { transform: none; } }
+
+.lp-foot { position: relative; display: grid; padding: 14px 20px; min-height: 44px; }
+.lp-foot > span {
+  grid-area: 1 / 1; align-self: center;
+  font: 400 12.5px/1.4 var(--display); color: var(--slate);
+}
+.lp-foot-a { animation: lpFootA var(--loop) linear infinite; }
+.lp-foot-b { animation: lpFootB var(--loop) linear infinite; color: var(--ok) !important; }
+
+@keyframes lpFootA { 0%, 7% { opacity: 1; } 10%, 100% { opacity: 0; } }
+@keyframes lpFootB { 0%, 56% { opacity: 0; } 62%, 94% { opacity: 1; } 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-count, .lp-scan, .lp-row, .lp-swap .was, .lp-swap .now,
+  .lp-verdict .was, .lp-verdict .now,
+  .lp-row > .lp-swap:first-of-type::after,
+  .lp-foot-a, .lp-foot-b { animation: none; }
+  .lp-row { opacity: 1; }
+  .lp-swap .now, .lp-verdict .now, .lp-foot-b { display: none; }
+  .lp-verdict .was { opacity: 1; }
+  .lp-count { color: var(--bad); }
+}
+
+@media (max-width: 1000px) {
+  .lp-cols { display: none; }
+  .lp-row { grid-template-columns: 1.4fr 1fr auto; gap: 8px 12px; }
+  .lp-row > .lp-swap:nth-of-type(2),
+  .lp-row > .lp-swap:nth-of-type(3) { display: none; }
 }

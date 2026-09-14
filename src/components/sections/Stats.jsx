@@ -29,7 +29,7 @@ const STATS = [
     src: 'Chainalysis',
     href: 'https://www.chainalysis.com/blog/crypto-crime-report-introduction/',
     logo: '/sources/chainalysis.png',
-    logoH: 20,
+    logoH: 16,
     tone: 'bad',
   },
   {
@@ -38,7 +38,7 @@ const STATS = [
     src: 'Crypto.com',
     href: 'https://crypto.com/research',
     logo: '/sources/cryptocom.png',
-    logoH: 20,
+    logoH: 16,
   },
   {
     n: '40–70M',
@@ -46,7 +46,7 @@ const STATS = [
     src: 'a16z',
     href: 'https://a16zcrypto.com/posts/article/state-of-crypto-report-2024/',
     logo: '/sources/a16z.svg',
-    logoH: 13,
+    logoH: 11,
   },
 ];
 

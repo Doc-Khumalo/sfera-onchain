@@ -35,8 +35,8 @@ export default function ChainStack({ total = 15, label = 'chains read the same w
             src={`/chains/${file}`}
             alt={name}
             title={name}
-            width={compact ? 22 : 30}
-            height={compact ? 22 : 30}
+            width={compact ? 20 : 24}
+            height={compact ? 20 : 24}
             loading="lazy"
             decoding="async"
           />

@@ -34,6 +34,14 @@
   --rule:   rgba(122, 147, 164, 0.22);
 
   /* type */
+  /* One easing for everything that settles rather than stops. Defined
+     here rather than in a page stylesheet because both pages use it, and
+     an undefined custom property inside an animation shorthand makes the
+     whole declaration invalid, which silently disables the animation
+     rather than falling back to a default. */
+  --ease-loop: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+
   --display: "Archivo", system-ui, -apple-system, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
