@@ -7,6 +7,7 @@ import { TERMS } from '../../data/site.js';
 import Ledger from './Ledger.jsx';
 import Detail from './Detail.jsx';
 import Handoff from './Handoff.jsx';
+import HowItReads from './HowItReads.jsx';
 
 /** A public address carrying unbounded approvals against a real balance.
     Verified before being written down, so the page has something honest to
@@ -266,22 +267,22 @@ export default function Dashboard() {
             </dl>
           </section>
 
+          <HowItReads
+            checked={result?.checked}
+            tokens={result?.coverage?.tokens}
+            spenders={result?.coverage?.spenders}
+            chain={chain?.name}
+          />
+
           <section className="coverage-note">
-            <p className="rule-label">What this covers</p>
-            <dl>
-              <div>
-                <dt>Checked<span>{result?.checked ?? 0}</span></dt>
-                <dd>{result?.coverage?.tokens ?? 0} tokens against {result?.coverage?.spenders ?? 0} known spenders, read directly from the chain.</dd>
-              </div>
-              <div>
-                <dt>Not covered<span>—</span></dt>
-                <dd>{(result?.coverage?.notCovered ?? []).join('. ')}.</dd>
-              </div>
-            </dl>
+            <p className="rule-label">What this does not cover</p>
+            <ul className="not-covered">
+              {(result?.coverage?.notCovered ?? []).map((x) => <li key={x}>{x}</li>)}
+            </ul>
             <p className="cov-warn">
-              This is not complete coverage of the wallet. An allowance cannot be
-              listed from chain state, only asked about, so what is missing here
-              is stated rather than implied away.
+              Finding nothing here is not the same as there being nothing. This
+              is the honest limit of asking rather than listing, and it is
+              stated rather than implied away.
             </p>
           </section>
 
@@ -306,7 +307,14 @@ export default function Dashboard() {
             )}
 
             {perms.length > 0 && (
-              <Ledger rows={shown} openId={openId} onOpen={(id) => setOpenId(id === openId ? null : id)} />
+              <Ledger
+                rows={shown}
+                openId={openId}
+                canAct={mode === 'wallet'}
+                explorer={result?.explorer}
+                onOpen={(id) => setOpenId(id === openId ? null : id)}
+                onRevoke={(p) => setHandoff({ perm: p })}
+              />
             )}
 
             {status === 'ready' && perms.length > 0 && shown.length === 0 && (

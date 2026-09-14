@@ -4,6 +4,7 @@ import Stats from './sections/Stats.jsx';
 import Demonstration from './sections/Demonstration.jsx';
 import HowItWorks from './sections/HowItWorks.jsx';
 import Coverage from './sections/Coverage.jsx';
+import Chains from './sections/Chains.jsx';
 import Standards from './sections/Standards.jsx';
 import Lifecycle from './sections/Lifecycle.jsx';
 import Horizon from './sections/Horizon.jsx';
@@ -31,6 +32,7 @@ export default function Home() {
         <HowItWorks />
         <Lifecycle />
         <Coverage />
+        <Chains />
         <Standards />
         <AccountAbstraction />
         <Developers />
