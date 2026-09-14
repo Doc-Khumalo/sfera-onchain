@@ -1,0 +1,50 @@
+/**
+ * The chains, stacked.
+ *
+ * A single chain chip said "Base" and implied the panel read one chain. It
+ * reads fifteen, and a row of overlapping marks says that faster than a number
+ * does, which is why every multi-chain product uses this shape.
+ *
+ * The marks are real logos, fetched once from each project and served from our
+ * own origin, so the page makes no third party request and cannot break when
+ * someone reorganises a CDN. Six are shown because six is what reads as a
+ * cluster rather than a queue; the count carries the rest.
+ *
+ * ON BASE. Its mark is the one that is genuinely just a colour: base.org
+ * publishes a solid blue favicon and five other sources gave the same or
+ * worse. That is their published asset rather than something drawn here, and
+ * a flat brand colour is the honest version of a mark that does not exist at
+ * this size.
+ */
+const SHOWN = [
+  { name: 'Ethereum', file: 'ethereum.png' },
+  { name: 'Base', file: 'base.png' },
+  { name: 'Arbitrum', file: 'arbitrum.png' },
+  { name: 'Optimism', file: 'optimism.png' },
+  { name: 'Polygon', file: 'polygon.png' },
+  { name: 'BNB Chain', file: 'bnb.png' },
+];
+
+export default function ChainStack({ total = 15, label = 'chains read the same way', compact = false }) {
+  return (
+    <span className={`cstack ${compact ? 'compact' : ''}`}>
+      <span className="cs-marks">
+        {SHOWN.map(({ name, file }) => (
+          <img
+            key={name}
+            src={`/chains/${file}`}
+            alt={name}
+            title={name}
+            width={compact ? 22 : 30}
+            height={compact ? 22 : 30}
+            loading="lazy"
+            decoding="async"
+          />
+        ))}
+      </span>
+      <span className="cs-label">
+        <b>{total}</b> {label}
+      </span>
+    </span>
+  );
+}

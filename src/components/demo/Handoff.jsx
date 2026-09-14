@@ -3,6 +3,8 @@ import { createPublicClient, custom } from 'viem';
 import { send } from '../../lib/wallet.js';
 import { remediation, permissions, format } from '../../lib/api.js';
 import { explain } from '../../lib/readings.js';
+import { Dialog, DialogContent } from '../ui/Dialog.jsx';
+import { Button } from '../ui/Button.jsx';
 
 /**
  * The wallet handoff, screens L08 to L13 of the UX Specification. Headers and
@@ -98,8 +100,12 @@ export default function Handoff({ perm, chain, chainId, owner, provider, explore
   const txUrl = explorer && hash ? `${explorer}/tx/${hash}` : null;
 
   return (
-    <div className="handoff-wrap" role="dialog" aria-modal="true" aria-label="Wallet handoff">
-      <article className="handoff">
+    <Dialog open onOpenChange={(o) => { if (!o) onCancel(); }}>
+      <DialogContent
+        title="Wallet handoff"
+        description="An unsigned transaction is prepared here and signed in your own wallet."
+      >
+      <div className="handoff-body">
         {stage === 'loading' && (
           <>
             <p className="rule-label">Preparing the correction</p>
@@ -141,12 +147,8 @@ export default function Handoff({ perm, chain, chainId, owner, provider, explore
             </details>
 
             <div className="d-actions">
-              <button type="button" className="btn" onClick={handOver}>
-                Continue to wallet
-              </button>
-              <button type="button" className="txt" onClick={onCancel}>
-                Cancel
-              </button>
+              <Button onClick={handOver}>Continue to wallet</Button>
+              <Button variant="link" onClick={onCancel}>Cancel</Button>
             </div>
           </>
         )}
@@ -159,9 +161,7 @@ export default function Handoff({ perm, chain, chainId, owner, provider, explore
             </p>
             <p className="h-wait" aria-live="polite"><span className="h-bar" /></p>
             <div className="d-actions">
-              <button type="button" className="txt" onClick={onCancel}>
-                Cancel
-              </button>
+              <Button variant="link" onClick={onCancel}>Cancel</Button>
             </div>
           </>
         )}
@@ -208,9 +208,7 @@ export default function Handoff({ perm, chain, chainId, owner, provider, explore
               </p>
             )}
             <div className="d-actions">
-              <button type="button" className="btn" onClick={onSettle}>
-                Back to permissions
-              </button>
+              <Button onClick={onSettle}>Back to permissions</Button>
             </div>
           </>
         )}
@@ -224,9 +222,7 @@ export default function Handoff({ perm, chain, chainId, owner, provider, explore
               Read it again before relying on it.
             </p>
             <div className="d-actions">
-              <button type="button" className="btn" onClick={onSettle}>
-                Back to permissions
-              </button>
+              <Button onClick={onSettle}>Back to permissions</Button>
             </div>
           </>
         )}
@@ -236,12 +232,8 @@ export default function Handoff({ perm, chain, chainId, owner, provider, explore
             <p className="rule-label">Permission not approved</p>
             <p className="h-body">Nothing was changed.</p>
             <div className="d-actions">
-              <button type="button" className="btn" onClick={() => setStage('ready')}>
-                Try again
-              </button>
-              <button type="button" className="txt" onClick={onCancel}>
-                Cancel
-              </button>
+              <Button onClick={() => setStage('ready')}>Try again</Button>
+              <Button variant="link" onClick={onCancel}>Cancel</Button>
             </div>
           </>
         )}
@@ -255,16 +247,13 @@ export default function Handoff({ perm, chain, chainId, owner, provider, explore
               permission. Nothing else is implied.
             </p>
             <div className="d-actions">
-              <button type="button" className="btn" onClick={() => setStage('ready')}>
-                Try again
-              </button>
-              <button type="button" className="txt" onClick={onCancel}>
-                Cancel
-              </button>
+              <Button onClick={() => setStage('ready')}>Try again</Button>
+              <Button variant="link" onClick={onCancel}>Cancel</Button>
             </div>
           </>
         )}
-      </article>
-    </div>
+      </div>
+      </DialogContent>
+    </Dialog>
   );
 }

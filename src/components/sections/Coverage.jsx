@@ -6,7 +6,7 @@ const STATUS = { 'in-build': 'In build', planned: 'Planned', experimental: 'Expe
 export default function Coverage() {
   return (
     <section className="coverage reveal" id="coverage">
-      <h2>Permissions decode deterministically.</h2>
+      <h2>We decode. We don't guess.</h2>
       <p className="lede">
         We can be right rather than probabilistic — and say unknown rather than
         safe when we cannot tell.

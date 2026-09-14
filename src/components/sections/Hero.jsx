@@ -1,4 +1,5 @@
-import Receipt from '../Receipt.jsx';
+import HeroPanel from '../HeroPanel.jsx';
+import ChainStack from '../ChainStack.jsx';
 
 /**
  * The hook, not the pitch.
@@ -19,11 +20,8 @@ export default function Hero() {
   return (
     <section className="hero">
       <div className="hero-type">
-        <p className="filed">Sfera Onchain · TX Guard</p>
-
         <h1>
-          You have approved things<br />
-          you cannot remember.
+You already said yes.
         </h1>
 
         <p className="lede">
@@ -46,14 +44,16 @@ export default function Hero() {
             <button type="submit" className="btn">Read it</button>
           </div>
           <p id="probe-note" className="probe-note">
-            Read-only, and no wallet needed. Fifteen chains. Nothing is signed,
-            stored, or sent anywhere.
+            Read-only, and no wallet needed. Nothing is signed, stored, or sent
+            anywhere.
           </p>
+
+          <ChainStack total={15} label="chains read the same way" />
         </form>
       </div>
 
       <div className="hero-art">
-        <Receipt />
+        <HeroPanel />
       </div>
     </section>
   );

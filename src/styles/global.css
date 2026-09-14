@@ -37,7 +37,14 @@
   --display: "Archivo", system-ui, -apple-system, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --gutter: clamp(22px, 5vw, 76px);
+  /* Content width and the gutter beside it, kept separate on purpose.
+     box-sizing is border-box, so a max-width that includes its own padding
+     silently narrows the content: 1180 with 76px gutters left 1028px to
+     actually read, which is 71% of a 1440 viewport. --page is derived so
+     the number below is the width of the content itself and nothing else. */
+  --content: 1260px;
+  --gutter: clamp(20px, 4vw, 64px);
+  --page: calc(var(--content) + var(--gutter) * 2);
 }
 
 * { box-sizing: border-box; }

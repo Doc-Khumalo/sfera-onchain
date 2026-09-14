@@ -9,6 +9,7 @@ import Detail from './Detail.jsx';
 import Handoff from './Handoff.jsx';
 import HowItReads from './HowItReads.jsx';
 import Verdict from './Verdict.jsx';
+import { Select } from '../ui/Select.jsx';
 
 /** A public address carrying unbounded approvals against a real balance.
     Verified before being written down, so the page has something honest to
@@ -49,6 +50,11 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
 
+  /* The reading before the last refresh, keyed by permission id. A row uses
+     it to animate from the old value to the new one, which is the moment the
+     whole product exists to produce. */
+  const [previous, setPrevious] = useState(null);
+
   const [filter, setFilter] = useState('all');
   const [openId, setOpenId] = useState(null);
   const [handoff, setHandoff] = useState(null);
@@ -76,7 +82,13 @@ export default function Dashboard() {
     setStatus('scanning');
     setError(null);
     try {
-      setResult(await fetchPermissions(chainId, address));
+      const next = await fetchPermissions(chainId, address);
+      setResult((was) => {
+        if (was) {
+          setPrevious(Object.fromEntries((was.permissions ?? []).map((p) => [p.id, p])));
+        }
+        return next;
+      });
       setStatus('ready');
     } catch (e) {
       /* A failed read is reported, never rendered as an empty ledger. */
@@ -147,7 +159,7 @@ export default function Dashboard() {
     return (
       <section className="gate">
         <p className="gate-kicker">Live</p>
-        <h1>The permissions this wallet has already given away.</h1>
+        <h1>What this wallet gave away.</h1>
         <p className="gate-lede">
           Connect a wallet and this reads its standing token permissions
           directly from the chain. Read-only until you ask for a change, and any
@@ -161,7 +173,7 @@ export default function Dashboard() {
           </p>
         )}
 
-        <div className="wallet-picks">
+        <div className="wallet-picks stagger">
           {wallets.map((w) => (
             <button key={w.info.uuid} type="button" className="btn"
               disabled={status === 'connecting'} onClick={() => onConnect(w)}>
@@ -208,7 +220,7 @@ export default function Dashboard() {
     <>
       <section className="wallet-strip">
         <div className="w-id">
-          <span className="w-dot" aria-hidden="true" />
+          <span className="w-dot live-dot" aria-hidden="true" />
           <span className="w-addr">{address.slice(0, 6)}…{address.slice(-4)}</span>
           <span className="w-net">{chain ? chain.name : `Chain ${chainId}`}</span>
         </div>
@@ -218,14 +230,15 @@ export default function Dashboard() {
             : `${walletName} · read-only until you ask for a change`}
         </p>
         {supported.length > 1 && (
-          <select className="chain-pick" value={Number(chainId) || ''}
-            onChange={(e) => {
-              const id = Number(e.target.value);
+          <Select
+            value={Number(chainId) || ''}
+            items={supported.map((c) => ({ value: c.id, label: c.name }))}
+            onValueChange={(v) => {
+              const id = Number(v);
               if (mode === 'wallet' && provider) switchChain(provider, id).catch(() => {});
               else setChainId(id);
-            }}>
-            {supported.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+            }}
+          />
         )}
         <button className="btn ghost sm" type="button" onClick={refresh} disabled={status === 'scanning'}>
           {status === 'scanning' ? 'Reading' : 'Re-read'}
@@ -278,7 +291,7 @@ export default function Dashboard() {
           />
 
           <section className="coverage-note">
-            <p className="rule-label">What this does not cover</p>
+            <p className="rule-label">Not covered</p>
             <ul className="not-covered">
               {(result?.coverage?.notCovered ?? []).map((x) => <li key={x}>{x}</li>)}
             </ul>
@@ -312,9 +325,11 @@ export default function Dashboard() {
             {perms.length > 0 && (
               <Ledger
                 rows={shown}
+                previous={previous}
                 openId={openId}
                 canAct={mode === 'wallet'}
                 explorer={result?.explorer}
+                chain={chain?.name}
                 onOpen={(id) => setOpenId(id === openId ? null : id)}
                 onRevoke={(p) => setHandoff({ perm: p })}
               />
@@ -335,7 +350,7 @@ export default function Dashboard() {
           </section>
 
           <section className="reading-note">
-            <p className="rule-label">Why these say reading and not verdict</p>
+            <p className="rule-label">Reading, not verdict</p>
             <p>
               A verdict compares the authority an application asked for against
               what your action actually required. Nothing is being asked for

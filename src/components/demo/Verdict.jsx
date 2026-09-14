@@ -1,4 +1,5 @@
 import { format } from '../../lib/api.js';
+import { Counter } from '../ui/Counter.jsx';
 
 /**
  * The line a person actually came for.
@@ -15,9 +16,18 @@ import { format } from '../../lib/api.js';
 export default function Verdict({ perms, readAt, scanning }) {
   if (scanning) {
     return (
-      <section className="verdict">
-        <p className="v-kicker">Reading the chain</p>
-        <h2 className="v-line">Asking every application we know about.</h2>
+      <section className="verdict field">
+        <p className="v-kicker">
+          <span className="live-dot mr-2 inline-block h-1.5 w-1.5 rounded-full bg-ok align-middle" />
+          Reading the chain
+        </p>
+        <h2 className="v-line">Asking every application we know.</h2>
+        {/* The sweep is the work, not a spinner. The engine really is moving
+            through pairs, so the page shows that rather than a shape that
+            only says something is happening somewhere. */}
+        <div className="relative mt-9 h-px overflow-hidden bg-line">
+          <span className="scan-line" />
+        </div>
       </section>
     );
   }
@@ -28,7 +38,7 @@ export default function Verdict({ perms, readAt, scanning }) {
 
   if (perms.length === 0) {
     return (
-      <section className="verdict">
+      <section className="verdict field">
         <p className="v-kicker">Nothing found</p>
         <h2 className="v-line">
           No standing permission turned up in what we asked about.
@@ -51,7 +61,7 @@ export default function Verdict({ perms, readAt, scanning }) {
   const tone = attention.length > 0 ? 'bad' : 'ok';
 
   return (
-    <section className={`verdict ${tone}`}>
+    <section className={`verdict field ${tone}`}>
       <p className="v-kicker">{readAt ? `Read ${new Date(readAt).toLocaleTimeString()}` : 'Read from the chain'}</p>
 
       {attention.length > 0 ? (
@@ -59,18 +69,16 @@ export default function Verdict({ perms, readAt, scanning }) {
           {/* Two counts in one sentence read badly: an application count
               followed by a permission count made "1 application ... none of
               them expires". The expiry clause stands on its own instead. */}
-          <b>{apps.size}</b> {apps.size === 1 ? 'application can' : 'applications can'} take from
-          this wallet without asking again.
-          {unbounded.length > 0 && <> Nothing here expires.</>}
+          <b><Counter value={apps.size} /></b> {apps.size === 1 ? 'application can' : 'applications can'} take
+          from this wallet.
+          {unbounded.length > 0 && <> Nothing expires.</>}
         </h2>
       ) : (
-        <h2 className="v-line">
-          Every permission we found is bounded by what this wallet holds.
-        </h2>
+        <h2 className="v-line">Everything found is bounded.</h2>
       )}
 
       {live.length > 0 && (
-        <ul className="v-amounts">
+        <ul className="v-amounts stagger">
           {live.map((p) => (
             <li key={p.id}>
               <span className="va-n">{format(p.reachableNow, p.decimals, p.symbol)}</span>

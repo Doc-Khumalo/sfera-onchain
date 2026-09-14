@@ -16,7 +16,7 @@ export default function Horizon() {
   return (
     <section className="horizon reveal">
       <div className="col-type">
-        <h2>The transaction control layer for onchain accounts.</h2>
+        <h2>The control layer.</h2>
         <p className="lede">
           Permission control is the wedge. Each stage has to be earned by the
           one before it.

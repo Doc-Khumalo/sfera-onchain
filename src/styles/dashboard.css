@@ -14,15 +14,15 @@ astro-island { display: contents; }
 
 main section,
 .demo-foot section {
-  max-width: 1180px;
+  max-width: var(--page);
   margin-inline: auto;
-  padding: clamp(22px, 3.4vh, 34px) var(--gutter);
+  padding: clamp(34px, 5.5vh, 64px) var(--gutter);
 }
 
 main h2 {
-  margin: 0 0 14px;
-  font: 800 clamp(21px, 2.4vw, 28px)/1.1 var(--display);
-  letter-spacing: -0.032em;
+  margin: 0 0 18px;
+  font: 700 clamp(24px, 3vw, 36px)/1.08 var(--display);
+  letter-spacing: -0.038em;
 }
 
 .lede {
@@ -34,11 +34,11 @@ main h2 {
 }
 
 .rule-label {
-  margin: 22px 0 8px;
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.24em;
+  margin: 22px 0 10px;
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--slate);
 }
@@ -51,7 +51,7 @@ main h2 {
   display: flex;
   align-items: baseline;
   gap: 20px;
-  max-width: 1180px;
+  max-width: var(--page);
   margin-inline: auto;
   padding: 18px var(--gutter) 16px;
   background: color-mix(in srgb, var(--void) 82%, transparent);
@@ -67,9 +67,9 @@ main h2 {
 .bar-nav { margin-left: auto; display: flex; gap: 24px; }
 
 .bar-nav a {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-family: var(--display);
+  font-size: 13.5px;
+  letter-spacing: 0;
   color: var(--mist);
   text-decoration: none;
   border-bottom: 1px solid transparent;
@@ -95,10 +95,9 @@ main h2 {
   background: var(--deck);
   border-bottom: 1px solid var(--line);
   color: var(--mist);
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: 0.02em;
   text-align: center;
 }
 
@@ -131,7 +130,7 @@ main h2 {
   border: 1px solid var(--ok);
   background: var(--ok);
   color: var(--void);
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -155,8 +154,8 @@ main h2 {
   border: 0;
   background: none;
   color: var(--mist);
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--display);
+  font-size: 13px;
   letter-spacing: 0.04em;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -175,7 +174,7 @@ main h2 {
   padding-bottom: 9px;
   border-bottom: 1px solid var(--ice);
   max-width: 15ch;
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.26em;
@@ -207,7 +206,7 @@ main h2 {
 .gate-terms li {
   padding: 9px 0;
   border-bottom: 1px dashed var(--rule);
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 11px;
   letter-spacing: 0.02em;
   color: var(--mist);
@@ -242,16 +241,16 @@ main h2 {
 }
 
 .w-net {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-family: var(--display);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--slate);
 }
 
 .w-note {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10.5px;
   color: var(--slate);
 }
@@ -276,9 +275,10 @@ main h2 {
 .summary dl > div:first-child { border-left: 0; padding-left: 0; }
 
 .summary dt {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.16em;
+  font-family: var(--display);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--slate);
 }
@@ -292,7 +292,7 @@ main h2 {
 
 .summary dd.s-note {
   margin-top: 8px;
-  font: 400 11px/1.4 var(--mono);
+  font: 400 12.5px/1.45 var(--display);
   letter-spacing: 0.02em;
   color: var(--mist);
 }
@@ -315,7 +315,7 @@ main h2 {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -356,15 +356,17 @@ main h2 {
 .filters { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
 
 .filters button {
-  padding: 7px 12px;
-  border: 1px solid var(--rule);
+  padding: 8px 15px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
   background: none;
   color: var(--mist);
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--display);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0;
   cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .filters button:hover { border-color: var(--ice); color: var(--ice); }
@@ -387,7 +389,7 @@ main h2 {
 .l-head {
   padding: 9px 0;
   border-bottom: 1px solid var(--rule);
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -415,7 +417,7 @@ main h2 {
 .c-app em {
   display: block;
   margin-top: 4px;
-  font: 400 10.5px/1 var(--mono);
+  font: 400 12px/1.3 var(--display);
   font-style: normal;
   letter-spacing: 0.06em;
   color: var(--slate);
@@ -424,7 +426,7 @@ main h2 {
 .c-granted,
 .c-exp,
 .c-ends {
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 12.5px;
   font-variant-numeric: tabular-nums;
 }
@@ -451,14 +453,14 @@ main h2 {
 .c-verdict em {
   display: block;
   margin-top: 4px;
-  font: 400 10px/1 var(--mono);
+  font: 400 11.5px/1.3 var(--display);
   font-style: normal;
   letter-spacing: 0.06em;
   color: var(--slate);
 }
 
 .v {
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -471,7 +473,7 @@ main h2 {
 
 .empty {
   padding: 22px 0;
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 11.5px;
   color: var(--slate);
 }
@@ -507,7 +509,7 @@ main h2 {
 
 .h-when,
 .h-event {
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10.5px;
   letter-spacing: 0.08em;
   color: var(--slate);
@@ -559,7 +561,7 @@ main h2 {
   border: 0;
   background: none;
   color: var(--mist);
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -604,7 +606,7 @@ main h2 {
   gap: 7px;
   margin: 0;
   white-space: nowrap;
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10.5px;
   letter-spacing: 0.04em;
   color: var(--mist);
@@ -641,7 +643,7 @@ main h2 {
 }
 
 .evidence summary {
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -680,7 +682,7 @@ main h2 {
 
 /* ---- wallet handoff --------------------------------------------- */
 
-.handoff-wrap {
+.handoff-wrap-legacy {
   position: fixed;
   inset: 0;
   z-index: 60;
@@ -691,23 +693,7 @@ main h2 {
 }
 
 /* the receipt's torn stock, reused: this is the same document */
-.handoff {
-  --tear: var(--th);
-  width: min(400px, 100%);
-  padding: 26px 26px 30px;
-  background: var(--deck);
-  filter:
-    drop-shadow(0 0 0 rgba(0,0,0,0))
-    drop-shadow(0 20px 40px rgba(0, 0, 0, 0.7));
-  -webkit-mask:
-    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
-    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
-    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--tear) repeat-x;
-  mask:
-    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
-    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
-    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--tear) repeat-x;
-}
+.handoff-body { display: block; }
 
 .handoff .rule-label { margin-top: 0; }
 
@@ -757,7 +743,7 @@ main h2 {
 .demo-foot {
   margin-top: clamp(20px, 4vh, 40px);
   border-top: 1px solid var(--ice);
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 11px;
   line-height: 1.7;
   color: var(--mist);
@@ -810,7 +796,7 @@ main h2 {
 .lookup label {
   display: block;
   margin-bottom: 9px;
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -829,7 +815,7 @@ main h2 {
   border-bottom: 1px solid var(--ice);
   background: none;
   color: var(--ice);
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 13px;
   letter-spacing: 0.02em;
 }
@@ -926,7 +912,7 @@ main h2 {
   border-bottom: 1px solid var(--ice);
   background: none;
   color: var(--ice);
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 11px;
   letter-spacing: 0.06em;
   cursor: pointer;
@@ -934,7 +920,7 @@ main h2 {
 
 .gate-chains {
   margin: 20px 0 0;
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10.5px;
   letter-spacing: 0.04em;
   color: var(--slate);
@@ -959,7 +945,7 @@ main h2 {
 }
 
 .rs-n {
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -1020,7 +1006,7 @@ main h2 {
 .ra-why {
   display: block;
   width: 100%;
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 9.5px;
   line-height: 1.4;
   color: var(--slate);
@@ -1031,25 +1017,28 @@ main h2 {
 /* ---- the verdict -------------------------------------------------- */
 
 .verdict {
-  padding-top: clamp(30px, 5vh, 52px) !important;
-  padding-bottom: clamp(26px, 4vh, 40px) !important;
+  padding-top: clamp(48px, 8vh, 96px) !important;
+  padding-bottom: clamp(40px, 6vh, 72px) !important;
 }
 
 .v-kicker {
-  margin: 0 0 16px;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  margin: 0 0 20px;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--slate);
 }
 
 .v-line {
   margin: 0;
-  max-width: 21ch;
-  font: 800 clamp(30px, 5.2vw, 56px)/1.04 var(--display);
-  letter-spacing: -0.04em;
+  max-width: 19ch;
+  font: 700 clamp(34px, 6vw, 72px)/1.015 var(--display);
+  letter-spacing: -0.045em;
+  text-wrap: pretty;
 }
 
 /* The count is the fact. It carries the accent, and only when there is
@@ -1078,23 +1067,23 @@ main h2 {
 
 .va-n {
   display: block;
-  font: 700 clamp(19px, 2.3vw, 26px)/1.1 var(--mono);
-  letter-spacing: -0.02em;
+  font: 600 clamp(22px, 2.8vw, 34px)/1.05 var(--mono);
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
   color: var(--bad);
 }
 
 .va-l {
   display: block;
-  margin-top: 8px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
+  margin-top: 10px;
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 0;
   color: var(--mist);
 }
 
 .v-sub {
-  margin: 26px 0 0;
+  margin: 34px 0 0;
   max-width: 58ch;
   font-size: 14.5px;
   line-height: 1.6;

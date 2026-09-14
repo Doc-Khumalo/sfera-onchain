@@ -1,0 +1,303 @@
+/* ---------------------------------------------------------------
+   The component layer for /demo.
+   
+   Tailwind's theme is configured with Sfera's own tokens rather than
+   its defaults, which is what stops a component library making this
+   look like every other product built with one. The palette, the type
+   and the radii below are the same values the homepage stylesheet
+   uses; only the delivery changes.
+
+   Preflight is deliberately NOT imported. The homepage has its own
+   1,900 line stylesheet and Tailwind's reset would walk straight
+   through it.
+   --------------------------------------------------------------- */
+
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+
+/* ---- shadcn's semantic contract, wearing Sfera's palette ---------
+
+   shadcn components are written against named roles rather than
+   colours: bg-primary, text-muted-foreground, border-ring. That
+   indirection is the whole reason the library can be themed rather
+   than merely used, so the roles are defined here in Sfera's values
+   and every component from the registry inherits them.
+
+   This is what stops it looking like the default install. Nothing is
+   restyled per component; the palette is declared once and the
+   catalogue follows it.
+   ------------------------------------------------------------------ */
+
+:root {
+  --background: #05070A;          /* void */
+  --foreground: #F2F6F9;          /* ice  */
+
+  --card: #0A0F15;                /* deck */
+  --card-foreground: #F2F6F9;
+  --popover: #0A0F15;
+  --popover-foreground: #F2F6F9;
+
+  /* Primary is the corrective action, so it is the mint that means
+     bounded and corrected. It is never the colour of a problem. */
+  --primary: #2FE0BC;
+  --primary-foreground: #05070A;
+
+  --secondary: #0E151D;           /* deck2 */
+  --secondary-foreground: #F2F6F9;
+  --muted: #0E151D;
+  --muted-foreground: #7D93A4;    /* mist */
+  --accent: #0E151D;
+  --accent-foreground: #F2F6F9;
+
+  /* Destructive is the mark for unbounded authority and nothing else. */
+  --destructive: #FF5F4E;
+  --destructive-foreground: #05070A;
+
+  --border: #263543;              /* line2 */
+  --input: #263543;
+  --ring: #2FE0BC;
+
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Preflight is skipped so the homepage stylesheet survives, but that
+   leaves form controls wearing the browser's own chrome: a Radix
+   trigger is a <button>, and a bare <button> renders with a light UA
+   background that is invisible against nothing and glaring against
+   this. Reset only the controls, and only inside the component layer. */
+button, [role="combobox"], input, select, textarea {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+}
+
+@theme {
+  /* ground */
+  --color-void: #05070A;
+  --color-deck: #0A0F15;
+  --color-deck2: #0E151D;
+  --color-line: #16202B;
+  --color-line2: #263543;
+
+  /* type */
+  --color-ice: #F2F6F9;
+  --color-mist: #7D93A4;
+  --color-slate: #48606F;
+
+  /* marks, meaning only */
+  --color-bad: #FF5F4E;
+  --color-ok: #2FE0BC;
+  --color-ok-lift: #54EDCE;
+
+  --font-display: "Archivo", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Restrained rather than absent. The old rule forbade rounding
+     entirely, which on a dark ground reads as unfinished rather than
+     austere. */
+  --radius-panel: 12px;
+  --radius-row: 8px;
+  --radius-pill: 999px;
+
+  /* The before-and-after transition is the product's whole argument,
+     so its timing is a token rather than a number typed in twice. */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- the correction, animated ------------------------------------
+
+   A permission changing from unbounded to removed is the single moment
+   this product exists to produce. It gets a real transition so a
+   person sees the state change rather than finding it already done.
+   ------------------------------------------------------------------ */
+
+@keyframes strike {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes settle {
+  0%   { background-color: rgba(47, 224, 188, 0.16); }
+  100% { background-color: transparent; }
+}
+
+.was-value {
+  position: relative;
+  color: var(--color-bad);
+}
+
+/* The strike is drawn rather than applied, so it travels across the
+   old value instead of appearing over it. */
+.was-value::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 50%;
+  height: 1px;
+  background: currentColor;
+  animation: strike 420ms var(--ease-settle) forwards;
+}
+
+.now-value { animation: rise 420ms 160ms var(--ease-settle) both; }
+
+.row-settled { animation: settle 1400ms var(--ease-settle) forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .was-value::after { animation: none; }
+  .now-value { animation: none; opacity: 1; transform: none; }
+  .row-settled { animation: none; }
+}
+
+/* ---- atmosphere --------------------------------------------------
+
+   The pages were a single flat value of black with hairlines on it,
+   which is why they read as unfinished rather than austere. Depth
+   here is ambient rather than decorative: a soft field behind the
+   content the page is about, so the eye has somewhere to land and
+   surfaces have something to sit on.
+
+   Nothing here is a gradient for its own sake. Each one is doing the
+   job a light source does in a photograph.
+   ------------------------------------------------------------------ */
+
+.field {
+  position: relative;
+  isolation: isolate;
+}
+
+/* One quiet light, up and behind. */
+.field::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 70%;
+  z-index: -1;
+  background:
+    radial-gradient(60% 55% at 22% 0%, rgba(47, 224, 188, 0.055), transparent 70%),
+    radial-gradient(45% 45% at 80% 8%, rgba(98, 126, 234, 0.045), transparent 70%);
+  pointer-events: none;
+}
+
+/* Surfaces catch that light at their top edge instead of being a flat
+   fill, which is the difference between a panel and a rectangle. */
+.lit {
+  background:
+    linear-gradient(180deg, rgba(242, 246, 249, 0.035), rgba(242, 246, 249, 0) 42%),
+    var(--color-deck);
+}
+
+.lit-strong {
+  background:
+    linear-gradient(180deg, rgba(242, 246, 249, 0.05), rgba(242, 246, 249, 0) 38%),
+    var(--color-deck);
+  box-shadow:
+    inset 0 1px 0 rgba(242, 246, 249, 0.06),
+    0 32px 70px -34px rgba(0, 0, 0, 0.95);
+}
+
+/* A row that warrants attention is tinted rather than outlined, so the
+   list has tonal rhythm instead of five identical bands. */
+.row-flagged {
+  background: linear-gradient(90deg, rgba(255, 95, 78, 0.055), transparent 62%);
+}
+
+/* ---- motion ------------------------------------------------------
+
+   The pages were static: everything was simply already there, which
+   reads as a screenshot rather than an application. These are the few
+   movements worth having, and no more than that. Each one carries
+   information: something arrived, something is working, something
+   changed. Motion that says nothing is noise with a frame rate.
+   ------------------------------------------------------------------ */
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes lift {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* A scan reads left to right across the table while the chain is being
+   asked, because the engine really is working through pairs and a
+   spinner would say only that something is happening somewhere. */
+@keyframes sweep {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(340%); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 3px rgba(47, 224, 188, 0.14); }
+  50%      { opacity: 0.55; box-shadow: 0 0 0 6px rgba(47, 224, 188, 0.04); }
+}
+
+/* Rows arrive in sequence rather than all at once, so the eye is led
+   down the list instead of hit by it. Six is enough: beyond that the
+   last rows would be waiting on an animation nobody is watching. */
+.stagger > * { animation: lift 460ms var(--ease-settle) both; }
+.stagger > *:nth-child(1) { animation-delay: 40ms; }
+.stagger > *:nth-child(2) { animation-delay: 90ms; }
+.stagger > *:nth-child(3) { animation-delay: 140ms; }
+.stagger > *:nth-child(4) { animation-delay: 190ms; }
+.stagger > *:nth-child(5) { animation-delay: 240ms; }
+.stagger > *:nth-child(n+6) { animation-delay: 280ms; }
+
+.scan-line {
+  position: absolute;
+  inset-block: 0;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, rgba(47, 224, 188, 0.07), transparent);
+  animation: sweep 1.5s linear infinite;
+}
+
+.live-dot { animation: pulseDot 2.4s var(--ease-settle) infinite; }
+
+/* A control should answer the pointer. Small, quick, and only on the
+   things that actually do something. */
+.lift-on-hover { transition: transform 160ms var(--ease-settle), border-color 160ms; }
+.lift-on-hover:hover { transform: translateY(-1px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger > *, .scan-line, .live-dot,
+  [class*="animate-"] { animation: none !important; }
+  .stagger > * { opacity: 1; transform: none; }
+  .lift-on-hover:hover { transform: none; }
+}

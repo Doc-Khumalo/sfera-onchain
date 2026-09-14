@@ -10,13 +10,13 @@
 /* ---- page frame ------------------------------------------------ */
 
 .sheet {
-  max-width: 1180px;
+  max-width: var(--page);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
 
 main > section {
-  max-width: 1180px;
+  max-width: var(--page);
   margin-inline: auto;
   padding: clamp(52px, 7vh, 82px) var(--gutter);
 }
@@ -45,7 +45,7 @@ main h2 {
   display: flex;
   align-items: baseline;
   gap: 20px;
-  max-width: 1180px;
+  max-width: var(--page);
   margin-inline: auto;
   padding: 18px var(--gutter) 16px;
 
@@ -130,15 +130,6 @@ main h2 {
 
 .hero { padding-block: clamp(56px, 9vh, 104px) clamp(40px, 6vh, 64px); }
 
-.filed {
-  margin: 0 0 clamp(22px, 3vh, 34px);
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--rule);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--slate);
-}
 
 .hero h1 {
   margin: 0 0 26px;
@@ -506,7 +497,7 @@ main h2 {
 }
 
 .trust-inner {
-  max-width: 1180px;
+  max-width: var(--page);
   margin-inline: auto;
   padding: clamp(58px, 8vh, 92px) var(--gutter);
 }
@@ -552,7 +543,7 @@ main h2 {
 /* ---- colophon ----------------------------------------------------------- */
 
 .foot {
-  max-width: 1180px;
+  max-width: var(--page);
   margin-inline: auto;
   padding: clamp(28px, 4vh, 40px) var(--gutter) clamp(36px, 5vh, 56px);
   border-top: 1px solid var(--line);
@@ -778,7 +769,20 @@ main h2 {
     drop-shadow(0 26px 46px rgba(0, 0, 0, 0.66));
 }
 
-/* two states stacked in the same cell, cross-faded on a loop */
+/* ---- the correction, as motion -----------------------------------
+
+   THE SIGNATURE MOVEMENT OF THIS PRODUCT, and the reason it is not a
+   crossfade. A fade says one value replaced another. A strike that
+   travels, followed by a value rising underneath, says something was
+   found, marked, and corrected in that order. The ledger uses the same
+   three beats when a real permission is revoked, so the homepage is
+   rehearsing the thing the product actually does rather than
+   illustrating it.
+
+   The exposure rows cascade behind the headline correction, because
+   the consequences follow the cause rather than arriving with it.
+   ------------------------------------------------------------------ */
+
 .swap dd,
 .exp dd {
   position: relative;
@@ -791,19 +795,43 @@ main h2 {
   text-align: right;
 }
 
-.was { color: var(--bad); animation: showWas 9s ease-in-out infinite; }
-.now { color: var(--ok); animation: showNow 9s ease-in-out infinite; }
+.was { color: var(--bad); animation: showWas 9s var(--ease-loop) infinite; }
+.now { color: var(--ok); animation: showNow 9s var(--ease-loop) infinite; }
+
+:root { --ease-loop: cubic-bezier(0.22, 1, 0.36, 1); }
 
 @keyframes showWas {
-  0%, 42% { opacity: 1; }
-  50%, 92% { opacity: 0; }
-  100% { opacity: 1; }
+  0%, 38%  { opacity: 1; }
+  46%, 92% { opacity: 0; }
+  100%     { opacity: 1; }
 }
 
 @keyframes showNow {
-  0%, 42% { opacity: 0; }
-  50%, 92% { opacity: 1; }
-  100% { opacity: 0; }
+  0%, 40%  { opacity: 0; transform: translateY(5px); }
+  48%, 92% { opacity: 1; transform: none; }
+  100%     { opacity: 0; transform: translateY(5px); }
+}
+
+/* The line that does the correcting. It travels across the old value
+   rather than appearing over it, which is what makes it read as an act
+   rather than a state. */
+.swap dd::before,
+.exp dd::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  height: 1px;
+  background: var(--bad);
+  animation: strikeLoop 9s var(--ease-loop) infinite;
+}
+
+@keyframes strikeLoop {
+  0%, 36%  { width: 0; opacity: 0; }
+  38%      { width: 0; opacity: 1; }
+  45%      { width: calc(100% + 4px); opacity: 1; }
+  52%, 92% { width: calc(100% + 4px); opacity: 0; }
+  100%     { width: 0; opacity: 0; }
 }
 
 /* the stamp belongs to the unbounded state only */
@@ -814,14 +842,33 @@ main h2 {
   border: 2px solid var(--bad);
   border-radius: 2px;
   rotate: -2.4deg;
-  animation: showWas 9s ease-in-out infinite;
+  animation: showWas 9s var(--ease-loop) infinite;
 }
+
+/* The consequences follow the cause. Each exposure row lags the one
+   above it, so the correction visibly propagates down the receipt. */
+.r-body .exp:nth-of-type(1) dd > span,
+.r-body .exp:nth-of-type(1) dd::before { animation-delay: 0.12s; }
+.r-body .exp:nth-of-type(2) dd > span,
+.r-body .exp:nth-of-type(2) dd::before { animation-delay: 0.24s; }
+.r-body .exp:nth-of-type(3) dd > span,
+.r-body .exp:nth-of-type(3) dd::before { animation-delay: 0.36s; }
 
 .exp dd .was,
 .exp dd .now { font-size: 11.5px; }
 
+/* The recommendation is the outcome, so it arrives last and stays. */
+.r-foot span:last-child { animation: recAppear 9s var(--ease-loop) infinite; }
+
+@keyframes recAppear {
+  0%, 44%  { opacity: 0.32; }
+  56%, 92% { opacity: 1; }
+  100%     { opacity: 0.32; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .was, .now, .swap dd::after { animation: none; }
+  .was, .now, .swap dd::after, .swap dd::before, .exp dd::before,
+  .r-foot span:last-child { animation: none; }
   .now { display: none; }
 }
 
@@ -837,7 +884,7 @@ main h2 {
 }
 
 .strip-label {
-  max-width: 1180px;
+  max-width: var(--page);
   margin: 0 auto 18px;
   padding-inline: var(--gutter);
   font-family: var(--mono);
@@ -938,7 +985,7 @@ main h2 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
-  max-width: 1180px;
+  max-width: var(--page);
   margin: 0 auto;
   background: var(--line);
 }
@@ -969,11 +1016,11 @@ main h2 {
 .stats dd.src a {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  gap: 10px;
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   color: var(--slate);
   text-decoration: none;
   transition: color 0.15s;
@@ -981,22 +1028,19 @@ main h2 {
 
 .stats dd.src a:hover { color: var(--mist); }
 
-/* The source's own colour and initial. Enough to recognise, and not a
-   trademark we fetched from someone else's server. */
-.src-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 17px;
-  height: 17px;
-  border: 1px solid var(--c);
-  border-radius: 3px;
-  color: var(--c);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
+/* The real mark, served from our own origin. Height is matched across
+   sources and width is left alone, because two are square and one is a
+   wordmark. Never recoloured or stretched. */
+.src-logo {
+  width: auto;
+  flex-shrink: 0;
+  opacity: 0.82;
+  transition: opacity 0.15s;
 }
+
+.stats dd.src a:hover .src-logo { opacity: 1; }
+
+.src-name { white-space: nowrap; }
 
 .src-out {
   width: 9px;
@@ -1332,4 +1376,738 @@ main h2 {
   font-size: 0.9em;
   color: var(--ice);
   border-bottom: 1px solid var(--line2);
+}
+
+
+/* ---- the ledger, working ------------------------------------------
+
+   One 15s loop, three rows, each corrected in turn with a 2s stagger.
+   Every beat is a keyframe on a delay, so the whole sequence runs with
+   no JavaScript at all and the homepage keeps shipping none.
+
+   Timing, as a fraction of the loop:
+     0-18%   found, unbounded, red
+     18-24%  the strike travels across the old value
+     22-30%  the new value rises, the badge turns
+     30-88%  removed, settled
+     88-100% reset for the next pass
+   ------------------------------------------------------------------ */
+
+.demo-table {
+  --loop: 15s;
+  margin-top: clamp(30px, 4vh, 44px);
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.dt-head,
+.dt-row {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 0.9fr 132px;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 22px;
+}
+
+.dt-head {
+  border-bottom: 1px solid var(--line);
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+.dt-right { text-align: right; justify-self: end; }
+
+.dt-row {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+  animation: dtFlag var(--loop) linear infinite;
+}
+
+.dt-row:last-child { border-bottom: 0; }
+
+/* the correcting pass moves down the list */
+.dt-2 > *, .dt-2 { animation-delay: 2s; }
+.dt-3 > *, .dt-3 { animation-delay: 4s; }
+
+@keyframes dtFlag {
+  0%, 17%   { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 60%); }
+  20%, 28%  { background: rgba(47,224,188,0.10); }
+  34%, 100% { background: transparent; }
+}
+
+.dt-app { display: flex; align-items: center; gap: 13px; min-width: 0; }
+
+.dt-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  font: 700 8.5px/1 var(--mono);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.dt-app b { display: block; font: 600 15px/1.2 var(--display); }
+.dt-app em {
+  display: block; margin-top: 3px;
+  font: 400 12px/1 var(--display); font-style: normal; color: var(--mist);
+}
+
+/* the value cell holds both states, stacked */
+.dt-value { position: relative; display: inline-grid; }
+.dt-value > span { grid-area: 1 / 1; font: 400 13px/1.4 var(--mono); }
+
+.dt-was { color: var(--bad); animation: dtWas var(--loop) linear infinite; }
+.dt-now { color: var(--ok); animation: dtNow var(--loop) linear infinite; }
+
+@keyframes dtWas { 0%, 18% { opacity: 1; } 24%, 100% { opacity: 0; } }
+@keyframes dtNow { 0%, 22% { opacity: 0; transform: translateY(4px); }
+                   28%, 88% { opacity: 1; transform: none; }
+                   94%, 100% { opacity: 0; transform: translateY(4px); } }
+
+/* the line that does the correcting */
+.dt-value::after {
+  content: "";
+  position: absolute;
+  left: -2px; top: 50%;
+  height: 1px;
+  background: var(--bad);
+  animation: dtStrike var(--loop) linear infinite;
+}
+
+@keyframes dtStrike {
+  0%, 17%   { width: 0; opacity: 0; }
+  18%       { width: 0; opacity: 1; }
+  23%       { width: calc(100% + 4px); opacity: 1; }
+  27%, 100% { width: calc(100% + 4px); opacity: 0; }
+}
+
+.dt-reading { position: relative; display: inline-grid; justify-items: start; }
+.dt-badge {
+  grid-area: 1 / 1;
+  display: inline-flex; align-items: center;
+  padding: 4px 10px; border-radius: 999px;
+  font: 700 9px/1 var(--mono); letter-spacing: 0.1em;
+}
+.dt-bad { background: rgba(255,95,78,0.15); color: var(--bad); animation: dtWas var(--loop) linear infinite; }
+.dt-ok  { background: rgba(47,224,188,0.12); color: var(--ok);  animation: dtNow var(--loop) linear infinite; }
+
+.dt-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 16px; border-radius: 999px;
+  background: var(--ok); color: var(--void);
+  font: 700 11px/1 var(--display); letter-spacing: 0.02em;
+  animation: dtPress var(--loop) linear infinite;
+}
+
+/* the press that causes the correction */
+@keyframes dtPress {
+  0%, 15%   { transform: none; opacity: 1; }
+  17%       { transform: scale(0.94); opacity: 1; }
+  19%, 30%  { transform: none; opacity: 1; }
+  34%, 100% { transform: none; opacity: 0.3; }
+}
+
+/* what is at stake, under the row, fading once it no longer is */
+.dt-amount {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding-left: 43px;
+  font: 400 11.5px/1 var(--mono);
+  color: var(--slate);
+  animation: dtWas var(--loop) linear infinite;
+}
+
+.demo-foot {
+  margin: 22px 0 0;
+  max-width: 62ch;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--slate);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dt-row, .dt-was, .dt-now, .dt-value::after,
+  .dt-bad, .dt-ok, .dt-btn, .dt-amount { animation: none; }
+  .dt-now, .dt-ok { display: none; }
+}
+
+@media (max-width: 760px) {
+  .dt-head { display: none; }
+  .dt-row { grid-template-columns: 1fr auto; gap: 8px 14px; }
+  .dt-value, .dt-reading { justify-self: start; }
+  .dt-amount { padding-left: 0; }
+}
+
+/* ---- the loop, as a sequence ---------------------------------------
+
+   Five steps that depend on one another, so they are connected rather
+   than merely stacked. The rail runs between marks and stops at the
+   last one, because the loop ends at verification rather than
+   trailing off.
+   -------------------------------------------------------------------- */
+
+.loop {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin: clamp(28px, 4vh, 44px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.loop-step {
+  position: relative;
+  padding: 0 22px 0 0;
+}
+
+/* the connector, drawn between marks and not past the last */
+.ls-rail {
+  position: absolute;
+  top: 19px;
+  left: 38px;
+  right: -4px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line2), var(--line));
+}
+
+.loop-step:last-child .ls-rail { display: none; }
+
+.ls-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line2);
+  border-radius: 50%;
+  background: var(--void);
+  color: var(--ok);
+  position: relative;
+  z-index: 1;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.ls-mark svg { width: 19px; height: 19px; }
+
+.loop-step:hover .ls-mark {
+  border-color: var(--ok);
+  transform: translateY(-1px);
+}
+
+.ls-n {
+  display: block;
+  margin: 18px 0 6px;
+  font: 600 11px/1 var(--display);
+  letter-spacing: 0.16em;
+  color: var(--slate);
+}
+
+.loop-step h3 {
+  margin: 0 0 6px;
+  font: 700 19px/1.15 var(--display);
+  letter-spacing: -0.025em;
+}
+
+.ls-q {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ok);
+}
+
+.ls-body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--mist);
+}
+
+@media (max-width: 1080px) {
+  .loop { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px 26px; }
+  .ls-rail { display: none; }
+}
+
+@media (max-width: 600px) {
+  .loop { grid-template-columns: 1fr; gap: 28px; }
+}
+
+/* ---- capabilities, alternating ------------------------------------- */
+
+.cap-row {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+  padding: clamp(28px, 4vh, 44px) 0;
+  border-top: 1px solid var(--line);
+}
+
+.cap-row:first-of-type { border-top: 0; }
+.cap-row.reverse .cap-copy { order: -1; }
+
+.cap-copy h3 {
+  margin: 0 0 14px;
+  font: 700 clamp(21px, 2.4vw, 28px)/1.15 var(--display);
+  letter-spacing: -0.03em;
+}
+
+.cap-copy p {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--mist);
+}
+
+.cap-panel {
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.cp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--line);
+  font: 600 14px/1 var(--display);
+}
+
+.cp-chip {
+  padding: 5px 11px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  font: 500 11.5px/1 var(--display);
+  color: var(--mist);
+}
+
+.cp-chip-ok { border-color: var(--ok); color: var(--ok); }
+
+/* rows cycle from found to removed, one after another */
+.cp-row {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--line);
+  animation: cpFlag 9s linear infinite;
+  animation-delay: var(--d);
+}
+
+.cp-row:last-child { border-bottom: 0; }
+
+@keyframes cpFlag {
+  0%, 26%   { background: linear-gradient(90deg, rgba(255,95,78,0.06), transparent 60%); }
+  32%, 40%  { background: rgba(47,224,188,0.09); }
+  48%, 100% { background: transparent; }
+}
+
+.cp-tok {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  font: 700 7.5px/1 var(--mono);
+  color: #fff;
+}
+
+.cp-app { font: 500 14px/1 var(--display); }
+
+.cp-state { position: relative; display: inline-grid; justify-items: end; }
+.cp-state > span { grid-area: 1 / 1; font: 400 12.5px/1 var(--mono); }
+.cp-was { color: var(--bad); animation: cpWas 9s linear infinite; animation-delay: var(--d); }
+.cp-now { color: var(--ok);  animation: cpNow 9s linear infinite; animation-delay: var(--d); }
+
+@keyframes cpWas { 0%, 27% { opacity: 1; } 33%, 100% { opacity: 0; } }
+@keyframes cpNow { 0%, 31% { opacity: 0; } 37%, 92% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+.cp-body { padding: 18px; }
+
+.cp-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px dotted var(--rule);
+  font: 400 13px/1 var(--display);
+  color: var(--mist);
+}
+
+.cp-line b { font: 400 13px/1 var(--mono); }
+.cp-bad { color: var(--bad); }
+.cp-ok { color: var(--ok); }
+
+.cp-data {
+  margin: 16px 0 0;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: var(--deck2);
+  font: 400 11px/1.5 var(--mono);
+  color: var(--mist);
+  word-break: break-all;
+}
+
+.cp-note { margin: 10px 0 0; font-size: 12px; color: var(--slate); }
+
+.cp-verify { display: flex; align-items: flex-start; gap: 14px; padding: 6px 0; }
+
+.cp-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--ok);
+  color: var(--ok);
+  animation: cpTick 9s var(--ease-loop) infinite;
+}
+
+.cp-check svg { width: 17px; height: 17px; }
+
+@keyframes cpTick {
+  0%, 30%  { opacity: 0.25; transform: scale(0.94); }
+  38%, 92% { opacity: 1; transform: none; }
+  100%     { opacity: 0.25; transform: scale(0.94); }
+}
+
+.cp-verify b { display: block; font: 600 15px/1.3 var(--display); }
+.cp-verify em {
+  display: block; margin-top: 5px;
+  font: 400 13px/1.5 var(--display); font-style: normal; color: var(--mist);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-row, .cp-was, .cp-now, .cp-check { animation: none; }
+  .cp-now { display: none; }
+}
+
+@media (max-width: 900px) {
+  .cap-row { grid-template-columns: 1fr; gap: 26px; }
+  .cap-row.reverse .cap-copy { order: 0; }
+}
+
+/* ---- the hero panel, the loop performed ---------------------------
+
+   One 18s cycle in four acts, every beat a keyframe on a delay:
+
+     0-14%    ASKING     sweep runs, rows arrive staggered
+     14-30%   FOUND      three unbounded, flagged, counter reads 3
+     30-72%   CORRECTING each struck and removed in turn, counter drains
+     72-92%   DONE       nothing reachable, panel settles
+     92-100%  RESET
+
+   No JavaScript. The homepage ships none and that property outranks
+   any animation on it.
+   -------------------------------------------------------------------- */
+
+@property --hp-n {
+  syntax: '<integer>';
+  initial-value: 3;
+  inherits: false;
+}
+
+.hp { --loop: 18s; position: relative; }
+
+.hp-frame {
+  border: 1px solid var(--line2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.hp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hp-title { font: 600 15px/1 var(--display); }
+
+.hp-chain {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  font: 500 12px/1 var(--display);
+  color: var(--mist);
+}
+
+.hp-dot { width: 9px; height: 9px; border-radius: 50%; background: #0052FF; }
+
+/* the count, and the sweep that runs while it is being established */
+.hp-stat {
+  position: relative;
+  padding: 20px 20px 22px;
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.hp-stat-label {
+  display: block;
+  font: 500 12px/1 var(--display);
+  letter-spacing: 0.04em;
+  color: var(--mist);
+}
+
+/* An integer counted down with @property, because a count is honest and
+   a converted currency total would need a price feed we do not have. */
+.hp-count {
+  display: block;
+  margin-top: 10px;
+  font: 700 clamp(34px, 4vw, 46px)/1 var(--display);
+  letter-spacing: -0.04em;
+  color: var(--bad);
+  counter-reset: hpn var(--hp-n);
+  animation: hpCount var(--loop) linear infinite;
+}
+
+.hp-count::after { content: counter(hpn); }
+
+.hp-count::before {
+  content: "";
+  display: inline-block;
+}
+
+@keyframes hpCount {
+  0%, 14%   { --hp-n: 0; color: var(--slate); }
+  16%, 33%  { --hp-n: 3; color: var(--bad); }
+  38%, 45%  { --hp-n: 2; color: var(--bad); }
+  50%, 57%  { --hp-n: 1; color: var(--bad); }
+  62%, 93%  { --hp-n: 0; color: var(--ok); }
+  100%      { --hp-n: 0; color: var(--slate); }
+}
+
+.hp-scan {
+  position: absolute;
+  inset-block: 0;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgba(47,224,188,0.10), transparent);
+  animation: hpSweep var(--loop) linear infinite;
+}
+
+@keyframes hpSweep {
+  0%       { transform: translateX(-110%); opacity: 1; }
+  12%      { transform: translateX(360%); opacity: 1; }
+  13%, 100% { transform: translateX(360%); opacity: 0; }
+}
+
+/* Rows arrive together and are corrected in sequence.
+   
+   The first version used one animation-delay for both, which shifts a
+   row's whole lifecycle rather than only its correction, so rows sat in
+   unrelated phases and the panel read as broken. Arrival is a small
+   shared stagger; the correction window is written per row into the
+   keyframes themselves, which is the only way to sequence one act
+   without moving the others. */
+
+.hp-row {
+  display: grid;
+  grid-template-columns: 30px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+  opacity: 0;
+}
+
+.hp-rows > .hp-row:last-child { border-bottom: 0; }
+
+.hp-r1 { animation: hpRow1 var(--loop) linear infinite; }
+.hp-r2 { animation: hpRow2 var(--loop) linear infinite; }
+.hp-r3 { animation: hpRow3 var(--loop) linear infinite; }
+
+@keyframes hpRow1 {
+  0%        { opacity: 0; transform: translateY(6px); background: transparent; }
+  5%, 15%   { opacity: 1; transform: none; background: transparent; }
+  17%, 30%  { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
+  34%, 40%  { background: rgba(47,224,188,0.10); opacity: 1; }
+  46%, 92%  { background: transparent; opacity: 0.5; }
+  97%, 100% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes hpRow2 {
+  0%        { opacity: 0; transform: translateY(6px); background: transparent; }
+  8%, 15%   { opacity: 1; transform: none; background: transparent; }
+  17%, 42%  { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
+  46%, 52%  { background: rgba(47,224,188,0.10); opacity: 1; }
+  58%, 92%  { background: transparent; opacity: 0.5; }
+  97%, 100% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes hpRow3 {
+  0%        { opacity: 0; transform: translateY(6px); background: transparent; }
+  11%, 15%  { opacity: 1; transform: none; background: transparent; }
+  17%, 54%  { background: linear-gradient(90deg, rgba(255,95,78,0.07), transparent 62%); }
+  58%, 64%  { background: rgba(47,224,188,0.10); opacity: 1; }
+  70%, 92%  { background: transparent; opacity: 0.5; }
+  97%, 100% { opacity: 0; transform: translateY(6px); }
+}
+
+.hp-tok {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  font: 700 8.5px/1 var(--mono); color: #fff;
+}
+
+.hp-who b { display: block; font: 600 14.5px/1.2 var(--display); }
+.hp-who em {
+  display: block; margin-top: 3px; font-style: normal;
+  font: 400 12px/1 var(--display); color: var(--mist); white-space: nowrap;
+}
+
+.hp-val { position: relative; display: inline-grid; justify-items: end; }
+.hp-val > span { grid-area: 1 / 1; font: 400 13px/1 var(--mono); white-space: nowrap; }
+.hp-act { position: relative; display: inline-grid; justify-items: end; }
+
+.hp-badge {
+  grid-area: 1 / 1;
+  display: inline-flex; align-items: center;
+  padding: 4px 10px; border-radius: 999px;
+  font: 700 8.5px/1 var(--mono); letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.hp-was, .hp-bad { color: var(--bad); }
+.hp-now, .hp-ok  { color: var(--ok); }
+.hp-bad { background: rgba(255,95,78,0.15); }
+.hp-ok  { background: rgba(47,224,188,0.12); }
+
+.hp-r1 .hp-was, .hp-r1 .hp-bad { animation: hpWas1 var(--loop) linear infinite; }
+.hp-r1 .hp-now, .hp-r1 .hp-ok  { animation: hpNow1 var(--loop) linear infinite; }
+.hp-r2 .hp-was, .hp-r2 .hp-bad { animation: hpWas2 var(--loop) linear infinite; }
+.hp-r2 .hp-now, .hp-r2 .hp-ok  { animation: hpNow2 var(--loop) linear infinite; }
+.hp-r3 .hp-was, .hp-r3 .hp-bad { animation: hpWas3 var(--loop) linear infinite; }
+.hp-r3 .hp-now, .hp-r3 .hp-ok  { animation: hpNow3 var(--loop) linear infinite; }
+
+@keyframes hpWas1 { 0%, 31% { opacity: 1; } 35%, 100% { opacity: 0; } }
+@keyframes hpNow1 { 0%, 33% { opacity: 0; transform: translateY(4px); } 38%, 93% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+@keyframes hpWas2 { 0%, 43% { opacity: 1; } 47%, 100% { opacity: 0; } }
+@keyframes hpNow2 { 0%, 45% { opacity: 0; transform: translateY(4px); } 50%, 93% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+@keyframes hpWas3 { 0%, 55% { opacity: 1; } 59%, 100% { opacity: 0; } }
+@keyframes hpNow3 { 0%, 57% { opacity: 0; transform: translateY(4px); } 62%, 93% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+
+/* the line that does the correcting, travelling rather than appearing */
+.hp-val::after {
+  content: "";
+  position: absolute;
+  left: -3px; top: 50%;
+  height: 1px;
+  background: var(--bad);
+  width: 0;
+  opacity: 0;
+}
+
+.hp-r1 .hp-val::after { animation: hpStrike1 var(--loop) linear infinite; }
+.hp-r2 .hp-val::after { animation: hpStrike2 var(--loop) linear infinite; }
+.hp-r3 .hp-val::after { animation: hpStrike3 var(--loop) linear infinite; }
+
+@keyframes hpStrike1 {
+  0%, 29% { width: 0; opacity: 0; }
+  30%     { width: 0; opacity: 1; }
+  34%     { width: calc(100% + 6px); opacity: 1; }
+  38%, 100% { width: calc(100% + 6px); opacity: 0; }
+}
+@keyframes hpStrike2 {
+  0%, 41% { width: 0; opacity: 0; }
+  42%     { width: 0; opacity: 1; }
+  46%     { width: calc(100% + 6px); opacity: 1; }
+  50%, 100% { width: calc(100% + 6px); opacity: 0; }
+}
+@keyframes hpStrike3 {
+  0%, 53% { width: 0; opacity: 0; }
+  54%     { width: 0; opacity: 1; }
+  58%     { width: calc(100% + 6px); opacity: 1; }
+  62%, 100% { width: calc(100% + 6px); opacity: 0; }
+}
+
+.hp-foot {
+  position: relative;
+  display: grid;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  min-height: 46px;
+}
+
+.hp-foot > span {
+  grid-area: 1 / 1;
+  align-self: center;
+  font: 400 12.5px/1.4 var(--display);
+  color: var(--slate);
+}
+
+.hp-foot-a { animation: hpFootA var(--loop) linear infinite; }
+.hp-foot-b { animation: hpFootB var(--loop) linear infinite; color: var(--ok) !important; }
+
+@keyframes hpFootA { 0%, 12% { opacity: 1; } 16%, 100% { opacity: 0; } }
+@keyframes hpFootB { 0%, 68% { opacity: 0; } 74%, 92% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-count, .hp-scan, .hp-row, .hp-was, .hp-now, .hp-val::after,
+  .hp-bad, .hp-ok, .hp-foot-a, .hp-foot-b { animation: none; }
+  .hp-now, .hp-ok, .hp-foot-b { display: none; }
+  .hp-row { opacity: 1; transform: none; }
+  .hp-count { color: var(--bad); }
+}
+
+/* ---- the chain stack ----------------------------------------------- */
+
+.cstack {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cs-marks { display: inline-flex; }
+
+/* Overlapped, each lifted above the one behind it, with a ring in the
+   page ground so the edges stay legible against one another. */
+.cs-marks img {
+  border-radius: 50%;
+  background: var(--deck);
+  box-shadow: 0 0 0 2px var(--void);
+  transition: transform 0.16s var(--ease-loop);
+}
+
+.cs-marks img + img { margin-left: -9px; }
+.compact .cs-marks img + img { margin-left: -7px; }
+
+/* Reading order is left to right, so the stack reads that way too. */
+.cs-marks img:nth-child(1) { z-index: 6; }
+.cs-marks img:nth-child(2) { z-index: 5; }
+.cs-marks img:nth-child(3) { z-index: 4; }
+.cs-marks img:nth-child(4) { z-index: 3; }
+.cs-marks img:nth-child(5) { z-index: 2; }
+.cs-marks img:nth-child(6) { z-index: 1; }
+
+.cstack:hover .cs-marks img { transform: translateY(-2px); }
+.cstack:hover .cs-marks img:nth-child(2) { transition-delay: 25ms; }
+.cstack:hover .cs-marks img:nth-child(3) { transition-delay: 50ms; }
+.cstack:hover .cs-marks img:nth-child(4) { transition-delay: 75ms; }
+.cstack:hover .cs-marks img:nth-child(5) { transition-delay: 100ms; }
+.cstack:hover .cs-marks img:nth-child(6) { transition-delay: 125ms; }
+
+.cs-label {
+  font: 400 13.5px/1 var(--display);
+  color: var(--mist);
+  white-space: nowrap;
+}
+
+.cs-label b { font-weight: 600; color: var(--ice); }
+
+.compact .cs-label { font-size: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cstack:hover .cs-marks img { transform: none; }
 }

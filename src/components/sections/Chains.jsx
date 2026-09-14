@@ -15,7 +15,7 @@ import { CHAINS } from '../../data/site.js';
 export default function Chains() {
   return (
     <section className="chains reveal" id="chains">
-      <h2>Fifteen chains, read the same way.</h2>
+      <h2>Fifteen chains.</h2>
       <p className="lede">
         The question is identical everywhere, because an ERC-20 allowance is
         identical everywhere. Adding a chain is a registry and an endpoint, not

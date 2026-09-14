@@ -25,7 +25,7 @@ export default function HowItReads({ checked, tokens, spenders, chain }) {
         </li>
         <li>
           <span className="rs-n">02</span>
-          <h3>So it asks {checked ?? '—'} times, at once.</h3>
+          <h3>So it asks {checked ?? '—'} times at once.</h3>
           <p>
             {tokens ?? '—'} tokens against {spenders ?? '—'} applications we have
             verified on {chain || 'this chain'}, batched into a single request
@@ -35,7 +35,7 @@ export default function HowItReads({ checked, tokens, spenders, chain }) {
         </li>
         <li>
           <span className="rs-n">03</span>
-          <h3>What it did not ask, it does not claim.</h3>
+          <h3>It claims only what it asked.</h3>
           <p>
             A permission to something outside that list is invisible here, and
             the page says so rather than presenting silence as safety. Finding

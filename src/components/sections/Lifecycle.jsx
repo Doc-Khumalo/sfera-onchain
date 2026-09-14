@@ -8,7 +8,7 @@ export default function Lifecycle() {
   return (
     <section className="life reveal" id="lifecycle">
       <div className="col-type">
-        <h2>It does not end when you sign.</h2>
+        <h2>Signing isn't the end.</h2>
         <p className="lede">
           Disconnecting an application does not remove what it can already do.
         </p>

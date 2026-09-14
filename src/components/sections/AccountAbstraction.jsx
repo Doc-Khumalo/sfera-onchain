@@ -3,7 +3,7 @@ export default function AccountAbstraction() {
   return (
     <section className="aa reveal">
       <div className="col-type">
-        <h2>Fewer signatures, not less control.</h2>
+        <h2>Fewer signatures. Same control.</h2>
         <p className="lede">
           We explain who can act, what they can do, what they can spend, how long
           access lasts and how it can be revoked.

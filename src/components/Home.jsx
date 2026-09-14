@@ -3,6 +3,7 @@ import Hero from './sections/Hero.jsx';
 import Stats from './sections/Stats.jsx';
 import Demonstration from './sections/Demonstration.jsx';
 import HowItWorks from './sections/HowItWorks.jsx';
+import Capabilities from './sections/Capabilities.jsx';
 import Coverage from './sections/Coverage.jsx';
 import Chains from './sections/Chains.jsx';
 import Standards from './sections/Standards.jsx';
@@ -30,6 +31,7 @@ export default function Home() {
         <Stats />
         <Demonstration />
         <HowItWorks />
+        <Capabilities />
         <Lifecycle />
         <Coverage />
         <Chains />
