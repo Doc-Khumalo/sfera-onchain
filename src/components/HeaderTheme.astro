@@ -1,0 +1,42 @@
+---
+/**
+ * Flips the sticky masthead while it sits over the dark spread.
+ *
+ * A few lines of vanilla JS rather than a framework island. If it never
+ * runs the masthead simply stays ink, which is correct for most of the page.
+ */
+---
+
+<script>
+function syncHeaderTheme() {
+  const bar = document.querySelector('.bar');
+  const dark = document.querySelector('.trust');
+  if (!bar || !dark) return;
+
+  // Watch only the band the masthead occupies, so the swap happens exactly
+  // when the dark section passes underneath it.
+  function observe() {
+    const h = bar.offsetHeight;
+    return new IntersectionObserver(
+      ([entry]) => bar.classList.toggle('over-dark', entry.isIntersecting),
+      { rootMargin: `0px 0px ${-(window.innerHeight - h)}px 0px`, threshold: 0 }
+    );
+  }
+
+  let io = observe();
+  io.observe(dark);
+
+  // The band depends on viewport height, so rebuild it on resize.
+  let t;
+  window.addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      io.disconnect();
+      io = observe();
+      io.observe(dark);
+    }, 150);
+  });
+}
+
+syncHeaderTheme();
+</script>

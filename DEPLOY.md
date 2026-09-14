@@ -1,5 +1,9 @@
 # Deploying sferaonchain.xyz
 
+> **LIVE since 30 August 2026.** `https://sferaonchain.xyz` serves the site from
+> Cloudflare Pages. Nameservers are `saanvi`/`shane.ns.cloudflare.com`. The steps
+> below are the record of how it was done, and the reference for changing it.
+
 GitHub for the repo, Cloudflare Pages for the hosting, Cloudflare for the DNS.
 Roughly forty minutes, most of it waiting for nameservers.
 
@@ -243,3 +247,32 @@ one, Rollback. It is instant and does not need a git revert.
 - `how-it-works.html` renders blank with JavaScript disabled. The homepage does not.
 - No analytics. Cloudflare Web Analytics is free, needs no cookie banner, and is
   one script tag.
+
+
+## Live configuration, as built
+
+| | |
+|---|---|
+| Repo | `github.com/Doc-Khumalo/sfera-onchain` (private) |
+| Pages project | `sferaonchain` → `sferaonchain.pages.dev` |
+| Custom domains | `sferaonchain.xyz`, `www.sferaonchain.xyz`, both Active |
+| Apex record | `CNAME @ -> sferaonchain.pages.dev`, CNAME-flattened |
+| Certificate | Google Trust Services, auto-renewing |
+| Nameservers | `saanvi.ns.cloudflare.com`, `shane.ns.cloudflare.com` |
+| Registrar | GoDaddy, unchanged. Transferable from ~26 October 2026 |
+
+Verified on 30 August: apex and www both 200, HTTP 301s to HTTPS, and
+`/how-it-works.html` 308s to `/how-it-works` and renders.
+
+### Gotchas hit during setup, so they are not hit again
+
+- **Cloudflare's dashboard defaults to Workers.** Pages is behind the small
+  "Looking to deploy Pages? Get started" link on the Create-an-application card.
+- **`npm ci` is what Cloudflare runs, not `npm run build`.** `@astrojs/react`
+  declares `@types/react` and `@types/react-dom` as required peers. npm 11 omits
+  unresolved required peers from the lock file; Cloudflare's npm 10.9.2 refuses to
+  install without them. They are now explicit devDependencies. **Test with
+  `npm ci`, not `npm install`, before trusting a deploy.**
+- **`.node-version` pins Node to 22.16.0** so Cloudflare cannot change it under us.
+- GoDaddy rejected the nameservers once with "Invalid nameserver provided" before
+  accepting the identical values. Retry before debugging.

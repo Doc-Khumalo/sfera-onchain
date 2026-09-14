@@ -1,173 +1,1066 @@
 /* ---------------------------------------------------------------
-   Homepage — the deck's closing frame, standing alone.
+   Homepage — set as a printed document.
+
+   Devices, used consistently: leader-dot rows for every figure, dashed
+   rules between blocks, a torn edge on the receipt and on the dark
+   spread, a red stamp for unbounded authority and a green seal for
+   bounded. No cards, no centred stack, no accent-on-black.
    --------------------------------------------------------------- */
 
-body {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow-x: hidden;
+/* ---- page frame ------------------------------------------------ */
+
+.sheet {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
 }
 
-/* ---- background grid ------------------------------------------ */
-
-.field {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
+main > section {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: clamp(52px, 7vh, 82px) var(--gutter);
 }
 
-.field .grid {
-  position: absolute;
-  inset: -10%;
-  opacity: 0.55;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 88px 88px;
-  -webkit-mask: radial-gradient(105% 72% at 50% 44%, #0000 20%, #000 82%);
-  mask: radial-gradient(105% 72% at 50% 44%, #0000 20%, #000 82%);
+main h2 {
+  margin: 0 0 22px;
+  max-width: 22ch;
+  font: 800 clamp(25px, 3.1vw, 38px)/1.08 var(--display);
+  letter-spacing: -0.035em;
 }
 
-/* everything above the grid */
-.bar,
-.stage,
-.foot {
-  position: relative;
-  z-index: 1;
+.lede {
+  margin: 0 0 clamp(28px, 4vh, 38px);
+  max-width: 54ch;
+  color: var(--ink2);
+  font-size: clamp(15px, 1.3vw, 16.5px);
+  line-height: 1.62;
 }
 
-/* ---- top bar --------------------------------------------------- */
+/* ---- masthead --------------------------------------------------- */
 
 .bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: clamp(20px, 3vh, 32px) var(--gutter);
+  align-items: baseline;
+  gap: 20px;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 20px var(--gutter) 16px;
+
+  /* The masthead always opposes the ground behind it. On the cream page it
+     is ink; over the dark spread it flips to paper. It is never the same
+     colour as what it sits on. */
+  background: var(--ink);
+  color: var(--paper);
+  transition: background 0.25s, color 0.25s;
 }
+
+.bar .bar-nav a { color: rgba(242, 238, 230, 0.62); }
+.bar .bar-nav a:hover { color: var(--paper); border-bottom-color: var(--paper); }
+
+.bar .btn {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
+}
+
+.bar .btn:hover { background: var(--stamp); border-color: var(--stamp); color: var(--paper); }
+
+/* over the dark spread: flip to paper */
+.bar.over-dark {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.bar.over-dark .bar-nav a { color: var(--ink2); }
+.bar.over-dark .bar-nav a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+.bar.over-dark .btn {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.bar.over-dark .btn:hover { background: var(--stamp); border-color: var(--stamp); color: var(--paper); }
 
 .logo {
   margin: 0;
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: clamp(10px, 1.3vw, 13px);
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
+  font: 800 17px/1 var(--display);
+  letter-spacing: -0.02em;
 }
 
-.logo i {
-  color: var(--ok);
-  font-style: normal;
-  margin-left: 0.12em;
+.bar-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 24px;
 }
+
+.bar-nav a {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink2);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+}
+
+.bar-nav a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* ---- buttons ---------------------------------------------------- */
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  border: 0;
-  border-radius: 99px;
-  background: var(--ok);
-  color: #04100D;
+  padding: 11px 18px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
   text-decoration: none;
-  transition: background 0.25s, transform 0.25s;
+  white-space: nowrap;
 }
 
-.btn:hover {
-  background: #54EDCE;
-  transform: translateY(-2px);
+.btn:hover { background: var(--stamp); border-color: var(--stamp); }
+
+.btn.ghost { background: none; color: var(--ink); }
+.btn.ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ---- hero ------------------------------------------------------- */
+
+.hero { padding-block: clamp(56px, 9vh, 104px) clamp(40px, 6vh, 64px); }
+
+.filed {
+  margin: 0 0 clamp(22px, 3vh, 34px);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink3);
 }
 
-/* ---- centre stage ---------------------------------------------- */
+.hero h1 {
+  margin: 0 0 26px;
+  font: 800 clamp(34px, 5.4vw, 66px)/1.0 var(--display);
+  letter-spacing: -0.045em;
+}
 
-.stage {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  padding: clamp(32px, 6vh, 72px) var(--gutter);
+.hero .lede { font-size: clamp(16px, 1.5vw, 19px); max-width: 46ch; }
+
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* ---- the problem, and the receipt -------------------------------- */
+
+.problem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 30%, 400px);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+  border-top: 1px solid var(--ink);
+}
+
+.problem h2 { max-width: 20ch; }
+.problem .lede { margin-bottom: 0; max-width: 42ch; }
+
+.receipt-stage { padding-top: 6px; }
+
+/* the deck's own receipt: cream stock, torn top and bottom */
+.receipt {
+  --tear: var(--th);
+  width: min(360px, 100%);
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0) 8%,
+                    rgba(0, 0, 0, 0) 92%, rgba(0, 0, 0, 0.06)),
+    #FBF8F2;
+  rotate: -0.7deg;
+  filter:
+    drop-shadow(0 1px 1px rgba(25, 28, 31, 0.16))
+    drop-shadow(0 16px 26px rgba(25, 28, 31, 0.18));
+  -webkit-mask:
+    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--tear) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--tear) repeat-x;
+}
+
+.r-head {
+  display: block;
+  padding: 22px 20px 12px;
   text-align: center;
 }
 
-.stage h1 {
-  margin: 0 0 clamp(18px, 3vh, 30px);
-  max-width: 18ch;
-  font: 800 clamp(32px, 6.2vw, 62px)/1.04 var(--display);
-  letter-spacing: -0.03em;
-  text-wrap: balance;
+.r-title {
+  display: block;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
 }
 
-.stage h1 em {
-  font-style: normal;
-  color: var(--ok);
+.r-sub {
+  display: block;
+  margin-top: 7px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
 }
 
-.lede {
+.r-body { padding: 4px 20px 10px; border-top: 1px dashed var(--rule); }
+
+.r-body dl { margin: 0; }
+
+/* leader-dot row: the page's signature device */
+.row {
+  display: flex;
+  align-items: baseline;
   margin: 0;
-  max-width: 54ch;
-  color: var(--mist);
-  font-size: clamp(15px, 1.6vw, 17px);
-  line-height: 1.62;
+  padding: 6px 0;
+}
+
+.row dt {
+  display: flex;
+  align-items: baseline;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 7px;
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink2);
+}
+
+.row dt::after {
+  content: "";
+  flex: 1 1 auto;
+  border-bottom: 1px dotted var(--rule);
+  transform: translateY(-3px);
+}
+
+.row dd {
+  flex: 0 0 auto;
+  margin: 0;
+  padding-left: 10px;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.row.lead { padding: 9px 0 11px; border-bottom: 4px double var(--rule); }
+.row.lead dt { font-size: 10.5px; }
+.row.lead dd { font-size: 21px; letter-spacing: -0.02em; }
+
+/* the stamp: unbounded authority, overprinted */
+.row.stamped dd {
+  position: relative;
+  color: var(--stamp);
+}
+
+.row.stamped dd::after {
+  content: "";
+  position: absolute;
+  inset: -5px -9px;
+  border: 2px solid var(--stamp);
+  border-radius: 2px;
+  rotate: -2.4deg;
+  opacity: 0.72;
+}
+
+.r-rule {
+  margin: 16px 0 8px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.r-note {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--rule);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+
+.r-foot {
+  display: block;
+  padding: 14px 20px 24px;
+  border-top: 1px dashed var(--rule);
+  text-align: center;
+}
+
+.r-foot span { display: block; }
+
+.r-foot span:first-child {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.r-foot span + span {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--seal);
+}
+
+/* ---- the method: a ruled list, not five cards --------------------- */
+
+.how { border-top: 1px solid var(--ink); }
+
+.method { margin: 0; }
+
+.m-row {
+  display: grid;
+  grid-template-columns: minmax(0, 15ch) minmax(0, 1fr);
+  gap: 10px clamp(24px, 5vw, 64px);
+  padding: 22px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.m-row:first-child { border-top: 1px dashed var(--rule); }
+
+.m-row dt { margin: 0; }
+
+.m-step {
+  display: block;
+  font: 800 20px/1.2 var(--display);
+  letter-spacing: -0.02em;
+}
+
+.m-q {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.m-row dd {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--ink2);
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+/* ---- coverage: a schedule ----------------------------------------- */
+
+.coverage { border-top: 1px solid var(--ink); }
+
+.schedule { margin: 0; }
+
+.s-row {
+  display: grid;
+  grid-template-columns: minmax(0, 22ch) minmax(0, 1fr);
+  gap: 8px clamp(24px, 5vw, 64px);
+  padding: 20px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.s-row:first-child { border-top: 1px dashed var(--rule); }
+
+.s-row dt {
+  margin: 0;
+  font: 700 16px/1.3 var(--display);
+}
+
+.s-status {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+}
+
+.s-status.in-build { color: var(--seal); }
+.s-status.experimental { color: var(--stamp); }
+
+.s-row dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 2;
+  color: var(--ink2);
+}
+
+/* ---- shared two-column section ------------------------------------
+   Heading and lede on the left, the object on the right. Same structure
+   as the problem section, so no block sits alone against dead space. */
+
+.aa,
+.dev,
+.life,
+.horizon {
+  border-top: 1px solid var(--ink);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(30px, 5vw, 72px);
+  align-items: start;
+}
+
+.col-type h2 { max-width: 17ch; }
+.col-type .lede { max-width: 40ch; }
+
+.footnote {
+  margin: 22px 0 0;
+  max-width: 44ch;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--ink3);
+}
+
+/* ---- account abstraction: a two-entry ledger ------------------------ */
+
+.ledger { margin: 0; }
+
+.l-row {
+  padding: 20px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.l-row:first-child { border-top: 1px dashed var(--rule); }
+
+.l-row dt {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.l-row dd {
+  margin: 0;
+  font: 800 clamp(24px, 3.2vw, 38px)/1.05 var(--display);
+  letter-spacing: -0.035em;
+}
+
+.l-row.stamped dd { color: var(--stamp); }
+.l-row.sealed dd { color: var(--seal); }
+
+.l-note {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--ink2);
+}
+
+/* ---- developers: the surface, as a spec table ----------------------- */
+
+.api { margin: 0; }
+
+.a-row {
+  display: grid;
+  grid-template-columns: minmax(0, 14ch) minmax(0, 1fr);
+  gap: 6px 24px;
+  padding: 16px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.a-row:first-child { border-top: 1px dashed var(--rule); }
+
+.a-row dt {
+  margin: 0;
+  font: 700 15px/1.4 var(--display);
+}
+
+.a-row dd {
+  margin: 0;
+  color: var(--ink2);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* ---- trust: the one dark spread -------------------------------------- */
+
+.trust {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: var(--void);
+  color: var(--paper);
+  -webkit-mask:
+    linear-gradient(#000 0 0) 0 var(--th) / 100% calc(100% - var(--th) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--th) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--th) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) 0 var(--th) / 100% calc(100% - var(--th) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--th) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--th) repeat-x;
+}
+
+.trust-inner {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: clamp(58px, 8vh, 92px) var(--gutter);
+}
+
+.trust h2 { color: var(--paper); max-width: 14ch; }
+.trust .lede { color: rgba(242, 238, 230, 0.62); }
+
+.terms {
+  margin: 0;
+  padding: 0;
+  max-width: 92ch;
+  list-style: none;
+  counter-reset: term;
+  columns: 2;
+  column-gap: clamp(28px, 5vw, 64px);
+}
+
+.terms li {
+  counter-increment: term;
+  break-inside: avoid;
+  padding: 13px 0 13px 42px;
+  border-bottom: 1px dashed rgba(242, 238, 230, 0.2);
+  font-size: 14.5px;
+  line-height: 1.5;
+  position: relative;
+}
+
+.terms li::before {
+  content: counter(term, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(242, 238, 230, 0.4);
+}
+
+/* ---- ask --------------------------------------------------------------- */
+
+.ask { padding-block: clamp(58px, 8vh, 92px) !important; }
+.ask h2 { font-size: clamp(28px, 4vw, 46px); max-width: 14ch; }
+
+/* ---- colophon ----------------------------------------------------------- */
+
+.foot {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: clamp(28px, 4vh, 40px) var(--gutter) clamp(36px, 5vh, 56px);
+  border-top: 1px solid var(--ink);
 }
 
 .who {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: clamp(14px, 3vw, 40px);
-  margin: clamp(26px, 4vh, 44px) 0 0;
+  gap: 12px 48px;
+  margin: 0 0 26px;
   padding: 0;
   list-style: none;
-  font-size: 14px;
-  color: var(--mist);
 }
 
 .who a {
-  color: var(--mist);
+  font-size: 15px;
   text-decoration: none;
-  border-bottom: 1px solid var(--line2);
+  border-bottom: 1px solid var(--rule);
   padding-bottom: 2px;
-  transition: color 0.2s, border-color 0.2s;
 }
 
-.who a:hover {
-  color: var(--ok);
-  border-color: var(--ok);
+.who a:hover { border-bottom-color: var(--ink); }
+
+.who span {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
 }
 
-/* ---- footer ---------------------------------------------------- */
-
-.foot {
+.foot-end {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  padding: clamp(18px, 3vh, 30px) var(--gutter);
+  justify-content: space-between;
+  gap: 10px 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.foot-end a { color: var(--ink3); text-decoration: none; }
+.foot-end a:hover { color: var(--ink); }
+
+/* ---- responsive ---------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .problem,
+  .aa,
+  .dev,
+  .life,
+  .horizon { grid-template-columns: 1fr; }
+  .receipt { rotate: 0deg; margin-inline: auto; }
+  .terms { columns: 1; }
+}
+
+@media (max-width: 640px) {
+  .bar-nav { display: none; }
+  .m-row,
+  .s-row,
+  .a-row { grid-template-columns: 1fr; }
+}
+
+
+/* ---- lifecycle: what happens after signing -------------------------- */
+
+.block-label.lift {
+  margin: 30px 0 12px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.alerts {
+  margin: 0;
+  padding: 0;
+  max-width: 44ch;
+  list-style: none;
+}
+
+.alerts li {
+  padding: 11px 0 11px 16px;
+  border-left: 2px solid var(--rule);
+  border-bottom: 1px dashed var(--rule);
+  font-size: 14px;
+  color: var(--ink2);
+}
+
+/* account-control events are the only ones that get the stamp colour */
+.alerts li.critical {
+  border-left-color: var(--stamp);
+  color: var(--ink);
+}
+
+/* the authority graph, set as a register */
+.graph {
+  padding: 26px 28px 24px;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+}
+
+.graph-title {
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.graph dl { margin: 0; }
+
+.graph .row { padding: 9px 0; }
+.graph .row dt { font-size: 11px; }
+.graph .row dd { font-size: 13px; font-weight: 500; }
+
+.graph-note {
+  margin: 20px 0 0;
+  padding-top: 14px;
+  border-top: 1px dashed var(--rule);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+
+/* ---- horizon: staged, never claimed --------------------------------- */
+
+.stages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: stage;
+}
+
+.stages li {
+  display: grid;
+  grid-template-columns: minmax(0, 15ch) minmax(0, 1fr);
+  gap: 4px 24px;
+  padding: 18px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.stages li:first-child { border-top: 1px dashed var(--rule); }
+
+.st-when {
+  grid-row: span 2;
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--slate);
+  color: var(--ink3);
+  padding-top: 4px;
 }
 
-.foot a {
-  color: var(--slate);
-  text-decoration: none;
-  transition: color 0.2s;
+.stages li.in-build .st-when { color: var(--seal); }
+
+.st-name {
+  font: 700 17px/1.3 var(--display);
+  letter-spacing: -0.015em;
 }
 
-.foot a:hover {
-  color: var(--ok);
+.st-q {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+
+/* what is not yet built reads quieter than what is */
+.stages li.later .st-name,
+.stages li.later .st-q { color: var(--ink3); }
+
+/* =================================================================
+   Motion and finish
+   All motion is decorative and stops under prefers-reduced-motion,
+   which global.css disables wholesale.
+   ================================================================= */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- scroll reveal ------------------------------------------------- */
+
+/* Visible by default. The script opts in to the animation by adding
+   `reveal-on` to <body>, so a failed script can never leave the page
+   blank — the worst case is simply no animation. */
+.reveal-on .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-on .reveal.shown { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on .reveal { opacity: 1; transform: none; }
+}
+
+/* ---- the receipt rewrites itself ------------------------------------ */
+
+.receipt {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.6s ease;
+}
+
+.receipt:hover {
+  transform: rotate(0deg) translateY(-4px);
+  filter:
+    drop-shadow(0 2px 2px rgba(25, 28, 31, 0.18))
+    drop-shadow(0 26px 40px rgba(25, 28, 31, 0.24));
+}
+
+/* two states stacked in the same cell, cross-faded on a loop */
+.swap dd,
+.exp dd {
+  position: relative;
+  display: inline-grid;
+}
+
+.swap dd > span,
+.exp dd > span {
+  grid-area: 1 / 1;
+  text-align: right;
+}
+
+.was { color: var(--stamp); animation: showWas 9s ease-in-out infinite; }
+.now { color: var(--seal); animation: showNow 9s ease-in-out infinite; }
+
+@keyframes showWas {
+  0%, 42% { opacity: 1; }
+  50%, 92% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes showNow {
+  0%, 42% { opacity: 0; }
+  50%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* the stamp belongs to the unbounded state only */
+.swap dd::after {
+  content: "";
+  position: absolute;
+  inset: -5px -9px;
+  border: 2px solid var(--stamp);
+  border-radius: 2px;
+  rotate: -2.4deg;
+  animation: showWas 9s ease-in-out infinite;
+}
+
+.exp dd .was,
+.exp dd .now { font-size: 11.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .was, .now, .swap dd::after { animation: none; }
+  .now { display: none; }
+}
+
+/* ---- standards marquee ----------------------------------------------- */
+
+.standards {
+  max-width: none !important;
+  padding: 30px 0 !important;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper2);
+  overflow: hidden;
+}
+
+.strip-label {
+  max-width: 1180px;
+  margin: 0 auto 18px;
+  padding-inline: var(--gutter);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.marquee {
+  -webkit-mask: linear-gradient(90deg, #0000, #000 8%, #000 92%, #0000);
+  mask: linear-gradient(90deg, #0000, #000 8%, #000 92%, #0000);
+}
+
+.track { display: flex; width: max-content; animation: slide 46s linear infinite; }
+
+.track ul {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0 5px;
+  list-style: none;
+}
+
+.track li {
+  padding: 9px 15px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--ink2);
+}
+
+@keyframes slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track { animation: none; }
+}
+
+/* ---- finish: a little more weight on the raised surfaces -------------- */
+
+.graph {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 12px 24px -18px rgba(25, 28, 31, 0.4);
+}
+
+.btn { transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s; }
+.btn:hover { transform: translateY(-1px); }
+
+.m-row, .s-row, .a-row, .l-row, .stages li, .alerts li {
+  transition: background 0.2s;
+}
+
+.m-row:hover, .s-row:hover, .a-row:hover, .stages li:hover {
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+
+/* =================================================================
+   Landing-page pass
+   Product in the hero, numbers as the credibility anchor, and far
+   fewer words per screen. Section treatment varies, not just layout.
+   ================================================================= */
+
+/* ---- hero: type left, product right ------------------------------- */
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 34%, 420px);
+  gap: clamp(36px, 6vw, 88px);
+  align-items: center;
+  padding-block: clamp(56px, 10vh, 116px) clamp(48px, 8vh, 92px);
+}
+
+.hero-type h1 { max-width: 13ch; }
+.hero .lede { max-width: 40ch; margin-bottom: clamp(28px, 4vh, 40px); }
+
+.hero-art { display: flex; justify-content: flex-end; }
+.hero-art .receipt { width: 100%; max-width: 380px; }
+
+/* ---- numbers ------------------------------------------------------ */
+
+.stats {
+  max-width: none !important;
+  padding: 0 !important;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.stats dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  max-width: 1180px;
+  margin: 0 auto;
+  background: rgba(242, 238, 230, 0.16);
+}
+
+.stats dl > div {
+  padding: clamp(28px, 4vw, 40px) clamp(20px, 3vw, 36px);
+  background: var(--ink);
+}
+
+.stats dt {
+  font: 800 clamp(30px, 4vw, 46px)/1 var(--display);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats dl > div:first-child dt { color: var(--stamp); }
+
+.stats dd {
+  margin: 10px 0 0;
+  max-width: 26ch;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(242, 238, 230, 0.72);
+}
+
+.stats dd.src {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(242, 238, 230, 0.4);
+}
+
+/* ---- the two prompts ---------------------------------------------- */
+
+.problem {
+  display: block;
+  text-align: center;
+}
+.problem h2 { margin-inline: auto; max-width: 18ch; }
+.lede.center { margin-inline: auto; text-align: center; max-width: 50ch; }
+
+.prompt-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 3vw, 32px);
+  max-width: 860px;
+  margin-inline: auto;
+  text-align: left;
+}
+
+.prompt { margin: 0; }
+
+.prompt figcaption {
+  margin-bottom: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.p-body {
+  padding: 26px 24px;
+  min-height: 232px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper2);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 14px 28px -22px rgba(25, 28, 31, 0.5);
+}
+
+.p-app {
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.p-ask {
+  margin: 0 0 32px;
+  font: 700 20px/1.3 var(--display);
+  letter-spacing: -0.02em;
+}
+
+.p-actions { display: flex; gap: 10px; }
+
+.p-actions span {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.p-no { color: var(--ink2); border-color: var(--rule) !important; }
+.p-yes { background: var(--ink); color: var(--paper); }
+
+/* the truth panel: same figures, stamp red */
+.prompt.real .p-body { background: var(--paper); }
+.prompt.real .row { padding: 9px 0; }
+.prompt.real .row dt { font-size: 11px; }
+.prompt.real .row dd { font-size: 12.5px; color: var(--stamp); }
+
+/* ---- responsive ---------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-art { justify-content: flex-start; }
+  .hero-art .receipt { max-width: 340px; }
+  .stats dl { grid-template-columns: 1fr; }
+  .prompt-pair { grid-template-columns: 1fr; }
 }

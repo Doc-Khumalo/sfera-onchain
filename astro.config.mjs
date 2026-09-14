@@ -6,4 +6,12 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://sferaonchain.xyz',
   integrations: [react()],
+
+  build: {
+    // Inline the stylesheet rather than emitting /_astro/*.css.
+    // Two small pages: one fewer round trip on first paint, and the built
+    // HTML stays self-contained so it renders correctly anywhere it is
+    // opened, not only when served from the site root.
+    inlineStylesheets: 'always',
+  },
 });
