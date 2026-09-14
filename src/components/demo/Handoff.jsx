@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createPublicClient, custom } from 'viem';
 import { send } from '../../lib/wallet.js';
-import { buildRevoke } from '../../lib/remediate.js';
-import { readAllowance } from '../../lib/scan.js';
-import { grantedText } from '../../lib/assess.js';
+import { remediation, permissions, format } from '../../lib/api.js';
+import { explain } from '../../lib/readings.js';
 
 /**
  * The wallet handoff, screens L08 to L13 of the UX Specification. Headers and
@@ -18,19 +17,31 @@ import { grantedText } from '../../lib/assess.js';
  * receipt lands the allowance is read back, and if the chain disagrees with
  * what was intended the mismatch is shown rather than a tick.
  */
-export default function Handoff({ perm, action, chain, owner, provider, onCancel, onSettle }) {
-  const [stage, setStage] = useState('ready'); // ready|wallet|pending|verifying|verified|mismatch|rejected|failed
+export default function Handoff({ perm, chain, chainId, owner, provider, explorer, onCancel, onSettle }) {
+  const [stage, setStage] = useState('loading'); // loading|ready|wallet|pending|verifying|verified|mismatch|rejected|failed
   const [hash, setHash] = useState(null);
   const [after, setAfter] = useState(null);
   const [error, setError] = useState(null);
+  const [tx, setTx] = useState(null);
 
-  const tx = buildRevoke({ token: perm.token.address, spender: perm.spender });
+  const granted = perm.unbounded ? 'Unlimited' : format(perm.granted, perm.decimals, perm.symbol);
+
+  /* The correction is constructed by the engine, not here. This page cannot
+     build authority-changing calldata and should not be trusted to: one
+     implementation, tested, with the bytes pinned against the other. */
+  useEffect(() => {
+    let live = true;
+    remediation(chainId, owner, perm.asset, perm.beneficiary)
+      .then((plan) => { if (live) { setTx(plan); setStage('ready'); } })
+      .catch((e) => { if (live) { setError(e); setStage('failed'); } });
+    return () => { live = false; };
+  }, [chainId, owner, perm.asset, perm.beneficiary]);
 
   async function handOver() {
     setStage('wallet');
     setError(null);
     try {
-      const h = await send(provider, { ...tx, from: owner });
+      const h = await send(provider, { to: tx.to, data: tx.data, value: tx.value, from: owner });
       setHash(h);
       setStage('pending');
     } catch (e) {
@@ -61,20 +72,20 @@ export default function Handoff({ perm, action, chain, owner, provider, onCancel
         }
 
         setStage('verifying');
-        const value = await readAllowance({
-          chainId: chain.id,
-          owner,
-          spender: perm.spender,
-          token: perm.token.address,
-          provider,
-        });
+        /* Verified by re-reading through the engine, which reads the chain
+           again rather than trusting the receipt. L12 and L13 are a real
+           verification, not a success message. */
+        const fresh = await permissions(chainId, owner);
         if (!live) return;
 
-        setAfter(value);
-        setStage(value === 0n ? 'verified' : 'mismatch');
+        const still = (fresh.permissions || []).find(
+          (p) => p.id.toLowerCase() === perm.id.toLowerCase(),
+        );
+        setAfter(still);
+        setStage(still ? 'mismatch' : 'verified');
       } catch (e) {
         if (!live) return;
-        setError(e.shortMessage || e.message);
+        setError(e);
         setStage('failed');
       }
     })();
@@ -84,22 +95,30 @@ export default function Handoff({ perm, action, chain, owner, provider, onCancel
     };
   }, [stage, hash]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const explorer = chain?.explorer && hash ? `${chain.explorer}/tx/${hash}` : null;
+  const txUrl = explorer && hash ? `${explorer}/tx/${hash}` : null;
 
   return (
     <div className="handoff-wrap" role="dialog" aria-modal="true" aria-label="Wallet handoff">
       <article className="handoff">
-        {stage === 'ready' && (
+        {stage === 'loading' && (
+          <>
+            <p className="rule-label">Preparing the correction</p>
+            <p className="h-body">Asking the engine to construct an unsigned payload.</p>
+            <p className="h-wait" aria-live="polite"><span className="h-bar" /></p>
+          </>
+        )}
+
+        {stage === 'ready' && tx && (
           <>
             <p className="rule-label">Ready for your wallet</p>
             <dl className="d-rows">
               <div className="row">
                 <dt>Application</dt>
-                <dd>{perm.app || perm.spenderShort}</dd>
+                <dd>{perm.label || `${perm.beneficiary.slice(0, 6)}…${perm.beneficiary.slice(-4)}`}</dd>
               </div>
               <div className="row">
                 <dt>Access now</dt>
-                <dd>{grantedText(perm)}</dd>
+                <dd>{granted}</dd>
               </div>
               <div className="row lead">
                 <dt>Access after</dt>
@@ -114,7 +133,7 @@ export default function Handoff({ perm, action, chain, owner, provider, onCancel
 
             <details className="evidence">
               <summary>The exact calldata</summary>
-              <pre className="calldata">{tx.data}</pre>
+              <pre className="calldata">{tx?.data}</pre>
               <p className="ev-note">
                 approve({perm.spenderShort}, 0) on {perm.token.symbol}. Decode it
                 yourself before you sign it.
@@ -154,13 +173,13 @@ export default function Handoff({ perm, action, chain, owner, provider, onCancel
             </p>
             <p className="h-body">
               {stage === 'pending'
-                ? `Waiting for ${chain.name} to confirm the change.`
+                ? `Waiting for ${chain?.name || 'the chain'} to confirm the change.`
                 : 'Transaction confirmed. Checking current access.'}
             </p>
             <p className="h-wait" aria-live="polite"><span className="h-bar" /></p>
-            {explorer && (
+            {txUrl && (
               <p className="ev-note">
-                <a href={explorer} target="_blank" rel="noopener">View transaction</a>
+                <a href={txUrl} target="_blank" rel="noopener">View transaction</a>
               </p>
             )}
           </>
@@ -172,7 +191,7 @@ export default function Handoff({ perm, action, chain, owner, provider, onCancel
             <dl className="d-rows">
               <div className="row">
                 <dt>Before</dt>
-                <dd className="was">{grantedText(perm)}</dd>
+                <dd className="was">{granted}</dd>
               </div>
               <div className="row lead">
                 <dt>After</dt>
@@ -180,12 +199,12 @@ export default function Handoff({ perm, action, chain, owner, provider, onCancel
               </div>
             </dl>
             <p className="h-body">
-              Read back from {chain.name}. The stated intent and the resulting
+              Read back from {chain?.name || 'the chain'}. The stated intent and the resulting
               state agree.
             </p>
-            {explorer && (
+            {txUrl && (
               <p className="ev-note">
-                <a href={explorer} target="_blank" rel="noopener">View transaction</a>
+                <a href={txUrl} target="_blank" rel="noopener">View transaction</a>
               </p>
             )}
             <div className="d-actions">
@@ -201,8 +220,8 @@ export default function Handoff({ perm, action, chain, owner, provider, onCancel
             {/* UX §60 — never call this success. */}
             <p className="rule-label">The result does not match the expected permission</p>
             <p className="h-body">
-              The transaction confirmed, but the allowance still reads{' '}
-              {after?.toString()}. Read it again before relying on it.
+              The transaction confirmed, but the permission is still present.
+              Read it again before relying on it.
             </p>
             <div className="d-actions">
               <button type="button" className="btn" onClick={onSettle}>
@@ -230,7 +249,7 @@ export default function Handoff({ perm, action, chain, owner, provider, onCancel
         {stage === 'failed' && (
           <>
             <p className="rule-label">Permission was not changed</p>
-            <p className="h-body">{error || 'The transaction did not complete successfully.'}</p>
+            <p className="h-body">{error ? explain(error) : 'The transaction did not complete successfully.'}</p>
             <p className="ev-note">
               We only know this transaction did not establish the expected
               permission. Nothing else is implied.

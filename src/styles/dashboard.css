@@ -850,3 +850,53 @@ main h2 {
   line-height: 1.5;
   color: var(--ink3);
 }
+
+/* ---- engine additions -------------------------------------------- */
+
+.because {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.because li {
+  padding: 7px 0 7px 16px;
+  position: relative;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink2);
+  border-bottom: 1px dotted var(--rule);
+}
+
+.because li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 14px;
+  width: 5px;
+  height: 5px;
+  background: var(--ink3);
+}
+
+.because li:first-child { border-top: 1px dotted var(--rule); }
+
+/* Ruled, not boxed, like the address input. */
+.chain-pick {
+  padding: 7px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  background: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.gate-chains {
+  margin: 20px 0 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink3);
+}
