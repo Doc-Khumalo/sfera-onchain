@@ -1076,7 +1076,12 @@ main h2 {
 }
 
 .p-no { color: var(--mist); border-color: var(--rule) !important; }
-.p-yes { background: var(--ok); color: var(--void); }
+/* The wallet's own Approve button, and deliberately NOT --ok. This panel
+   exists to show that tapping Approve grants unbounded reusable authority,
+   and --ok means bounded, corrected, verified. Filling it mint endorses the
+   exact action the panel beside it condemns in five rows of red. It is
+   neutral, the way a wallet's own primary button is. */
+.p-yes { background: var(--ice); color: var(--void); }
 
 /* the truth panel: same figures, stamp red */
 .prompt.real .p-body { background: var(--void); }

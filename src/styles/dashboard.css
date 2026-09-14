@@ -405,7 +405,10 @@ main h2 {
 .l-row:focus-visible { outline-offset: -2px; }
 
 .l-row:hover { background: var(--deck); }
-.l-row.on { background: var(--deck); box-shadow: inset 2px 0 0 var(--ok); }
+/* Selection is not a verdict. A mint rail down a row reading UNBOUNDED says
+   corrected about the one permission that is not, so the indicator is
+   neutral and the reading column keeps the meaning to itself. */
+.l-row.on { background: var(--deck); box-shadow: inset 2px 0 0 var(--ice); }
 
 .c-app { font-weight: 700; font-size: 15.5px; letter-spacing: -0.012em; }
 
