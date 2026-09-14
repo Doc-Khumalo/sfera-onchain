@@ -1,0 +1,852 @@
+/* ---------------------------------------------------------------
+   /demo — the permission ledger.
+
+   Same printed document as the homepage: cream stock, dashed rules,
+   leader dots, a red stamp for unbounded authority and a green seal
+   for bounded. No cards, no shells. A ledger is a ruled page, so the
+   table is ruled rather than boxed.
+   --------------------------------------------------------------- */
+
+/* The island is hydrated, so Astro wraps its sections in <astro-island>.
+   display:contents puts them back in main's flow, and the selectors below
+   reach through it rather than assuming a direct child. */
+astro-island { display: contents; }
+
+main section,
+.demo-foot section {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: clamp(22px, 3.4vh, 34px) var(--gutter);
+}
+
+main h2 {
+  margin: 0 0 14px;
+  font: 800 clamp(21px, 2.4vw, 28px)/1.1 var(--display);
+  letter-spacing: -0.032em;
+}
+
+.lede {
+  margin: 0 0 22px;
+  max-width: 56ch;
+  color: var(--ink2);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.rule-label {
+  margin: 22px 0 8px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.rule-label.seal { color: var(--seal); }
+
+/* ---- masthead --------------------------------------------------- */
+
+.bar {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 20px var(--gutter) 16px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.logo { margin: 0; font: 800 17px/1 var(--display); letter-spacing: -0.02em; }
+
+.bar-nav { margin-left: auto; display: flex; gap: 24px; }
+
+.bar-nav a {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: rgba(242, 238, 230, 0.62);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+}
+
+.bar-nav a:hover { color: var(--paper); border-bottom-color: var(--paper); }
+
+/* ---- the standing disclosure ------------------------------------ */
+
+/* This never scrolls away. The figures are invented, and a page of
+   invented figures shown to an investor has to say so on every screen. */
+.demo-band {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 9px var(--gutter);
+  background: var(--stamp);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ---- buttons ---------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 18px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn:hover { background: var(--stamp); border-color: var(--stamp); }
+.btn.ghost { background: none; color: var(--ink); }
+.btn.ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn.sm { padding: 7px 12px; font-size: 10px; }
+
+.txt {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.txt:hover { color: var(--ink); }
+
+/* ---- the gate --------------------------------------------------- */
+
+.gate { padding-block: clamp(52px, 10vh, 96px) clamp(44px, 7vh, 72px) !important; }
+
+.gate-kicker {
+  margin: 0 0 14px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--ink);
+  max-width: 15ch;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.gate h1 {
+  margin: 0 0 18px;
+  max-width: 18ch;
+  font: 800 clamp(33px, 5.4vw, 60px)/1.02 var(--display);
+  letter-spacing: -0.042em;
+}
+
+.gate-lede {
+  margin: 0 0 30px;
+  max-width: 52ch;
+  color: var(--ink2);
+  font-size: clamp(15px, 1.3vw, 16.5px);
+  line-height: 1.62;
+}
+
+.gate-terms {
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 60ch;
+}
+
+.gate-terms li {
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink2);
+}
+
+.gate-terms li:first-child { border-top: 1px dashed var(--rule); }
+
+/* ---- wallet strip ----------------------------------------------- */
+
+.wallet-strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding-block: 20px !important;
+  border-bottom: 1px solid var(--ink);
+}
+
+.w-id { display: flex; align-items: baseline; gap: 10px; }
+
+.w-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--seal);
+  translate: 0 -1px;
+}
+
+.w-addr {
+  font: 700 15px/1 var(--mono);
+  letter-spacing: 0.02em;
+}
+
+.w-net {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.w-note {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink3);
+}
+
+.wallet-strip .btn { margin-left: auto; }
+
+/* ---- summary ---------------------------------------------------- */
+
+.summary dl {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 0;
+}
+
+.summary dl > div {
+  padding: 4px 22px 4px 0;
+  border-left: 1px solid var(--rule);
+  padding-left: 22px;
+}
+
+.summary dl > div:first-child { border-left: 0; padding-left: 0; }
+
+.summary dt {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.summary dd {
+  margin: 8px 0 0;
+  font: 800 clamp(26px, 3.4vw, 40px)/1 var(--display);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary dd.s-note {
+  margin-top: 8px;
+  font: 400 11px/1.4 var(--mono);
+  letter-spacing: 0.02em;
+  color: var(--ink2);
+}
+
+/* ---- coverage disclosure ---------------------------------------- */
+
+.coverage-note dl { margin: 0; }
+
+.coverage-note dl > div {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 20px;
+  padding: 11px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.coverage-note dl > div:first-child { border-top: 1px dashed var(--rule); }
+
+.coverage-note dt {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.coverage-note dt span { color: var(--ink3); font-variant-numeric: tabular-nums; }
+
+.coverage-note dd {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+
+.cov-warn {
+  margin: 16px 0 0;
+  max-width: 62ch;
+  padding-left: 14px;
+  border-left: 3px solid var(--stamp);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+/* ---- ledger ----------------------------------------------------- */
+
+.ledger-head {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.ledger-head h2 { margin: 0; }
+
+.filters { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+
+.filters button {
+  padding: 7px 12px;
+  border: 1px solid var(--rule);
+  background: none;
+  color: var(--ink2);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.filters button:hover { border-color: var(--ink); color: var(--ink); }
+.filters button.on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.ledger { border-top: 1px solid var(--ink); }
+
+.l-head,
+.l-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1.1fr 0.8fr 0.9fr 1fr;
+  gap: 18px;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  padding: 13px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.l-head {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.l-row {
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.l-row:hover { background: var(--paper2); }
+.l-row.on { background: var(--paper2); box-shadow: inset 3px 0 0 var(--ink); }
+
+.c-app { font-weight: 700; font-size: 15.5px; letter-spacing: -0.012em; }
+
+.c-app em {
+  display: block;
+  margin-top: 4px;
+  font: 400 10.5px/1 var(--mono);
+  font-style: normal;
+  letter-spacing: 0.06em;
+  color: var(--ink3);
+}
+
+.c-granted,
+.c-exp,
+.c-ends {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* unbounded authority is overprinted, the same mark the receipt uses */
+.c-granted.stamped {
+  position: relative;
+  display: inline-block;
+  color: var(--stamp);
+}
+
+.c-granted.stamped::after {
+  content: "";
+  position: absolute;
+  inset: -4px -8px;
+  border: 2px solid var(--stamp);
+  border-radius: 2px;
+  rotate: -2.4deg;
+  opacity: 0.72;
+}
+
+.c-ends.stamp { color: var(--stamp); }
+
+.c-verdict em {
+  display: block;
+  margin-top: 4px;
+  font: 400 10px/1 var(--mono);
+  font-style: normal;
+  letter-spacing: 0.06em;
+  color: var(--ink3);
+}
+
+.v {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.v.stamp { color: var(--stamp); }
+.v.seal { color: var(--seal); }
+.v.plain { color: var(--ink2); }
+
+.empty {
+  padding: 22px 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink3);
+}
+
+.verdict-key {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 34px;
+  margin: 22px 0 0;
+  padding-top: 16px;
+  border-top: 1px dashed var(--rule);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+
+.verdict-key b { margin-right: 8px; }
+
+/* ---- history ---------------------------------------------------- */
+
+.history { margin: 0; padding: 0; list-style: none; }
+
+.history li {
+  display: grid;
+  grid-template-columns: 104px 92px 150px 1fr;
+  gap: 18px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.history li:first-child { border-top: 1px solid var(--ink); }
+
+.h-when,
+.h-event {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+}
+
+.h-event { font-weight: 700; text-transform: uppercase; color: var(--ink2); }
+.h-event.seal { color: var(--seal); }
+.h-event.stamp { color: var(--stamp); }
+
+.h-app { font-weight: 700; font-size: 14.5px; }
+
+.h-body { font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
+
+/* ---- detail ----------------------------------------------------- */
+
+.detail {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 40;
+  width: min(430px, 100%);
+  height: 100dvh;
+  overflow-y: auto;
+  padding: 26px 28px 40px;
+  background: #FBF8F2;
+  border-left: 1px solid var(--ink);
+  box-shadow: -18px 0 44px rgba(25, 28, 31, 0.14);
+}
+
+.d-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.d-head .rule-label { margin-top: 0; }
+
+.d-head h3 {
+  margin: 0;
+  font: 800 24px/1.1 var(--display);
+  letter-spacing: -0.032em;
+}
+
+.d-close {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink2);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.d-close:hover { color: var(--stamp); }
+
+.d-verdict { margin: 18px 0 6px; font-size: 12px; letter-spacing: 0.2em; }
+
+.d-means { margin: 0 0 6px; font-size: 14px; line-height: 1.5; }
+
+.d-not {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink3);
+}
+
+.d-consequence {
+  margin: 18px 0 0;
+  padding: 13px 15px;
+  background: var(--paper2);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.d-rows { margin: 0; }
+
+.d-rows .row {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+  padding: 6px 0;
+}
+
+.d-rows .row dt {
+  display: flex;
+  align-items: baseline;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 7px;
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink2);
+}
+
+/* leader dots, the page's signature device */
+.d-rows .row dt::after {
+  content: "";
+  flex: 1 1 auto;
+  border-bottom: 1px dotted var(--rule);
+  transform: translateY(-3px);
+}
+
+.d-rows .row dd {
+  flex: 0 1 auto;
+  margin: 0;
+  padding-left: 10px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.d-rows .row.lead { padding: 9px 0 11px; border-bottom: 4px double var(--rule); }
+.d-rows .row.lead dd { font-size: 19px; letter-spacing: -0.02em; }
+
+.d-rows .was { color: var(--stamp); text-decoration: line-through; }
+.d-rows .now { color: var(--seal); }
+
+.evidence {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--rule);
+}
+
+.evidence summary {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  cursor: pointer;
+}
+
+.evidence summary:hover { color: var(--ink); }
+
+.ev-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink3);
+}
+
+.d-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ink);
+}
+
+.d-unknown {
+  margin: 18px 0 0;
+  padding-left: 14px;
+  border-left: 3px solid var(--ink3);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+
+/* ---- wallet handoff --------------------------------------------- */
+
+.handoff-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(11, 13, 16, 0.58);
+}
+
+/* the receipt's torn stock, reused: this is the same document */
+.handoff {
+  --tear: var(--th);
+  width: min(400px, 100%);
+  padding: 26px 26px 30px;
+  background: #FBF8F2;
+  filter:
+    drop-shadow(0 1px 1px rgba(25, 28, 31, 0.16))
+    drop-shadow(0 18px 30px rgba(25, 28, 31, 0.3));
+  -webkit-mask:
+    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--tear) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - var(--tear) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--tear) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--tear) repeat-x;
+}
+
+.handoff .rule-label { margin-top: 0; }
+
+.h-body {
+  margin: 16px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+
+/* the one sentence the whole product turns on */
+.h-unsigned {
+  margin: 14px 0 0;
+  padding-left: 13px;
+  border-left: 3px solid var(--seal);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.h-wait { margin: 18px 0 0; }
+
+.h-bar {
+  display: block;
+  height: 2px;
+  background: var(--rule);
+  overflow: hidden;
+  position: relative;
+}
+
+.h-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  background: var(--ink);
+  animation: slide 1.1s linear infinite;
+}
+
+@keyframes slide {
+  from { translate: -100% 0; }
+  to { translate: 300% 0; }
+}
+
+/* ---- footer ----------------------------------------------------- */
+
+.demo-foot {
+  margin-top: clamp(20px, 4vh, 40px);
+  border-top: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ink2);
+}
+
+.demo-foot a { color: var(--ink); }
+
+/* ---- narrow ----------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .summary dl { grid-template-columns: repeat(2, 1fr); gap: 22px 0; }
+  .summary dl > div:nth-child(odd) { border-left: 0; padding-left: 0; }
+  .verdict-key { grid-template-columns: 1fr; }
+  .history li { grid-template-columns: 92px 1fr; gap: 5px 14px; }
+  .history .h-app { grid-column: 2; }
+  .history .h-body { grid-column: 2; }
+}
+
+@media (max-width: 720px) {
+  .bar-nav { display: none; }
+
+  .l-head { display: none; }
+
+  .l-row {
+    grid-template-columns: 1fr auto;
+    gap: 4px 14px;
+    padding: 15px 0;
+  }
+
+  .c-app { grid-column: 1; }
+  .c-verdict { grid-column: 2; text-align: right; }
+  .c-granted { grid-column: 1; }
+  .c-exp { grid-column: 2; text-align: right; }
+  .c-ends { grid-column: 1 / -1; color: var(--ink3); }
+
+  .coverage-note dl > div { grid-template-columns: 1fr; gap: 6px; }
+
+  .detail { width: 100%; border-left: 0; }
+}
+
+/* ---- read any address ------------------------------------------- */
+
+.lookup {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px dashed var(--rule);
+  max-width: 460px;
+}
+
+.lookup label {
+  display: block;
+  margin-bottom: 9px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.lookup-row { display: flex; gap: 10px; }
+
+/* Ruled, not boxed. The input is a line to write on, per the design rules. */
+.lookup input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 9px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  background: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.lookup input::placeholder { color: var(--ink3); }
+.lookup input:focus { outline: none; border-bottom-width: 2px; }
+
+.lookup .txt { margin-top: 14px; display: inline-block; }
+
+.gate-error {
+  margin: 16px 0 0;
+  padding-left: 13px;
+  border-left: 3px solid var(--stamp);
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.gate-none {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: var(--ink2);
+}
+
+.wallet-picks { display: flex; flex-wrap: wrap; gap: 12px; }
+.wallet-picks .btn { gap: 8px; }
+
+/* ---- notices ---------------------------------------------------- */
+
+.notice { border-top: 1px solid var(--ink); }
+.notice p { max-width: 62ch; font-size: 14px; line-height: 1.55; }
+.notice.bad { box-shadow: inset 3px 0 0 var(--stamp); }
+.n-why { color: var(--ink2); font-size: 13px !important; }
+.notice .btn { margin-top: 14px; }
+
+/* ---- reading note ------------------------------------------------ */
+
+.reading-note { border-top: 1px dashed var(--rule); }
+.reading-note p { max-width: 68ch; font-size: 14px; line-height: 1.6; color: var(--ink2); }
+
+/* ---- calldata ---------------------------------------------------- */
+
+.calldata {
+  margin: 10px 0 0;
+  padding: 11px 12px;
+  background: var(--paper2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  word-break: break-all;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.d-note {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink3);
+}

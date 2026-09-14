@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import Dashboard from '../components/demo/Dashboard.jsx';
+import { CONTACT } from '../data/site.js';
+import '../styles/dashboard.css';
+
+const title = 'Permission ledger — Sfera Onchain';
+const description =
+  'Connect a wallet and read its standing token permissions directly from the chain. Read-only until you ask for a change, and any change is handed to your wallet unsigned.';
+---
+
+<Base title={title} description={description}>
+  {/* Never scrolls away. Every figure below is invented and the page says so. */}
+  <p class="demo-band">
+    Live · reads real permissions from the chain · read-only until you ask for a change
+  </p>
+
+  <header class="bar">
+    <p class="logo">Sfera Onchain</p>
+    <nav class="bar-nav">
+      <a href="/">Homepage</a>
+      <a href="/how-it-works.html">The loop</a>
+      <a href={CONTACT} target="_blank" rel="noopener">Get in touch</a>
+    </nav>
+  </header>
+
+  <main>
+    {/* The one interactive island on the site. Hydrated because the ledger
+        is the argument: it has to be opened, filtered and corrected. */}
+    <Dashboard client:load />
+  </main>
+
+  <footer class="demo-foot">
+    <section>
+      <p>
+        Sfera Onchain is pre-release. This page reads standing ERC-20 permissions
+        from the chain and can build one transaction, an approve set to zero,
+        which your own wallet signs. It is not the decision engine, it does not
+        cover every permission type, and it says so above rather than implying
+        otherwise.
+      </p>
+      <p>
+        The loop itself is the proof of concept. <a href="/">Homepage</a> ·
+        <a href="/how-it-works.html">How it works</a> ·
+        <a href={CONTACT} target="_blank" rel="noopener">Get in touch</a>
+      </p>
+    </section>
+  </footer>
+</Base>
