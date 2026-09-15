@@ -225,7 +225,13 @@
   .dash section.gate {
     grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.75fr);
     column-gap: clamp(36px, 5vw, 72px);
+    /* Centred against each other. Top-aligned, a short field sat level with
+       the first line of a three-line headline and left a hole under it; this
+       reads as one row with two halves. */
+    align-items: center;
   }
+  /* The trail is not one of the halves. */
+  .gate .crumbs { grid-column: 1 / -1; align-self: start; }
   /* So do the commitments: they are about the screen, not about either half
      of it, so they run underneath both as one band rather than hanging off
      the end of a column. Five short lines across the width read as a row of
@@ -257,16 +263,11 @@
 
 .gate-say { min-width: 0; }
 
-/* The action half, as one object in the frame the console and the sheet use.
-   Loose parts beside a 56px headline read as debris; a panel reads as the
-   thing you came to use. */
-.gate-do {
-  min-width: 0;
-  padding: clamp(20px, 2.2vw, 28px);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: linear-gradient(180deg, #0B1117, #080D12);
-}
+/* No panel. The two halves are a sentence and the field it is about, and a
+   box around one of them makes it a widget sitting next to prose rather than
+   the other half of one line of thought. What holds it together is the
+   alignment, not a border. */
+.gate-do { min-width: 0; }
 
 /* Below the field: how else to get in, and what it reads. */
 .gate-or {
