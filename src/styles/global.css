@@ -140,7 +140,21 @@ a { color: inherit; }
   font-variant-numeric: tabular-nums;
 }
 /* Both spellings occupy one cell so the swap cannot shift the layout. */
+/* The three spellings of one figure — millions, thousands, plain — stacked in
+   a single grid cell, one visible at a time. They align to the START of that
+   cell by default, and the cell is as wide as the widest of them: so a number
+   showing its plain form sat left-aligned in a box sized for its millions
+   form, and the column's right edge came out ragged. Left is right for the
+   console's big figures, which read from the left; in a table of amounts the
+   spellings have to end where the column ends. */
 .roll .rnum { display: inline-grid; justify-items: start; }
+.a-table td:nth-child(2) .rnum,
+.a-table td:nth-child(3) .rnum { justify-items: end; }
+/* Except the floor value under a count of items: its "$" is a flex sibling of
+   the digits, so ending the digits at a box sized for the widest spelling
+   pulls the mark away from the number — "$      0" rather than "$3". The line
+   is right-aligned as a whole by .a-reach; inside it the two stay together. */
+.a-table td:nth-child(3) .a-reach-usd .rnum { justify-items: start; }
 .roll .rnum > i { grid-area: 1 / 1; font-style: normal; }
 /* Three spellings, because grouping cannot be done with one counter: under a
    thousand it is plain, under a million it is one comma, above that two. A

@@ -32,7 +32,11 @@ const STATS = [
     n: '$17B+',
     l: 'stolen through crypto scams and fraud in 2025',
     src: 'Chainalysis',
-    href: 'https://www.chainalysis.com/blog/crypto-crime-report-introduction/',
+    /* The scams chapter of the Crypto Crime Report, which is where the $17B
+       figure is: its own headline reads "Record $17 Billion Estimated Stolen
+       in Crypto Scams and Fraud in 2025". The link was to the report's
+       introduction page, which 404s. */
+    href: 'https://www.chainalysis.com/blog/crypto-scams-2026/',
     logo: '/sources/chainalysis.png',
     logoH: 30,
     tone: 'bad',
