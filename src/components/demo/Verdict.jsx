@@ -13,7 +13,31 @@ import { format, isDollar } from '../../lib/api.js';
  * have, and a single invented figure on a security product is worse than five
  * honest ones.
  */
-export default function Verdict({ perms, readAt, scanning, failed }) {
+export default function Verdict({ perms, readAt, scanning, failed, waiting }) {
+  /* Before anything has been asked. The page reads zero because zero is what
+     has been read, and says what it will do with an address rather than
+     standing empty until one arrives. */
+  if (waiting) {
+    return (
+      <section className="verdict split">
+        <p className="v-kicker">Not read yet</p>
+        <h2 className="v-line">Read what a wallet has already given away.</h2>
+        <ul className="v-amounts">
+          <li>
+            <span className="va-n zero">0</span>
+            <span className="va-l">permissions read so far</span>
+          </li>
+        </ul>
+        <p className="v-sub">
+          Give an address above, or connect a wallet, and this reads its
+          standing token permissions directly from the chain. Read-only until
+          you ask for a change, and any change is handed to your wallet
+          unsigned.
+        </p>
+      </section>
+    );
+  }
+
   if (scanning) {
     return (
       <section className="verdict">

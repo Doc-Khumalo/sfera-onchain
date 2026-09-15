@@ -269,6 +269,85 @@
    alignment, not a border. */
 .gate-do { min-width: 0; }
 
+/* ---- the console's read bar ----------------------------------------------
+   Where the wallet's identity sits once there is one. Same padding, same
+   rule beneath it, so the console does not change shape when a read begins —
+   only what the bar is saying changes. */
+/* ONE HEIGHT, BOTH STATES. The bar that asks for an address and the bar that
+   names the one being read are the same object saying different things, so
+   they are the same size: one rule, one min-height, and the console does not
+   jump the moment a read begins. */
+.a-console-head,
+.a-console-read {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  min-height: 70px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,0.012);
+}
+/* One line, always: what is in here swaps with the line that names the
+   wallet, and a second line here would make the console jump. Below the
+   breakpoint it wraps like everything else and both states wrap alike. */
+@media (min-width: 900px) {
+  .a-console-head,
+  .a-console-read { flex-wrap: nowrap; }
+}
+.a-console-read .lookup { flex: 1 1 340px; min-width: 0; max-width: 480px; }
+/* Named for assistive technology, and taking no room. `.sr-only` loses here:
+   `.lookup label` is the more specific selector and puts the display back. */
+.a-console-read .lookup label {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* A fixed row, so the bar is 70px whatever is in the field — the same 70px
+   the wallet's own line occupies. Padding alone left it at 75 and the two
+   states disagreed by five pixels every time a read began. */
+.a-console-read .lookup-row { height: 44px; padding-block: 0; }
+.a-console-read .lookup input { padding-block: 0; }
+.a-console-read .lookup .btn { padding-block: 8px; }
+.a-console-or { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* Inline beside the field, not under it: under it would be a second line and
+   the bar would no longer match the one it swaps with. */
+.a-console-read .txt { flex: 0 0 auto; margin: 0; padding: 0; white-space: nowrap; }
+.a-console-read .gate-or-label { margin: 0; }
+
+/* Change the wallet. A mark rather than a word: it sits beside an address in
+   mono and a label there reads as part of it. */
+.a-wallet-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  margin-left: 4px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: none;
+  color: var(--slate);
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+.a-wallet-edit svg { width: 13px; height: 13px; }
+.a-wallet-edit:hover { border-color: var(--ok); color: var(--ok); }
+.a-wallet-edit:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
+
+/* The commitments, under the console rather than under a gate — which means
+   they carry the page frame themselves now, because the gate's grid used to
+   give it to them and they sat flush against the window without it. */
+.dash > .gate-terms {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: clamp(20px, 3vh, 34px) var(--gutter) clamp(30px, 5vh, 56px);
+}
+
 /* Below the field: how else to get in, and what it reads. */
 .gate-or {
   margin-top: 20px;

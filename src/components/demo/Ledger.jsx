@@ -332,6 +332,11 @@ function NothingRow({ empty, columns = 6 }) {
         <td data-col="State"><StateChip tone="unk">Nothing found</StateChip></td>
         <td data-col="Action">
           <span className="a-do">
+            {empty?.action && (
+              <button type="button" className="a-pill a-pill-go" onClick={empty.action.run}>
+                {empty.action.label}
+              </button>
+            )}
             {empty?.onReset && (
               <button type="button" className="a-pill a-pill-gone" onClick={empty.onReset}>
                 Show everything read

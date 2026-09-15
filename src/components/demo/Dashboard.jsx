@@ -376,11 +376,15 @@ export default function Dashboard({ embedded = false }) {
   }
 
   function lookUp(value, forceChain) {
-    const addr = value.trim();
+    const addr = (value ?? '').trim();
     if (!isAddress(addr)) {
-      setError(new ApiError({ code: 'ADDRESS_INVALID', message: 'That is not a valid address.' }));
+      const bad = new ApiError({ code: 'ADDRESS_INVALID', message: 'That is not a valid address.' });
+      setError(bad);
+      note({ key: 'addr', tone: 'bad', title: 'That is not a valid address',
+             body: 'An address is 42 characters and begins 0x. Nothing was sent.' });
       return;
     }
+    setNotes((ns) => ns.filter((n) => n.key !== 'addr'));
     setError(null);
     setMode('lookup');
     setProvider(null);
@@ -402,6 +406,15 @@ export default function Dashboard({ embedded = false }) {
     forget();
   }
 
+  /* Change the wallet: clear the reading and put the address back in the
+     field, so the ordinary case — one character wrong — is an edit rather
+     than retyping forty-two of them. */
+  function editAddress() {
+    const was = address;
+    forget();
+    setTyped(was ?? '');
+  }
+
   function forget() {
     writeAddress(null);
     setProvider(null); setAddress(null); setChainId(null); setResult(null);
@@ -421,105 +434,70 @@ export default function Dashboard({ embedded = false }) {
    * root, and the trail is rendered once above whichever of them is showing.
    * `/` mounts this without it, because there the ledger is a section of a
    * page that already has a header and a place in it. */
-  const gate = (
-      <section className="gate">
-        {/* What this is, and what it does with an address: two halves of one
-            screen, and they sit beside each other rather than one under the
-            other. The sentence explains; the field acts. Stacked, a reader
-            scrolled past the explanation to reach the only control on the
-            page, and the right half of the screen held nothing at all. */}
-        <div className="gate-say">
-          {embedded
-            ? <h2>What this wallet gave away.</h2>
-            : <h1>What this wallet gave away.</h1>}
-          <p className="gate-lede">
-            Connect a wallet and this reads its standing token permissions
-            directly from the chain. Read-only until you ask for a change, and any
-            change is handed to your wallet unsigned.
-          </p>
+  /* THERE IS NO GATE.
+   *
+   * It was a screen of its own: a headline, a sentence and a field, standing
+   * between a reader and the thing this page is. Someone who had never seen
+   * the ledger had to commit an address to it before learning what it would
+   * do with one — and it was a second layout to keep in step with the first,
+   * which is where most of this page's alignment bugs came from.
+   *
+   * So the field moved into the console, where the wallet's identity sits once
+   * there is one, and the ledger is on screen from the first frame: the
+   * figures read zero, the table says nothing has been read yet, and the
+   * vocabulary underneath is there to be read while a reader decides. Nothing
+   * is hidden behind an act of faith.
+   */
+  const readBar = (
+    <div className="a-console-read">
+      <form className="lookup" onSubmit={(e) => { e.preventDefault(); lookUp(typed); }}>
+        {/* Named for assistive technology only. On screen the placeholder and
+            the button say it, and a label above the field would make this bar
+            taller than the one it swaps with — the console would change height
+            the moment a read began. */}
+        <label htmlFor="addr" className="sr-only">Read any public address</label>
+        <div className={`lookup-row${error ? ' bad' : ''}`}>
+          <input
+            id="addr"
+            value={typed}
+            onChange={(e) => { setTyped(e.target.value); if (error) setError(null); }}
+            placeholder="0x…"
+            spellCheck="false"
+            autoComplete="off"
+            aria-invalid={error ? 'true' : undefined}
+          />
+          <button type="submit" className="btn ghost">Read</button>
         </div>
+        {/* The field carries the failure — the row goes red and the input is
+            marked invalid — and the reason goes to a toast. It used to print
+            underneath, which made this bar taller than the line it swaps with
+            and showed the engine's own errors twice, since those are toasted
+            already. */}
+      </form>
 
-        {/* The right half is an object, not a pile.
-         *
-         * It was a status line, a label, a field, a link and a row of chain
-         * marks floating in space beside a very large headline — five loose
-         * fragments where the composition needed one thing with weight. So it
-         * is a panel, in the same frame the console and the detail sheet use,
-         * and the parts inside it run in the order they are used: read an
-         * address, or connect the wallet that holds one.
-         *
-         * "No wallet was found" moved to the bottom of it. It is a fact about
-         * this browser, not the first thing anyone came to read. */}
-        <div className="gate-do">
-          <form className="lookup" onSubmit={(e) => { e.preventDefault(); lookUp(typed); }}>
-            <label htmlFor="addr">Read any public address</label>
-            <div className={`lookup-row${error ? ' bad' : ''}`}>
-              <input
-                id="addr"
-                value={typed}
-                onChange={(e) => { setTyped(e.target.value); if (error) setError(null); }}
-                placeholder="0x…"
-                spellCheck="false"
-                autoComplete="off"
-                aria-invalid={error ? 'true' : undefined}
-                aria-describedby={error ? 'addr-error' : undefined}
-              />
-              <button type="submit" className="btn ghost">Read</button>
-            </div>
+      {/* Beside the field it fills in, which is the only place it means
+          anything. It sat in the table's waiting row for a while to keep this
+          bar one line tall; the bar is one line tall because the note that
+          used to share it moved to that row instead. */}
+      <button type="button" className="txt" onClick={() => lookUp(EXAMPLE.address, EXAMPLE.chainId)}>
+        Use an example address
+      </button>
 
-            {/* The error belongs to the field, not to the page: under the
-                input it failed on, with the input marked invalid so assistive
-                technology says so too. */}
-            {error && (
-              <p className="gate-error" id="addr-error" role="alert">
-                {explain(error)}
-              </p>
-            )}
-
-            <button type="button" className="txt" onClick={() => lookUp(EXAMPLE.address, EXAMPLE.chainId)}>
-              Use an example address with unbounded permissions
-            </button>
-          </form>
-
-          <div className="gate-or">
-            {wallets.length > 0 ? (
-              <>
-                <p className="gate-or-label">or connect a wallet</p>
-                <div className="wallet-picks">
-                  {wallets.map((w) => (
-                    <button key={w.info.uuid} type="button" className="btn"
-                      disabled={status === 'connecting'} onClick={() => onConnect(w)}>
-                      {w.info.icon && <img src={w.info.icon} alt="" width="16" height="16" />}
-                      {status === 'connecting' ? 'Check your wallet' : w.info.name}
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p className="gate-none">
-                No wallet was found in this browser. Any public address reads
-                the same way.
-              </p>
-            )}
-
-            {supported.length > 0 && (
-              <p className="gate-chains" title={supported.map((c) => c.name).join(', ')}>
-                <ChainStack label={`${supported.length} chains, all read the same way`} compact />
-              </p>
-            )}
+      {wallets.length > 0 && (
+        <div className="a-console-or">
+          <p className="gate-or-label">or connect</p>
+          <div className="wallet-picks">
+            {wallets.map((w) => (
+              <button key={w.info.uuid} type="button" className="btn"
+                disabled={status === 'connecting'} onClick={() => onConnect(w)}>
+                {w.info.icon && <img src={w.info.icon} alt="" width="16" height="16" />}
+                {status === 'connecting' ? 'Check your wallet' : w.info.name}
+              </button>
+            ))}
           </div>
         </div>
-
-        {/* The commitments belong to the screen, not to either half of it.
-            They are the reasons it is safe to paste an address, so they run
-            the full width underneath both columns rather than being tucked
-            into one of them. */}
-        <ul className="gate-terms">
-          {TERMS.map((t) => (
-            <li key={t}><span className="gt-tick" aria-hidden="true">✓</span>{t}</li>
-          ))}
-        </ul>
-      </section>
+      )}
+    </div>
   );
 
   const chain = supported.find((c) => c.id === Number(chainId));
@@ -569,9 +547,11 @@ export default function Dashboard({ embedded = false }) {
      the same rule that keeps a filtered zero neutral, applied to the case
      where it matters far more: a wallet that could not be read must never look
      like a wallet with nothing on it. */
-  const unread = status !== 'ready';
+  const unread = !address || status !== 'ready';
   const uncertain = narrowed || unread;
-  const unreadCap = status === 'scanning' ? 'reading the chain' : 'the chain did not answer';
+  const unreadCap = !address
+    ? 'nothing asked yet'
+    : status === 'scanning' ? 'reading the chain' : 'the chain did not answer';
   const toSeeToHere = shown.filter(task).length;
   const takersHere = new Set(
     shown.filter((p) => p.attention).map((p) => (p.label || p.beneficiary).toLowerCase())
@@ -581,7 +561,18 @@ export default function Dashboard({ embedded = false }) {
      described: which chain was asked, how many pairs, and the way back. */
   const onChain = supported.find((c) => c.id === chainFilter) || null;
   const filterName = FILTERS.find((f) => f.k === filter)?.label;
-  const emptyShape = status === 'scanning' ? {
+  const emptyShape = !address ? {
+    title: 'Nothing read yet',
+    /* Whether this browser has a wallet in it is a fact about the reader's
+       machine, not about the field — so it says so here rather than taking a
+       line in the bar, and it never tells someone to connect a wallet that
+       is not there. */
+    where: wallets.length > 0
+      ? 'give an address above, or connect a wallet'
+      : 'give an address above — no wallet was found in this browser',
+    note: null,
+    onReset: null,
+  } : status === 'scanning' ? {
     title: 'Reading the chain',
     where: `asking ${supported.length} chains`,
     note: null,
@@ -625,7 +616,6 @@ export default function Dashboard({ embedded = false }) {
         />
       )}
 
-      {!address ? gate : (
       <>
       {/* ALWAYS THE WHOLE PAGE. This was gated on `chain && status !== 'error'`,
           so a wallet on an unlisted chain, or one read that came back 429, and
@@ -640,6 +630,7 @@ export default function Dashboard({ embedded = false }) {
             readAt={result?.readAt}
             scanning={status === 'scanning'}
             failed={status === 'error'}
+            waiting={!address}
           />
 
           <section className="ledger-block">
@@ -668,33 +659,48 @@ export default function Dashboard({ embedded = false }) {
                   dot, a note — for a header doing the identical job beside an
                   identical table, which is most of why the two pages read as
                   two products. */}
-              <div className="a-console-head">
-                <span className="a-wallet">
-                  <span className="a-avatar" aria-hidden="true" />
-                  <b>{address.slice(0, 6)}…{address.slice(-4)}</b>
-                  {/* No chip. It said "Public address · read-only · not your
-                      wallet" beside the address, which the note under the
-                      table already says in a sentence — and says better,
-                      because it says what follows from it. No single-chain
-                      chip either: every chain is read, and the picker opposite
-                      says how many. */}
-                </span>
+              {/* Until there is an address, the head IS the field. After
+                  there is one, it is the wallet and the chains being read —
+                  the same bar, saying the thing that matters at the time. */}
+              {address ? (
+                <div className="a-console-head">
+                  <span className="a-wallet">
+                    <span className="a-avatar" aria-hidden="true" />
+                    <b>{address.slice(0, 6)}…{address.slice(-4)}</b>
+                    {/* The way back to the field. Without it the only exit
+                        from a reading was the breadcrumb, which says where
+                        you are rather than offering to change it. A mark, not
+                        a word: beside an address set in mono, "Change" reads
+                        as part of the address. */}
+                    <button
+                      type="button"
+                      className="a-wallet-edit"
+                      onClick={editAddress}
+                      aria-label="Change the wallet being read"
+                      title="Change the wallet being read"
+                    >
+                      <svg viewBox="0 0 16 16" aria-hidden="true" fill="none"
+                        stroke="currentColor" strokeWidth="1.5"
+                        strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11.2 2.6a1.4 1.4 0 0 1 2 2L6 11.8l-2.7.7.7-2.7 7.2-7.2Z" />
+                      </svg>
+                    </button>
+                  </span>
 
-                <span className="a-console-acts">
-                  {/* The stacked marks ARE the chain control — see
-                      ui/ChainPicker.jsx. They used to sit beside a dropdown
-                      that named the same chains, so the console depicted its
-                      coverage in one place and let you act on it in another. */}
-                  {supported.length > 1 && (
-                    <ChainPicker
-                      chains={supported}
-                      value={chainFilter}
-                      counts={perChain}
-                      onChange={setChainFilter}
-                    />
-                  )}
-                </span>
-              </div>
+                  <span className="a-console-acts">
+                    {/* The stacked marks ARE the chain control — see
+                        ui/ChainPicker.jsx. */}
+                    {supported.length > 1 && (
+                      <ChainPicker
+                        chains={supported}
+                        value={chainFilter}
+                        counts={perChain}
+                        onChange={setChainFilter}
+                      />
+                    )}
+                  </span>
+                </div>
+              ) : readBar}
 
               {/* Always. Not "once a read has finished", not "if anything was
                   found" — always. Every gate on this console was a way for the
@@ -815,8 +821,17 @@ export default function Dashboard({ embedded = false }) {
           onAct={() => setHandoff({ perm: open, intent: { kind: 'revoke' } })} />
       )}
 
+          {/* The reasons it is safe to paste an address, under the field
+              that asks for one. They go once there is a reading to look at:
+              a commitment is read before the act, not after it. */}
+          {!address && (
+            <ul className="gate-terms">
+              {TERMS.map((t) => (
+                <li key={t}><span className="gt-tick" aria-hidden="true">✓</span>{t}</li>
+              ))}
+            </ul>
+          )}
       </>
-      )}
 
       {/* Beside every screen, not inside one of them. */}
       <Toaster notes={notes} onDismiss={dismiss} />
