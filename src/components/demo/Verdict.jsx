@@ -1,209 +1,211 @@
 import { Counter, Amount } from '../ui/Counter.jsx';
 import { format, isDollar } from '../../lib/api.js';
+import { reading } from '../../lib/readings.js';
+import { PermissionReceipt } from '../Receipt.jsx';
 
 /**
  * The line a person actually came for.
  *
- * Four equal tiles reading 3, 3, 3, 1 make someone do arithmetic to find out
- * whether they should care. This says it once, in a sentence, and then shows
- * the amounts underneath.
+ * ONE SENTENCE, EVERY STATE. It used to be five: a headline for reading, one
+ * for nothing found, one for a failed read, one for an unbounded wallet and
+ * one for a bounded one — each a different length, so the section changed
+ * shape at every step and a reader lost their place twice per read. Now there
+ * is one sentence and its two figures climb into it, from nought before
+ * anything is known to whatever the chain returned. The words stay put; only
+ * the numbers move.
  *
  * It states quantities per asset rather than one converted total, because
  * converting to a currency needs a price feed the proof of concept does not
  * have, and a single invented figure on a security product is worse than five
- * honest ones.
+ * honest ones. The one figure it does give is a sum of dollar stablecoins,
+ * which is arithmetic rather than conversion — and it says "at least" whenever
+ * something reachable could not join that sum.
  */
+
+/* What the engine knows about expiry, in the words the table uses. The payload
+   carries no expiry field, so this comes from its own reasoning. */
+function expiryOf(p) {
+  if ((p.because ?? []).some((b) => /no expiry/i.test(b))) return 'Never';
+  if (p.reading === 'EXPIRED') return 'Expired';
+  if (p.reading === 'REMOVED') return 'Removed';
+  return 'Not established';
+}
+
+const rawOf = (p) => {
+  try { return BigInt(p.reachableNow ?? '0'); } catch { return 0n; }
+};
+
+/* Rescaled to hundredths so tokens of different decimals can be added: USDC's
+   six and DAI's eighteen both turn up, and they are the same dollar. */
+function toCents(p) {
+  const d = p.decimals || 0;
+  const v = rawOf(p);
+  return d > 2 ? v / (10n ** BigInt(d - 2)) : v * (10n ** BigInt(2 - d));
+}
+
 export default function Verdict({ perms, readAt, scanning, failed, waiting }) {
-  /* Before anything has been asked. The page reads zero because zero is what
-     has been read, and says what it will do with an address rather than
-     standing empty until one arrives. */
-  if (waiting) {
-    return (
-      <section className="verdict split">
-        <p className="v-kicker">Not read yet</p>
-        <h2 className="v-line">Read what a wallet has already given away.</h2>
-        <ul className="v-amounts">
-          <li>
-            <span className="va-n zero">0</span>
-            <span className="va-l">permissions read so far</span>
-          </li>
-        </ul>
-        <p className="v-sub">
-          Give an address above, or connect a wallet, and this reads its
-          standing token permissions directly from the chain. Read-only until
-          you ask for a change, and any change is handed to your wallet
-          unsigned.
-        </p>
-      </section>
-    );
-  }
-
-  if (scanning) {
-    return (
-      <section className="verdict">
-        <p className="v-kicker">
-          <span className="live-dot mr-2 inline-block h-1.5 w-1.5 rounded-full bg-ok align-middle" />
-          Reading the chain
-        </p>
-        <h2 className="v-line">Asking every application we know.</h2>
-        {/* The sweep is the work, not a spinner. The engine really is moving
-            through pairs, so the page shows that rather than a shape that
-            only says something is happening somewhere. */}
-        <div className="relative mt-9 h-px overflow-hidden bg-line">
-          <span className="scan-line" />
-        </div>
-      </section>
-    );
-  }
-
+  /* Everything with something to take today, whatever its reading. A bounded
+     permission over a live balance can still take that balance; leaving it out
+     of the sentence would understate what is reachable, and understating is
+     the one direction that makes a wallet look safer than it is. */
+  const live = perms.filter((p) => rawOf(p) > 0n);
+  const apps = new Set(live.map((p) => (p.label || p.beneficiary).toLowerCase()));
   const unbounded = perms.filter((p) => p.reading === 'UNBOUNDED');
   const attention = perms.filter((p) => p.attention);
-  const apps = new Set(attention.map((p) => (p.label || p.beneficiary).toLowerCase()));
 
-  /* A read that failed is not a wallet with nothing on it, and must never be
-     written as one. The page still stands — the console, the table and the
-     legend are all below this — but the sentence at the top of it says what
-     actually happened. */
-  if (failed) {
-    return (
-      <section className="verdict split">
-        <p className="v-kicker">Not read</p>
-        <h2 className="v-line">This wallet has not been read.</h2>
-        <ul className="v-amounts">
-          <li>
-            <span className="va-n zero">0</span>
-            <span className="va-l">permissions read · the chain did not answer</span>
-          </li>
-        </ul>
-        <p className="v-sub">
-          A zero here is a failure to read, not a finding of nothing. What this
-          wallet has granted is unchanged by our not being able to see it.
-        </p>
-      </section>
-    );
-  }
+  const dollars = live.filter((p) => isDollar(p.symbol));
+  const cents = dollars.reduce((n, p) => n + toCents(p), 0n);
+  /* Reachable in something the sum cannot hold. The figure is then a floor,
+     and the sentence says so. */
+  const unpriced = live.filter((p) => !isDollar(p.symbol));
 
-  if (perms.length === 0) {
-    return (
-      <section className="verdict ok split">
-        <p className="v-kicker">{readAt ? `Read ${new Date(readAt).toLocaleTimeString()}` : 'Read from the chain'}</p>
-        <h2 className="v-line">
-          No standing permission turned up in what we asked about.
-        </h2>
-        <ul className="v-amounts">
-          <li>
-            <span className="va-n zero">0</span>
-            <span className="va-l">reachable by anything we asked about</span>
-          </li>
-        </ul>
-        <p className="v-sub">
-          That is not the same as this wallet having none. It means the
-          applications we know to ask about do not hold one.
-        </p>
-      </section>
-    );
-  }
-
-  const raw = (p) => { try { return BigInt(p.reachableNow ?? '0'); } catch { return 0n; } };
-
-  /* ONE FIGURE. The panel listed every permission's reachable amount, which is
-     the Reachable column of the table directly underneath it — the same five
-     numbers, twice, with the second copy dressed as a summary. A summary that
-     repeats its source is not a summary.
-   *
-   * So: what can be added, added. Dollar stablecoins are denominated in the
-   * same unit and sum honestly — this is arithmetic on USDC and USDT, not a
-   * price feed, and it is the figure a person actually wants. What cannot be
-   * added does not get added: WETH and UNI are named underneath in their own
-   * units, because converting them would need a price this page does not have
-   * and will not invent.
-   *
-   * MARKETING PLAN §30 and the note this file already carried: no single
-   * converted total. A sum of dollars is not a conversion. */
-  const scope = attention.length > 0 ? attention : perms;
-
-  const dollars = scope.filter((p) => isDollar(p.symbol));
-  const dollarTotal = dollars.reduce((n, p) => {
-    /* Rescale each to hundredths before adding: two dollar tokens do not
-       have to share a decimals value, and USDC's 6 and DAI's 18 are both
-       common. */
-    const d = p.decimals || 0;
-    const v = raw(p);
-    return n + (d > 2 ? v / (10n ** BigInt(d - 2)) : v * (10n ** BigInt(2 - d)));
-  }, 0n);
-
-  const others = scope.filter((p) => !isDollar(p.symbol));
-  const lead = dollars.length > 0
-    ? { figure: `${(dollarTotal / 100n).toLocaleString('en-US')}.${(dollarTotal % 100n).toString().padStart(2, '0')}`,
-        label: dollars.length > 1
-          ? `reachable now, across ${[...new Set(dollars.map((p) => p.symbol))].join(' and ')}`
-          : `reachable by ${dollars[0].label || 'an unverified spender'}`,
-        zero: dollarTotal === 0n }
-    : others.length > 0
-      ? { figure: format(others[0].reachableNow ?? '0', others[0].decimals, others[0].symbol),
-          label: `reachable by ${others[0].label || 'an unverified spender'}`,
-          zero: raw(others[0]) === 0n }
-      : { figure: '0', label: 'reachable by anything we asked about', zero: true };
-
-  /* Everything that cannot join that sum, named in its own unit — one entry
-     per asset, not one per permission. Two Permit2 approvals over the same
-     WETH produced "0 WETH · 0 WETH", which reads as a mistake because it is
-     one: the line is a list of assets, and an asset appears once. */
-  const rest = Object.entries(
-    (dollars.length > 0 ? others : others.slice(1)).reduce((acc, p) => {
-      const key = p.symbol || 'unreadable';
-      acc[key] = acc[key] ?? { total: 0n, decimals: p.decimals, symbol: p.symbol };
-      acc[key].total += raw(p);
+  const otherTotals = Object.values(
+    unpriced.reduce((acc, p) => {
+      const k = p.symbol || 'unreadable';
+      acc[k] = acc[k] ?? { total: 0n, decimals: p.decimals, symbol: p.symbol };
+      acc[k].total += rawOf(p);
       return acc;
     }, {}),
-  ).map(([, a]) => format(a.total.toString(), a.decimals, a.symbol));
+  );
+  const others = otherTotals.map((a) => format(a.total.toString(), a.decimals, a.symbol));
 
-  const tone = attention.length > 0 ? 'bad' : 'ok';
-  const shape = ' split';
+  /* One permission gets printed, and it is the one with most at stake — which
+     means the largest DOLLAR exposure, not the largest raw number.
+   *
+     Ranking on base units is the mistake this codebase already caught once
+     in the console's figures: 5.9315 WETH carries eighteen decimals and
+     $14,707.73 of USDC carries six, so the raw comparison put the WETH row on
+     the receipt and printed "5.9315 WETH" where a figure anyone can read
+     belonged. Rescaling by decimals does not fix it either — one WETH and one
+     USDC are not comparable amounts.
+   *
+     So: rank the dollar-denominated permissions against each other, where the
+     comparison is real, and print the largest. A wallet holding nothing in
+     dollars falls back to the first permission worth acting on, in its own
+     units, because there is no honest way to rank across assets without a
+     price feed this page does not have. */
+  const pool = attention.length > 0 ? attention : perms;
+  const priced = pool.filter((p) => isDollar(p.symbol) && rawOf(p) > 0n);
+  const worst = priced.length
+    ? priced.reduce((a, b) => (toCents(b) > toCents(a) ? b : a))
+    : (pool.length ? pool[0] : null);
+
+  /* Money is shown as money, and it climbs to its figure the way every other
+     number on this page does. A dollar asset prints with the mark and no
+     ticker — "$14,707.73" reads at a glance where "14,707.73 USDC" asks the
+     reader to know what USDC is. */
+  const asMoney = (p, raw) => (isDollar(p.symbol)
+    ? <Amount raw={raw ?? '0'} decimals={p.decimals} money prefix="$" />
+    : <Amount raw={raw ?? '0'} decimals={p.decimals} symbol={p.symbol} />);
+
+  const blank = waiting || scanning || failed || perms.length === 0;
+
+  /* A ZERO THAT WAS EARNED. Nothing reachable is a win and the figures say so
+     in mint — but only when the zero is a finding. Before a read, during one,
+     and after one that failed, the same zero means "not established", and mint
+     there is the all-clear this page exists not to give.
+   *
+     Nor when the read simply found nothing: Marketing Plan §30 — no issue
+     detected is not presented as guaranteed safety, and an empty result is
+     the case that sentence was written for. Mint is for a wallet whose
+     permissions were read, counted, and reach nothing. */
+  const clear = !blank && perms.length > 0 && live.length === 0;
+  const tone = attention.length > 0 ? 'bad' : clear ? 'ok clear' : 'ok';
+
+  const kicker = waiting ? 'Not read yet'
+    : scanning ? 'Reading the chain'
+    : failed ? 'Not read'
+    : perms.length === 0 ? 'Nothing found'
+    : readAt ? `Read ${new Date(readAt).toLocaleTimeString()}`
+    : 'Read from the chain';
+
+  const receiptState = waiting ? 'Not read yet'
+    : scanning ? 'Reading'
+    : failed ? 'Not read'
+    : 'Nothing found';
+
+  const sub = waiting
+    ? 'Give an address above, or connect a wallet, and this reads its standing token permissions directly from the chain. Read-only until you ask for a change, and any change is handed to your wallet unsigned.'
+    : failed
+      ? 'A zero here is a failure to read, not a finding of nothing. What this wallet has granted is unchanged by our not being able to see it.'
+      : perms.length === 0
+        ? 'That is not the same as this wallet having none. It means the applications we know to ask about do not hold one.'
+        : attention.length > 0
+          ? (cents === 0n && unpriced.every((p) => rawOf(p) === 0n)
+            ? 'The balances these reach are empty. The authority is not: it covers whatever arrives next, without being asked again.'
+            : 'Each of these was granted once and has been live ever since. Removing one is a transaction your own wallet signs.')
+          : 'Bounded is not safe. It is a smaller blast radius, not none.';
 
   return (
-    <section className={`verdict ${tone}${shape}`}>
-      <p className="v-kicker">{readAt ? `Read ${new Date(readAt).toLocaleTimeString()}` : 'Read from the chain'}</p>
+    <section className={`verdict ${tone} split`}>
+      <p className="v-kicker">
+        {scanning && (
+          <span className="live-dot mr-2 inline-block h-1.5 w-1.5 rounded-full bg-ok align-middle" />
+        )}
+        {kicker}
+      </p>
 
-      {attention.length > 0 ? (
-        <h2 className="v-line">
-          {/* Two counts in one sentence read badly: an application count
-              followed by a permission count made "1 application ... none of
-              them expires". The expiry clause stands on its own instead. */}
-          <b><Counter value={apps.size} /></b> {apps.size === 1 ? 'application can' : 'applications can'} take
-          from this wallet.
-          {unbounded.length > 0 && <> Nothing expires.</>}
-        </h2>
+      {/* The same sentence, always, with the numbers climbing into it. */}
+      <h2 className="v-line">
+        <b><Counter value={apps.size} /></b>{' '}
+        {apps.size === 1 ? 'application can take' : 'applications can take'}{' '}
+        <b>
+          {(unpriced.length > 0 && cents > 0n) || otherTotals.length > 1 ? 'at least ' : ''}
+          {/* A dollar figure when there is one. When the wallet holds nothing
+              this page can price, "$0.00" beside "can take" is a zero that is
+              not true — 4.2 UNI is reachable and the sentence would be saying
+              nothing is. It states the largest amount it can name instead, in
+              that asset's own units. */}
+          {cents > 0n || otherTotals.length === 0 ? (
+            <Amount raw={cents.toString()} decimals={2} money prefix="$" />
+          ) : (
+            <Amount
+              raw={otherTotals[0].total.toString()}
+              decimals={otherTotals[0].decimals}
+              symbol={otherTotals[0].symbol}
+            />
+          )}
+        </b>{' '}
+        from this wallet.
+        {unbounded.length > 0 && <> Nothing expires.</>}
+      </h2>
+
+      {/* The receipt, printed from what was actually read — and printed on
+          every state, with the figures it has, which before a read is none of
+          them. It was hidden while scanning, so the column emptied for the
+          length of every read and the section changed shape twice. */}
+      {blank || !worst ? (
+        <PermissionReceipt
+          state={receiptState}
+          allowance="0"
+          reachable="0"
+          expires="Not established"
+          action={scanning ? 'Asking every application we know' : '$0.00 reachable across this wallet'}
+        />
       ) : (
-        <h2 className="v-line">Everything found is bounded.</h2>
+        <PermissionReceipt
+          perm={{ ...worst, readingLabel: reading(worst.reading).label }}
+          allowance={worst.unbounded ? 'Unlimited' : asMoney(worst, worst.granted)}
+          reachable={asMoney(worst, worst.reachableNow)}
+          expires={expiryOf(worst)}
+          /* The wallet's whole reach, in the units it can be said in — and
+             without a "$0.00" clause when there are no dollars in it. */
+          action={cents > 0n
+            ? `$${format(cents.toString(), 2, null, true)} reachable across this wallet${others.length ? `, and ${others.join(' · ')}` : ''}`
+            : others.length
+              ? `${others.join(' · ')} reachable across this wallet`
+              : 'Nothing reachable across this wallet'}
+        />
       )}
 
-      {/* No entrance on the panel: it is the frame, not the news. The figures
-          inside it climb, and they are the same figures the table's Reachable
-          column shows, so they climb the same way. Red is reserved for an
-          amount actually at stake — a zero is a fact, not an alarm. */}
-      <ul className="v-amounts">
-        <li>
-          <span className={`va-n${lead.zero ? ' zero' : ''}`}>{lead.figure}</span>
-          <span className="va-l">{lead.label}</span>
-          {rest.length > 0 && (
-            <span className="va-rest">
-              and {rest.join(' · ')} — different units, not added to it
-            </span>
-          )}
-        </li>
-      </ul>
-
-      <p className="v-sub">
-        {attention.length > 0
-          ? lead.zero && rest.every((r) => /^0(\.00)? /.test(r) || r === '0')
-            /* Zero reachable is the case people misread as safe, so the
-               sentence says what the zero does not mean. Under the figure,
-               not instead of it. */
-            ? 'The balances these reach are empty. The authority is not: it covers whatever arrives next, without being asked again.'
-            : 'Each of these was granted once and has been live ever since. Removing one is a transaction your own wallet signs.'
-          : 'Bounded is not safe. It is a smaller blast radius, not none.'}
-      </p>
+      {scanning ? (
+        /* The sweep is the work, not a spinner. The engine really is moving
+           through pairs, so the page shows that rather than a shape that only
+           says something is happening somewhere. */
+        <p className="v-sub"><span className="v-scan"><span className="scan-line" /></span></p>
+      ) : (
+        <p className="v-sub">{sub}</p>
+      )}
     </section>
   );
 }

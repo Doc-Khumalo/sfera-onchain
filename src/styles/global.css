@@ -547,3 +547,198 @@ button.a-pill[disabled] { cursor: not-allowed; }
   /* Stacked cells align to the right edge like the figures they hold. */
   .a-table td .a-sw, .a-table td .a-sw-live, .a-table td .a-reach { justify-items: end; }
 }
+
+/* ---- the Access Receipt -------------------------------------------------
+   Moved here from home.css, which the ledger does not load. The receipt is
+   rendered on both pages now: with example values on the homepage, and with a
+   wallet's real ones on the ledger. Every token it needs it declares on
+   `.perm` itself — only --mono and --ease-loop come from the top of this
+   file. */
+/* ---- the Access Receipt, printed on paper --------------------------
+
+   Lifted from the nine-step deck, where this object was first drawn.
+   Cream stock on a dark ground with a torn top and bottom, which is the
+   one surface on this site that is not another dark card. A page about
+   calldata should read as a document.
+
+   It rewrites itself on a 9s loop: the request is struck, the
+   correction rises, and the exposure rows follow the headline rather
+   than arriving with it.
+   -------------------------------------------------------------------- */
+
+.perm {
+  --paper: #F2EEE6;
+  --pink: #191C1F;
+  --pink2: #8C8377;
+  --prule: rgba(25, 28, 31, 0.34);
+  --stamp: #C2342A;
+  --seal: #0F7355;
+  --tw: 9px;
+  --th: 5px;
+
+  width: min(330px, 100%);
+  color: var(--pink);
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.055), rgba(0,0,0,0) 9%, rgba(0,0,0,0) 90%, rgba(0,0,0,.07)),
+    var(--paper);
+  rotate: -0.7deg;
+  filter:
+    drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 22px 34px rgba(0, 0, 0, 0.62));
+  -webkit-mask:
+    linear-gradient(#000 0 0) 0 var(--th) / 100% calc(100% - var(--th) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--th) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--th) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) 0 var(--th) / 100% calc(100% - var(--th) * 2) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 0 0 / var(--tw) var(--th) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 0 100% / var(--tw) var(--th) repeat-x;
+}
+
+.rhead { display: block; text-align: center; padding: 14px 16px 9px; }
+
+.rhead .rt {
+  display: block;
+  font: 700 9px/1 var(--mono);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.rhead .rs {
+  position: relative;
+  display: inline-grid;
+  margin-top: 7px;
+  font: 700 7.5px/1 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.rhead .rs > span {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rhead .rs > span::before {
+  content: "";
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.rs-a { color: var(--stamp); animation: rWas 9s var(--ease-loop) infinite; }
+.rs-b { color: var(--seal); animation: rNow 9s var(--ease-loop) infinite; }
+
+.rbody { padding: 2px 16px 8px; border-top: 1px dashed var(--prule); }
+.rbody dl { margin: 0; }
+
+.prow { display: flex; align-items: baseline; margin: 0; padding: 5px 0; }
+
+.prow dt {
+  display: flex;
+  align-items: baseline;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 6px;
+  margin: 0;
+  white-space: nowrap;
+  font: 400 8.5px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pink2);
+}
+
+/* the leader dots that make a receipt a receipt */
+.prow dt::after {
+  content: "";
+  flex: 1 1 auto;
+  border-bottom: 1px dotted var(--prule);
+  transform: translateY(-2px);
+}
+
+.prow dd {
+  flex: 0 0 auto;
+  margin: 0;
+  padding-left: 8px;
+  white-space: nowrap;
+  font: 700 11.5px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--stamp);
+}
+
+.prow.lead { padding: 8px 0 10px; margin-bottom: 6px; border-bottom: 4px double var(--prule); }
+.prow.lead dd { font-size: 19px; letter-spacing: -0.01em; padding-left: 10px; }
+.prow.lead dd.fixed { color: var(--pink); }
+
+.rrule {
+  margin: 12px 0 4px;
+  font: 400 7.5px/1 var(--mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--pink2);
+}
+
+/* two states in one cell, the old one struck before the new one rises */
+.swap dd, .exp dd, .rfoot span > span { position: relative; display: inline-grid; }
+.swap dd > span, .exp dd > span, .rfoot span > span > span { grid-area: 1 / 1; text-align: right; }
+
+.perm .was { color: var(--stamp); animation: rWas 9s var(--ease-loop) infinite; }
+.perm .now { color: var(--seal); animation: rNow 9s var(--ease-loop) infinite; }
+
+@keyframes rWas { 0%, 38% { opacity: 1; } 46%, 92% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes rNow {
+  0%, 40%  { opacity: 0; transform: translateY(4px); }
+  48%, 92% { opacity: 1; transform: none; }
+  100%     { opacity: 0; transform: translateY(4px); }
+}
+
+/* the line that does the correcting */
+.swap dd::before, .exp dd::before {
+  content: "";
+  position: absolute;
+  left: -2px; top: 50%;
+  height: 1px;
+  background: var(--stamp);
+  animation: rStrike 9s var(--ease-loop) infinite;
+}
+
+@keyframes rStrike {
+  0%, 36%  { width: 0; opacity: 0; }
+  38%      { width: 0; opacity: 1; }
+  45%      { width: calc(100% + 4px); opacity: 1; }
+  52%, 92% { width: calc(100% + 4px); opacity: 0; }
+  100%     { width: 0; opacity: 0; }
+}
+
+/* Consequences follow the cause, staggered behind the headline
+   correction. Keyed by explicit class: nth-of-type counts div children
+   and the first two divs are .prow.lead, so an nth-of-type on .exp
+   matched nothing and every row ran in step with the headline. */
+.exp-1 dd > span, .exp-1 dd::before { animation-delay: 0.14s; }
+.exp-2 dd > span, .exp-2 dd::before { animation-delay: 0.28s; }
+.exp-3 dd > span, .exp-3 dd::before { animation-delay: 0.42s; }
+
+.exp dd { font-size: 10.5px; }
+
+.rfoot {
+  display: block;
+  text-align: center;
+  padding: 9px 16px 15px;
+  border-top: 1px dashed var(--prule);
+  font: 400 7.5px/1.5 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pink2);
+}
+
+.rfoot span { display: block; }
+.rfoot span + span { margin-top: 6px; font-weight: 700; }
+.rfoot .was { color: var(--stamp); }
+.rfoot .now { color: var(--seal); }
+
+@media (prefers-reduced-motion: reduce) {
+  .perm .was, .perm .now, .rs-a, .rs-b,
+  .swap dd::before, .exp dd::before { animation: none; }
+  .perm .now, .rs-b { display: none; }
+}

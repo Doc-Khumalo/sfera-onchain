@@ -4,6 +4,7 @@ import { parseUnits } from 'viem';
 import { reading } from '../../lib/readings.js';
 import { format } from '../../lib/api.js';
 import { AssetMark } from '../ui/AssetMark.jsx';
+import { ChainMark } from '../ui/ChainMark.jsx';
 import { Tooltip, TooltipProvider } from '../ui/Tooltip.jsx';
 import { Amount } from '../ui/Counter.jsx';
 import {
@@ -120,9 +121,23 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
         {/* Portalled to <body>, so it carries the ledger's root class or every
             rule scoped to `.dash` stops at its edge. */}
         <Popover.Content className="rowmenu dash" align="end" sideOffset={8} collisionPadding={16}>
+          {/* The asset and the chain it is on, and the address underneath as
+              something that can be followed — a spender is an address before
+              it is a name, and the name is ours rather than the chain's. */}
           <p className="rowmenu-head">
-            <b>{p.label || 'This permission'}</b>
-            <span>{p.chain?.name} · {p.symbol || 'Unreadable contract'}</span>
+            <AssetMark symbol={p.symbol} chain={p.chain} size={26} />
+            <span>
+              <b>{p.label || 'This permission'}</b>
+              <span>{p.chain?.name} · {p.symbol || 'Unreadable contract'}</span>
+              {link ? (
+                <a className="rowmenu-addr" href={`${link}/address/${p.beneficiary}`}
+                  target="_blank" rel="noopener" onClick={shut}>
+                  {p.beneficiary.slice(0, 10)}…{p.beneficiary.slice(-8)}
+                </a>
+              ) : (
+                <span className="rowmenu-addr">{p.beneficiary.slice(0, 10)}…{p.beneficiary.slice(-8)}</span>
+              )}
+            </span>
           </p>
 
           {limiting ? (

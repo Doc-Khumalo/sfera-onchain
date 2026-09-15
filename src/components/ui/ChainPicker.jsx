@@ -16,6 +16,12 @@ import { ChainMark } from './ChainMark.jsx';
  * should have to scan — and it is fifteen precisely because the answer to
  * "which chain is my permission on" is usually "one I had forgotten about".
  *
+ * SEVERAL AT ONCE. `value` is a set. It used to be one id, so the ledger could
+ * be narrowed to exactly one chain or to all fifteen and nothing in between,
+ * when "the two I actually use" is the ordinary case. Picking does not close
+ * the menu — the whole point is to pick more than one — and "All chains"
+ * empties the set, because a filter that selects nothing selects everything.
+ *
  * Each row carries what was found on that chain. A chain with nothing on it
  * still appears, and says zero: absent from a list and empty on the chain look
  * identical otherwise, and the difference is the whole point of this page.
@@ -25,35 +31,48 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
   const [q, setQ] = useState('');
   const list = useRef(null);
 
-  const picked = chains.find((c) => c.id === value) || null;
+  const picked = chains.filter((c) => value.has(c.id));
   const total = Object.values(counts).reduce((n, c) => n + c, 0);
+  const shownCount = picked.length
+    ? picked.reduce((n, c) => n + (counts[c.id] ?? 0), 0)
+    : total;
 
   const found = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return needle ? chains.filter((c) => c.name.toLowerCase().includes(needle)) : chains;
   }, [chains, q]);
 
-  function choose(id) {
-    onChange(id);
-    setOpen(false);
+  function toggle(id) {
+    const next = new Set(value);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    /* Every chain ticked is the same view as none ticked, and the second is
+       the one the label can say in three words. */
+    onChange(next.size === chains.length ? new Set() : next);
+  }
+
+  function all() {
+    onChange(new Set());
     setQ('');
   }
+
+  const label = picked.length === 0
+    ? `All chains · ${chains.length}`
+    : picked.length === 1
+      ? picked[0].name
+      : `${picked.length} chains · ${shownCount}`;
 
   return (
     <Popover.Root open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQ(''); }}>
       <Popover.Trigger asChild>
-        <button type="button" className="cpick" aria-label="Choose which chain to show">
+        <button type="button" className="cpick" aria-label="Choose which chains to show">
           <span className="cstack compact">
-            {/* One mark when a chain is chosen, the cluster when none is: the
-                trigger shows what it is doing rather than a fixed decoration. */}
+            {/* The marks of what is picked, or the cluster when everything is. */}
             <span className="cs-marks">
-              {(picked ? [picked] : chains.slice(0, 6)).map((c) => (
+              {(picked.length ? picked : chains).slice(0, 6).map((c) => (
                 <ChainMark key={c.id} chain={c} size={20} />
               ))}
             </span>
-            <span className="cs-label">
-              {picked ? picked.name : `All chains · ${chains.length}`}
-            </span>
+            <span className="cs-label">{label}</span>
           </span>
           <svg className="cpick-mark" viewBox="0 0 10 6" aria-hidden="true">
             <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor"
@@ -77,14 +96,14 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
             onKeyDown={(e) => {
               /* Enter takes the first match, because typing three letters and
                  then reaching for the mouse is not a search. */
-              if (e.key === 'Enter' && found.length) { e.preventDefault(); choose(found[0].id); }
+              if (e.key === 'Enter' && found.length) { e.preventDefault(); toggle(found[0].id); }
               if (e.key === 'ArrowDown') { e.preventDefault(); list.current?.querySelector('button')?.focus(); }
             }}
           />
 
           <ul className="cmenu-list" ref={list}>
             <li>
-              <button type="button" onClick={() => choose(0)} aria-current={value === 0 || undefined}>
+              <button type="button" onClick={all} aria-pressed={picked.length === 0}>
                 <span className="cm-all" aria-hidden="true" />
                 <span className="cm-name">All chains</span>
                 <em>{total}</em>
@@ -92,7 +111,7 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
             </li>
             {found.map((c) => (
               <li key={c.id}>
-                <button type="button" onClick={() => choose(c.id)} aria-current={value === c.id || undefined}>
+                <button type="button" onClick={() => toggle(c.id)} aria-pressed={value.has(c.id)}>
                   <ChainMark chain={c} size={18} />
                   <span className="cm-name">{c.name}</span>
                   <em>{counts[c.id] ?? 0}</em>

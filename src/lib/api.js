@@ -102,7 +102,7 @@ export function isDollar(symbol) {
  * is what somebody else can take; understating it by a rounding is the one
  * direction that makes a wallet look safer than it is.
  */
-export function format(raw, decimals, symbol) {
+export function format(raw, decimals, symbol, alwaysCents = false) {
   if (raw === null || raw === undefined) return 'Not established';
   let v;
   try {
@@ -114,7 +114,9 @@ export function format(raw, decimals, symbol) {
   const d = decimals || 0;
   const tail = symbol ? ` ${symbol}` : '';
 
-  if (isDollar(symbol)) {
+  /* `alwaysCents` is for money with no ticker to recognise it by — a sum of
+     stablecoins is denominated in dollars and named by nothing. */
+  if (alwaysCents || isDollar(symbol)) {
     const places = 2n;
     const unit = 10n ** places;
     /* Rescale to hundredths, rounding half-up on the way down. */

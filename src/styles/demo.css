@@ -660,13 +660,13 @@
 .cpick[data-state="open"] .cpick-mark { transform: rotate(180deg); }
 
 .cmenu {
-  width: 290px;
+  width: 272px;
   max-height: min(60vh, 420px);
   display: flex;
   flex-direction: column;
-  padding: 8px;
+  padding: 7px;
   border: 1px solid var(--line2);
-  border-radius: 14px;
+  border-radius: 13px;
   background: linear-gradient(180deg, #0B1117, #080D12);
   box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.9);
   z-index: 50;
@@ -677,7 +677,7 @@
 .cmenu-find {
   flex: 0 0 auto;
   width: 100%;
-  padding: 9px 12px;
+  padding: 7px 11px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.025);
@@ -689,7 +689,7 @@
 
 .cmenu-list {
   flex: 1 1 auto;
-  margin: 7px 0 0;
+  margin: 5px 0 0;
   padding: 0;
   list-style: none;
   overflow-y: auto;
@@ -698,14 +698,15 @@
 .cmenu-list button {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   width: 100%;
-  padding: 8px 9px;
+  /* Tighter. Fifteen rows at 8/9 made a list you scroll rather than scan. */
+  padding: 5px 8px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 8px;
   background: none;
   color: var(--mist);
-  font: 400 13px/1 var(--display);
+  font: 400 12.5px/1.2 var(--display);
   text-align: left;
   cursor: pointer;
 }
@@ -713,7 +714,17 @@
 .cmenu-list button:focus-visible { outline: 2px solid var(--ok); outline-offset: -2px; }
 /* The one being shown. Marked rather than merely highlighted, so it survives
    the pointer moving over something else. */
-.cmenu-list button[aria-current] { background: rgba(47, 224, 188, 0.1); color: var(--ok); }
+/* Picked. A tick rather than a fill, because several can be on at once and a
+   column of filled rows is a solid block rather than a set of choices. */
+.cmenu-list button[aria-pressed="true"] { color: var(--ok); }
+.cmenu-list button[aria-pressed="true"]::after {
+  content: '✓';
+  order: 3;
+  margin-left: 2px;
+  font: 700 11px/1 var(--display);
+  color: var(--ok);
+}
+.cmenu-list button[aria-pressed="true"] em { color: var(--ok); }
 .cm-name { flex: 1 1 auto; min-width: 0; }
 /* How many permissions were found there. Slate, and never red: it is a count
    of what was read, not a judgement on any of it. */
@@ -995,3 +1006,188 @@ tr:hover .rowmenu-trigger,
 
   .toast-viewport { right: 12px; left: 12px; bottom: 12px; width: auto; }
 }
+
+/* ---- the receipt, holding real figures -----------------------------------
+   The depiction on the homepage rewrites itself on a loop; this one has
+   nothing to rewrite, so its two-colour vocabulary is set by the reading
+   rather than by a keyframe, and nothing animates until something changes. */
+.perm-live { rotate: -0.4deg; width: min(420px, 100%); }
+.perm-live .rs-live { font-weight: 700; letter-spacing: 0.1em; }
+.perm-live .rs-stamped { color: var(--stamp); }
+.perm-live .rs-sealed { color: var(--seal); }
+/* The figures follow the reading. Stamp is the mark for authority that is
+   unbounded or wider than its balance; on a permission that is bounded, spent
+   or gone, every value printing in stamp says the opposite of the chip above
+   it. */
+.perm-sealed .rbody dd { color: var(--seal); }
+.perm-live .rs-live::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: middle;
+}
+/* Static: the loop's opacity keyframes would blink figures that are not
+   changing. The before-and-after belongs to a correction that settled. */
+.perm-live .was, .perm-live .now { animation: none; opacity: 1; }
+.perm-live .was-value { color: var(--stamp); }
+.perm-live .now-value { color: var(--seal); display: block; }
+.perm-live .rfoot span + span {
+  color: var(--pink2);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* It replaces the amounts card, so it sits where that card sat. */
+.verdict.split .perm-live { grid-area: amounts; align-self: start; justify-self: start; }
+
+/* A receipt with nothing on it yet. The figures read zero rather than the
+   surface being withheld: an empty screen teaches nothing, and zero is a
+   reading. Neither stamp nor seal — no finding has been made. */
+.perm-live .rs-none { color: var(--pink2); }
+.perm-blank .rbody dd { color: var(--pink2); }
+
+/* The sweep, in the sub-line's place, so the section keeps its three rows
+   while a read is running. */
+.v-scan { position: relative; display: block; height: 1px; overflow: hidden; background: var(--line); }
+
+/* ---- the wallet, and what can be done with it ----------------------------
+   The address is a control, not a caption: it opens everything this page
+   knows about the wallet and everything the product is being built to do
+   with it. See demo/WalletMenu.jsx for why the unavailable items are listed
+   rather than hidden. */
+.a-wallet-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 11px 5px 5px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.a-wallet-trigger b { font: 400 13px/1 var(--mono); color: var(--ice); }
+.a-wallet-trigger:hover,
+.a-wallet-trigger[data-state="open"] {
+  border-color: var(--line2);
+  background: rgba(255, 255, 255, 0.03);
+}
+.a-wallet-trigger:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
+.a-wallet-chev { width: 10px; height: 6px; flex: 0 0 auto; color: var(--slate); }
+.a-wallet-trigger[data-state="open"] .a-wallet-chev { transform: rotate(180deg); }
+
+.wmenu {
+  width: 340px;
+  max-height: min(78vh, 620px);
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.9);
+  z-index: 50;
+}
+.wmenu:focus-visible { outline: none; }
+
+.wm-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 9px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.wm-head b { display: block; font: 600 13px/1.2 var(--display); color: var(--ice); }
+.wm-head em {
+  display: block;
+  margin-top: 3px;
+  font: 400 10.5px/1.3 var(--mono);
+  font-style: normal;
+  color: var(--slate);
+  overflow-wrap: anywhere;
+}
+
+.wm-rule {
+  margin: 12px 9px 5px;
+  font: 400 9.5px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.wm-list { margin: 0; padding: 0; list-style: none; }
+.wm-row > button,
+.wm-row > a,
+.wm-row.wm-off,
+.wm-row.wm-said {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--ice);
+  font: 400 13px/1.25 var(--display);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.wm-row > button:hover, .wm-row > a:hover { background: rgba(255, 255, 255, 0.04); }
+.wm-row > button:focus-visible, .wm-row > a:focus-visible { outline: 2px solid var(--ok); outline-offset: -2px; }
+.wm-mark { flex: 0 0 auto; display: inline-flex; }
+.wm-text { flex: 1 1 auto; min-width: 0; }
+.wm-text em {
+  display: block;
+  margin-top: 2px;
+  font: 400 11px/1.35 var(--display);
+  font-style: normal;
+  color: var(--mist);
+}
+/* Listed, not hidden: the product's shape, and how far this page gets. */
+.wm-off { cursor: default; }
+.wm-off .wm-text b { color: var(--mist); }
+.wm-soon {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border: 1px dashed var(--line2);
+  border-radius: 999px;
+  font: 400 9.5px/1.3 var(--mono);
+  color: var(--slate);
+  white-space: nowrap;
+}
+.wm-note {
+  margin: 12px 9px 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font: 400 11.5px/1.5 var(--display);
+  color: var(--slate);
+}
+/* A row that states something rather than doing something. */
+.wm-said { cursor: default; }
+
+/* The figures in the headline, when nothing is reachable and that was read
+   rather than assumed. See demo/Verdict.jsx for when this is allowed. */
+.verdict.clear .v-line b { color: var(--ok); }
+
+/* An address that can be followed, in the places that name one. The evidence
+   for every figure beside it is on a block explorer; a panel about one
+   permission should not make a reader go looking for the link. */
+.rowmenu-addr,
+.d-addr {
+  display: block;
+  margin-top: 4px;
+  font: 400 10.5px/1.3 var(--mono);
+  color: var(--slate);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+a.rowmenu-addr:hover, a.d-addr:hover { color: var(--ok); text-decoration: underline; }
+
+.rowmenu-head { display: flex; align-items: flex-start; gap: 11px; }
+.rowmenu-head > span { min-width: 0; }
+.d-head { align-items: flex-start; gap: 12px; }
+.d-head > div { flex: 1 1 auto; min-width: 0; }

@@ -54,8 +54,19 @@ export function Counter({ value, duration = 700 }) {
  * large to count through legibly, and anything a reader has asked not to see
  * move, are rendered outright.
  */
-export function Amount({ raw, decimals, symbol, duration = 900 }) {
-  const final = format(raw, decimals, symbol);
+/**
+ * `money` forces the two-place treatment for a figure that is money without
+ * carrying a ticker: the headline's sum of stablecoins, and a token amount
+ * printed with a mark instead of a symbol.
+ *
+ * It says nothing about SCALE. It used to also set decimals to 2, which was
+ * right for a value already in hundredths and wrong for raw token units —
+ * $14,707.73 of USDC has six decimals and came out as $147,077,300.00. Scale
+ * is `decimals`, always, and the caller knows it.
+ */
+export function Amount({ raw, decimals, symbol, prefix = '', money: asMoney = false, duration = 900 }) {
+  const money = asMoney || isDollar(symbol);
+  const final = prefix + format(raw, decimals, asMoney ? null : symbol, money);
 
   let whole = 0;
   try {
@@ -64,7 +75,10 @@ export function Amount({ raw, decimals, symbol, duration = 900 }) {
 
   /* Nothing to climb through: no figure at all, a figure under one whole unit,
      or one so large the count would be a blur. */
-  const still = !Number.isFinite(whole) || whole <= 0 || whole > 1e12;
+  /* A money figure climbs even from zero: the sentence it sits in is the same
+     sentence in every state, and a zero that snaps while the count beside it
+     climbs is two different behaviours in one line. */
+  const still = !Number.isFinite(whole) || whole > 1e12 || (whole <= 0 && !money);
 
   const [shown, setShown] = useState(still ? null : 0);
   const from = useRef(0);
@@ -98,11 +112,12 @@ export function Amount({ raw, decimals, symbol, duration = 900 }) {
   if (shown === null) return <>{final}</>;
   /* A dollar figure keeps its cents while it climbs, so the column does not
      gain a decimal point at the moment the number stops. */
-  const dp = isDollar(symbol) ? 2 : 0;
+  const dp = money ? 2 : 0;
   return (
     <>
+      {prefix}
       {shown.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp })}
-      {symbol ? ` ${symbol}` : ''}
+      {symbol && !asMoney ? ` ${symbol}` : ''}
     </>
   );
 }

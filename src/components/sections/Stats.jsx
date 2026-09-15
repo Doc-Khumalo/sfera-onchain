@@ -45,7 +45,10 @@ const STATS = [
     n: '741M+',
     l: 'people own crypto worldwide',
     src: 'Crypto.com',
-    href: 'https://crypto.com/research',
+    /* The announcement of the figure itself — "rising from 659 million in
+       2024 to 741 million in 2025" — rather than the research hub, which is a
+       landing page a reader would have to search from. */
+    href: 'https://crypto.com/en/company-news/global-cryptocurrency-ownership-reaches-741-million-in-2025',
     logo: '/sources/cryptocom.png',
     logoH: 30,
   },
@@ -53,7 +56,10 @@ const STATS = [
     n: '40 - 70M+',
     l: 'of them actively use it onchain',
     src: 'a16z',
-    href: 'https://a16zcrypto.com/posts/article/state-of-crypto-report-2024/',
+    /* The 2025 report, which is where this range now comes from: "We estimate
+       that there are roughly 40-70 million active crypto users." The link was
+       to the 2024 edition, a year out of date. */
+    href: 'https://a16zcrypto.com/posts/article/state-of-crypto-report-2025/',
     logo: '/sources/a16z.svg',
     logoH: 20,
   },

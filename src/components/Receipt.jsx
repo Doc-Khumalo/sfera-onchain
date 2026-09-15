@@ -16,7 +16,93 @@
  * Copy is UX Specification §21-25 and §38.
  *
  * Pure CSS. The homepage ships no JavaScript.
+ *
+ * TWO MODES, ONE OBJECT.
+ *
+ * With no props it is the depiction above: example figures on a 9s loop, the
+ * request struck and the correction rising under it, shipping no JavaScript.
+ *
+ * Given a permission it prints that permission, and the loop stops — there is
+ * nothing to animate towards, because nothing has been corrected yet. It also
+ * drops the "Your action" row, and that omission is the point: the ledger
+ * reads standing authority with no intent to compare it against, so a line
+ * claiming to know what you set out to do would be invented. The receipt says
+ * what the chain says and stops there.
+ *
+ * When a correction does settle, `was` carries the previous reading and the
+ * swap runs for real, once, on values that actually changed.
  */
+
+/* The reading, in the receipt's own two-colour vocabulary: the stamp for
+   authority that is unbounded or wider than its balance, the seal for
+   authority that is bounded, spent or gone. */
+const SEALED = new Set(['BOUNDED', 'REMOVED', 'EXPIRED']);
+
+/**
+ * `perm` may be absent. It is absent before anything has been read, when a
+ * read failed, and when a read found nothing — three different facts that
+ * share one shape, and the receipt prints all three rather than handing the
+ * screen to a card with a bare zero on it. Every figure reads 0 or "Not
+ * established", because that is what is known.
+ */
+export function PermissionReceipt({ perm, was, allowance, reachable, expires, action, state }) {
+  const sealed = perm ? SEALED.has(perm.reading) : false;
+  const changed = perm && was && was.granted !== perm.granted;
+
+  return (
+    <article className={`perm perm-live${perm ? (sealed ? ' perm-sealed' : ' perm-stamped') : ' perm-blank'}`}>
+      <header className="rhead">
+        <span className="rt">Access receipt</span>
+        <span className="rs">
+          <span className={`rs-live ${perm ? (sealed ? 'rs-sealed' : 'rs-stamped') : 'rs-none'}`}>
+            {perm ? perm.readingLabel : state}
+          </span>
+        </span>
+      </header>
+
+      <div className="rbody">
+        <dl>
+          {/* No "Your action". Nothing was asked for here, so there is
+              nothing to hold the request against — see the note above.
+              A plain row, not a lead one: the lead treatment sets its value at
+              19px over a label built for a short figure, and an application's
+              name is not short. */}
+          <div className="prow">
+            <dt>Application</dt>
+            <dd>{perm ? (perm.label || 'Unverified spender') : '—'}</dd>
+          </div>
+
+          <div className="prow lead">
+            <dt>App request</dt>
+            <dd>
+              {changed ? (
+                <>
+                  <span className="was-value">{was.shown}</span>
+                  <span className="now-value">{allowance}</span>
+                </>
+              ) : allowance}
+            </dd>
+          </div>
+
+          <p className="rrule">What this exposes</p>
+
+          <div className="prow"><dt>Reachable now</dt><dd>{reachable}</dd></div>
+          <div className="prow">
+            <dt>Future deposits</dt>
+            <dd>{!perm ? 'Not established' : perm.futureExposed ? 'Exposed' : 'Not exposed'}</dd>
+          </div>
+          <div className="prow"><dt>Access ends</dt><dd>{expires}</dd></div>
+        </dl>
+      </div>
+
+      <footer className="rfoot">
+        <span>Read from the chain · nothing signed</span>
+        {action && <span>{action}</span>}
+      </footer>
+    </article>
+  );
+}
+
 export default function Receipt() {
   return (
     <article className="perm" aria-hidden="true">

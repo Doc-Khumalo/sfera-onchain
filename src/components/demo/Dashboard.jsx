@@ -4,12 +4,12 @@ import { isAddress } from 'viem';
 import { discover, connect, watch, switchChain } from '../../lib/wallet.js';
 import { chains as fetchChains, permissions as fetchPermissions, format, ApiError } from '../../lib/api.js';
 import { reading, explain } from '../../lib/readings.js';
-import { TERMS } from '../../data/site.js';
 import Ledger from './Ledger.jsx';
 import Detail from './Detail.jsx';
 import Handoff from './Handoff.jsx';
 import Verdict from './Verdict.jsx';
 import { ChainPicker } from '../ui/ChainPicker.jsx';
+import WalletMenu from './WalletMenu.jsx';
 import { Counter } from '../ui/Counter.jsx';
 import { Toaster } from '../ui/Toast.jsx';
 
@@ -123,8 +123,10 @@ function readAddress() {
   return handed && isAddress(handed.trim()) ? handed.trim() : null;
 }
 
-function match(p, f, onChain) {
-  if (onChain && p.chain?.id !== onChain) return false;
+/* `picked` is a set of chain ids. Empty means every chain — a filter that
+   selects nothing selects everything, which is what "All chains" is. */
+function match(p, f, picked) {
+  if (picked.size > 0 && !picked.has(p.chain?.id)) return false;
   if (f === 'attention') return p.attention;
   if (f === 'unbounded') return p.reading === 'UNBOUNDED';
   return true;
@@ -165,9 +167,11 @@ export default function Dashboard({ embedded = false }) {
   const [previous, setPrevious] = useState(null);
 
   const [filter, setFilter] = useState('all');
-  /* 0 means every chain, which is the default: a reader should not have to
-     already suspect a chain to be shown what is on it. */
-  const [chainFilter, setChainFilter] = useState(0);
+  /* A set, empty by default, which is every chain: a reader should not have to
+     already suspect a chain to be shown what is on it. It was one id, so the
+     ledger could be narrowed to exactly one chain or to all fifteen and
+     nothing in between — and "the two I actually use" is the ordinary case. */
+  const [chainFilter, setChainFilter] = useState(() => new Set());
   const [openId, setOpenId] = useState(null);
   const [handoff, setHandoff] = useState(null);
 
@@ -539,7 +543,7 @@ export default function Dashboard({ embedded = false }) {
    * The captions carry the other half: what the view is narrowed FROM. A
    * count of zero under a narrowed view must never be able to read as an
    * all-clear, because on this page that is the one lie that matters. */
-  const narrowed = filter !== 'all' || chainFilter !== 0;
+  const narrowed = filter !== 'all' || chainFilter.size > 0;
 
   /* A zero that has not been established. Scanning and failure both produce
      one, and neither is a finding — so neither may wear the mint that means
@@ -559,7 +563,12 @@ export default function Dashboard({ embedded = false }) {
 
   /* What the table says when it has nothing to list. Named rather than
      described: which chain was asked, how many pairs, and the way back. */
-  const onChain = supported.find((c) => c.id === chainFilter) || null;
+  /* Named only when one chain is picked: "Nothing on Base and Unichain" is a
+     sentence about two places, and the row has one line to say it in. */
+  const onlyChain = chainFilter.size === 1
+    ? supported.find((c) => chainFilter.has(c.id)) || null
+    : null;
+  const onChain = onlyChain;
   const filterName = FILTERS.find((f) => f.k === filter)?.label;
   const emptyShape = !address ? {
     title: 'Nothing read yet',
@@ -590,8 +599,8 @@ export default function Dashboard({ embedded = false }) {
     note: perms.length === 0
       ? 'Nothing found is not the same as nothing existing. This asks a known list of tokens and spenders, and what it did not ask about is listed below.'
       : 'Everything read is still there — this view is narrowed. Widen it to see the rest.',
-    onReset: (filter !== 'all' || chainFilter !== 0)
-      ? () => { setFilter('all'); setChainFilter(0); }
+    onReset: narrowed
+      ? () => { setFilter('all'); setChainFilter(new Set()); }
       : null,
   };
 
@@ -611,7 +620,7 @@ export default function Dashboard({ embedded = false }) {
       {!embedded && (
         <Crumbs
           address={address}
-          chain={supported.find((c) => c.id === chainFilter) || null}
+          chain={onlyChain}
           onBack={address ? leaveResult : forget}
         />
       )}
@@ -665,26 +674,26 @@ export default function Dashboard({ embedded = false }) {
               {address ? (
                 <div className="a-console-head">
                   <span className="a-wallet">
-                    <span className="a-avatar" aria-hidden="true" />
-                    <b>{address.slice(0, 6)}…{address.slice(-4)}</b>
-                    {/* The way back to the field. Without it the only exit
-                        from a reading was the breadcrumb, which says where
-                        you are rather than offering to change it. A mark, not
-                        a word: beside an address set in mono, "Change" reads
-                        as part of the address. */}
-                    <button
-                      type="button"
-                      className="a-wallet-edit"
-                      onClick={editAddress}
-                      aria-label="Change the wallet being read"
-                      title="Change the wallet being read"
-                    >
-                      <svg viewBox="0 0 16 16" aria-hidden="true" fill="none"
-                        stroke="currentColor" strokeWidth="1.5"
-                        strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M11.2 2.6a1.4 1.4 0 0 1 2 2L6 11.8l-2.7.7.7-2.7 7.2-7.2Z" />
-                      </svg>
-                    </button>
+                    {/* The address is the way in to everything this page knows
+                        about the wallet — see demo/WalletMenu.jsx. It used to
+                        be a string with a pencil beside it. */}
+                    <WalletMenu
+                      address={address}
+                      walletName={walletName}
+                      mode={mode}
+                      chain={onlyChain}
+                      chains={supported}
+                      perms={perms}
+                      /* `result` carries no explorer — each chain has its own
+                         and the merge keeps them on the rows. At wallet level,
+                         use the chain being shown, or the first one read. */
+                      explorer={(onlyChain || result?.chainsRead?.[0])?.explorer}
+                      scanning={status === 'scanning'}
+                      onReRead={refresh}
+                      onSwitch={(id) => provider && switchChain(provider, id)}
+                      onChange={editAddress}
+                      onForget={forget}
+                    />
                   </span>
 
                   <span className="a-console-acts">
@@ -795,10 +804,9 @@ export default function Dashboard({ embedded = false }) {
                 key drawn in a different style from the thing it explains makes
                 a reader match them up by reading rather than by looking, which
                 is the one job a key has. */}
-            {/* The vocabulary, whether or not there is anything wearing it.
-                It is how a reader learns what the six words mean, and an empty
-                result is exactly when they have the attention to read it. */}
-            {(
+            {/* The vocabulary, when there are rows wearing it. On an empty
+                table it is six definitions of nothing. */}
+            {shown.length > 0 && (
               <ul className="verdict-key">
                 {['UNBOUNDED', 'OVER_WIDE', 'BOUNDED', 'EXPIRED', 'REMOVED', 'UNKNOWN'].map((k) => {
                   const r = reading(k);
@@ -821,16 +829,6 @@ export default function Dashboard({ embedded = false }) {
           onAct={() => setHandoff({ perm: open, intent: { kind: 'revoke' } })} />
       )}
 
-          {/* The reasons it is safe to paste an address, under the field
-              that asks for one. They go once there is a reading to look at:
-              a commitment is read before the act, not after it. */}
-          {!address && (
-            <ul className="gate-terms">
-              {TERMS.map((t) => (
-                <li key={t}><span className="gt-tick" aria-hidden="true">✓</span>{t}</li>
-              ))}
-            </ul>
-          )}
       </>
 
       {/* Beside every screen, not inside one of them. */}

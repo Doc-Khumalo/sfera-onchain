@@ -64,7 +64,9 @@ astro-island { display: contents; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 20px;
+  /* Tighter. These were 11px/20px, which on a bar beside a 44px field made
+     every control read as a call to action. */
+  padding: 8px 15px;
   border: 1px solid var(--ok);
   background: var(--ok);
   color: var(--void);
@@ -83,7 +85,7 @@ astro-island { display: contents; }
 
 .dash .btn.ghost { background: none; color: var(--ice); border-color: var(--line2); }
 .dash .btn.ghost:hover:not([disabled]) { border-color: var(--ok); color: var(--ok); background: none; }
-.dash .btn.sm { padding: 7px 14px; font-size: 10px; }
+.dash .btn.sm { padding: 6px 12px; font-size: 10px; }
 
 .dash .btn[disabled] { opacity: 0.38; cursor: not-allowed; }
 

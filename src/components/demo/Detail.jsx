@@ -1,6 +1,7 @@
 import { reading } from '../../lib/readings.js';
 import { format } from '../../lib/api.js';
 import { Dialog, SheetContent } from '../ui/Dialog.jsx';
+import { AssetMark } from '../ui/AssetMark.jsx';
 
 /**
  * Permission detail. Field set from Retention §11.2, technical material under
@@ -26,10 +27,22 @@ export default function Detail({ perm, explorer, canAct = true, onClose, onAct }
         title={`${perm.label || 'Permission'} detail`}
         description={r.means}
       >
+      {/* The asset, the chain it is on, and the address — followable, because
+          the evidence for everything below this line is on a block explorer
+          and a panel about one permission should not make a reader go looking
+          for it. */}
       <header className="d-head">
+        <AssetMark symbol={perm.symbol} chain={perm.chain} size={30} />
         <div>
-          <p className="rule-label">Permission detail</p>
+          <p className="rule-label">{perm.chain?.name ?? 'Permission detail'}</p>
           <h3>{perm.label || `${perm.beneficiary.slice(0, 6)}…${perm.beneficiary.slice(-4)}`}</h3>
+          {explorer ? (
+            <a className="d-addr" href={`${explorer}/address/${perm.beneficiary}`} target="_blank" rel="noopener">
+              {perm.beneficiary.slice(0, 12)}…{perm.beneficiary.slice(-10)}
+            </a>
+          ) : (
+            <span className="d-addr">{perm.beneficiary.slice(0, 12)}…{perm.beneficiary.slice(-10)}</span>
+          )}
         </div>
         <button type="button" className="d-close" onClick={onClose} aria-label="Close detail">Close</button>
       </header>
