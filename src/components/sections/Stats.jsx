@@ -1,6 +1,11 @@
 /**
  * Market figures, each attributed and each checkable.
  *
+ * Every figure carries a plus. These are not fixed points — they are the last
+ * published reading of something still moving, and a bare number implies a
+ * precision none of them has. The plus also keeps the page honest as the
+ * figures age between refreshes.
+ *
  * Sourcing comes from the Business Plan: Chainalysis, Crypto.com and a16z.
  * Stated as estimates because that is what they are, and none of them are
  * ours.
@@ -24,29 +29,29 @@
  */
 const STATS = [
   {
-    n: '$17B',
+    n: '$17B+',
     l: 'stolen through crypto scams and fraud in 2025',
     src: 'Chainalysis',
     href: 'https://www.chainalysis.com/blog/crypto-crime-report-introduction/',
     logo: '/sources/chainalysis.png',
-    logoH: 16,
+    logoH: 30,
     tone: 'bad',
   },
   {
-    n: '741M',
+    n: '741M+',
     l: 'people own crypto worldwide',
     src: 'Crypto.com',
     href: 'https://crypto.com/research',
     logo: '/sources/cryptocom.png',
-    logoH: 16,
+    logoH: 30,
   },
   {
-    n: '40–70M',
+    n: '40 - 70M+',
     l: 'of them actively use it onchain',
     src: 'a16z',
     href: 'https://a16zcrypto.com/posts/article/state-of-crypto-report-2024/',
     logo: '/sources/a16z.svg',
-    logoH: 11,
+    logoH: 20,
   },
 ];
 

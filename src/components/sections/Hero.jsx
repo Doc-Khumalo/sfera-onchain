@@ -48,7 +48,7 @@ You already said yes.
             anywhere.
           </p>
 
-          <ChainStack total={15} label="chains read the same way" />
+          <ChainStack label="+ more, all read the same way" />
         </form>
       </div>
 

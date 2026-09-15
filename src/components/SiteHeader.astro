@@ -1,0 +1,35 @@
+---
+/**
+ * One header, both pages.
+ *
+ * `/` and `/demo` each had their own: different links, a different shape,
+ * a different call to action. Whichever a reader met first made the other look
+ * like a different site, which is the opposite of what the link between them
+ * is supposed to do.
+ *
+ * `base` is where the section anchors live. On the page that owns them it is
+ * empty and they stay in-page; anywhere else it points back at that page, so
+ * the same nav works from both without either knowing about the other.
+ */
+const { base = '' } = Astro.props;
+import { CONTACT } from '../data/site.js';
+
+/* Sections of the marketing page, plus the ledger, which is its own page and
+   says so with a path rather than a hash. `base` prefixes the hashes for a
+   reader who is somewhere else; a path needs no prefix and gets none. */
+const NAV = [
+  ['Product', '#product'],
+  ['Read a wallet', '/demo'],
+  ['Integrate', '#developers'],
+  ['Questions', '#faq'],
+  ['How it works', '#how'],
+];
+---
+
+<header class="a-nav">
+  <a class="a-mark" href="/">Sfera <span>Onchain</span></a>
+  <nav>
+    {NAV.map(([label, to]) => <a href={to.startsWith('/') ? to : `${base}${to}`}>{label}</a>)}
+  </nav>
+  <a class="a-btn a-btn-solid" href={CONTACT} target="_blank" rel="noopener">Get in touch</a>
+</header>

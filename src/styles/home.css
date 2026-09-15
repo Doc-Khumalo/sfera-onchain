@@ -244,7 +244,6 @@ main h2 {
    as the problem section, so no block sits alone against dead space. */
 
 .aa,
-.dev,
 .life,
 .horizon {
   border-top: 1px solid var(--line);
@@ -758,14 +757,14 @@ main h2 {
   color: var(--mist);
 }
 
-.stats dd.src { margin-top: 14px; }
+.stats dd.src { margin-top: 18px; }
 
 .stats dd.src a {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-family: var(--display);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.04em;
   color: var(--slate);
@@ -781,7 +780,10 @@ main h2 {
 .src-logo {
   width: auto;
   flex-shrink: 0;
-  opacity: 0.82;
+  /* Sized to be recognised, not merely present. A mark nobody can identify
+     attributes nothing, which defeats the whole reason for using the real one
+     rather than a name in text. */
+  opacity: 1;
   transition: opacity 0.15s;
 }
 
@@ -790,8 +792,8 @@ main h2 {
 .src-name { white-space: nowrap; }
 
 .src-out {
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
   opacity: 0;
   transition: opacity 0.15s;
 }
@@ -1547,50 +1549,7 @@ main h2 {
 
 /* ---- the chain stack ----------------------------------------------- */
 
-.cstack {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.cs-marks { display: inline-flex; }
-
-/* Overlapped, each lifted above the one behind it, with a ring in the
-   page ground so the edges stay legible against one another. */
-.cs-marks img {
-  border-radius: 50%;
-  background: var(--deck);
-  box-shadow: 0 0 0 2px var(--void);
-  transition: transform 0.16s var(--ease-loop);
-}
-
-.cs-marks img + img { margin-left: -8px; }
-.compact .cs-marks img + img { margin-left: -7px; }
-
-/* Reading order is left to right, so the stack reads that way too. */
-.cs-marks img:nth-child(1) { z-index: 6; }
-.cs-marks img:nth-child(2) { z-index: 5; }
-.cs-marks img:nth-child(3) { z-index: 4; }
-.cs-marks img:nth-child(4) { z-index: 3; }
-.cs-marks img:nth-child(5) { z-index: 2; }
-.cs-marks img:nth-child(6) { z-index: 1; }
-
-.cstack:hover .cs-marks img { transform: translateY(-2px); }
-.cstack:hover .cs-marks img:nth-child(2) { transition-delay: 25ms; }
-.cstack:hover .cs-marks img:nth-child(3) { transition-delay: 50ms; }
-.cstack:hover .cs-marks img:nth-child(4) { transition-delay: 75ms; }
-.cstack:hover .cs-marks img:nth-child(5) { transition-delay: 100ms; }
-.cstack:hover .cs-marks img:nth-child(6) { transition-delay: 125ms; }
-
-.cs-label {
-  font: 400 12.5px/1 var(--display);
-  color: var(--mist);
-  white-space: nowrap;
-}
-
-.cs-label b { font-weight: 600; color: var(--ice); }
-
-.compact .cs-label { font-size: 12px; }
+/* ChainStack lives in global.css — it is used on every page. */
 
 @media (prefers-reduced-motion: reduce) {
   .cstack:hover .cs-marks img { transform: none; }
@@ -1918,6 +1877,10 @@ main h2 {
 /* Never reaches a thousand, so its grouped spelling would only add width.
    See the note in alt.css. */
 .roll-a2 .g { display: none; }
+/* No figure on this page reaches a million, so none of these rolls binds an M
+   track — and an unbound spelling falls back to opacity 1 and paints over the
+   one that is showing. */
+.lp .roll .m, .roll[class*="roll-"] .m { display: none; }
 .roll-a2 { animation: rlA2 var(--loop) linear infinite; }
 .roll-a2 .g { animation: rlA2G var(--loop) linear infinite; }
 .roll-a2 .p { animation: rlA2P var(--loop) linear infinite; }
@@ -2233,4 +2196,535 @@ main h2 {
   .lp-row { grid-template-columns: 1.4fr 1fr auto; gap: 8px 12px; }
   .lp-row > .lp-swap:nth-of-type(2),
   .lp-row > .lp-swap:nth-of-type(3) { display: none; }
+}
+
+/* ---- one integration ----------------------------------------------------
+   Two rows rather than two columns: the pitch and the evidence side by side,
+   then what the integration gives you across the full width. The old layout
+   put a four-item list beside a column that ran out of copy a third of the
+   way down, so most of the section was empty. */
+.dev { border-top: 1px solid var(--line); }
+
+.dev-top {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(30px, 5vw, 72px);
+  align-items: start;
+}
+
+/* What you stop owning. More persuasive than what you gain, because every
+   one of these is something the reader can picture themselves maintaining. */
+.dev-not {
+  margin: 26px 0 30px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  max-width: 42ch;
+}
+.dev-not li {
+  position: relative;
+  padding-left: 22px;
+  font: 400 13.5px/1.55 var(--display);
+  color: var(--mist);
+}
+/* A struck-through minus: these are the things that come off the plate. */
+.dev-not li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0.62em;
+  width: 11px; height: 1.5px;
+  background: var(--bad);
+  opacity: 0.75;
+}
+
+/* The evidence is the artefact itself. The Access Receipt already existed,
+   already carried this exact content and already animated the correction, so
+   a second dark-mode version of it built for this section was pure
+   duplication. Cream paper against a page of dark panels is also the one
+   moment of material contrast the site has — framing it in another dark card
+   would throw that away. */
+.dev-receipt { display: grid; justify-items: center; gap: 20px; }
+/* The hero sizes the receipt for a narrow column beside a headline. Here it is
+   the only thing in its half of the section, so it can be read at arm's
+   length. */
+.dev-receipt .perm { width: min(400px, 100%); }
+.dr-label {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  justify-content: center;
+  margin: 0;
+}
+.dr-label em {
+  font: 400 11px/1 var(--mono); font-style: normal;
+  letter-spacing: 0.08em; color: var(--slate);
+}
+.dr-foot {
+  max-width: 46ch;
+  margin: 0;
+  text-align: center;
+  font: 400 12px/1.65 var(--display);
+  color: var(--slate);
+}
+.dr-foot b {
+  font-family: var(--mono); font-weight: 400; font-size: 11.5px; color: var(--mist);
+}
+
+.dev-gives {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: clamp(38px, 5vw, 60px) 0 0;
+  border-top: 1px dashed var(--rule);
+}
+.dev-gives > div {
+  padding: 22px 26px 4px 0;
+  border-left: 1px dashed var(--rule);
+  padding-left: 26px;
+}
+.dev-gives > div:first-child { border-left: 0; padding-left: 0; }
+.dev-gives dt {
+  margin: 0 0 8px;
+  font: 700 14px/1.3 var(--display);
+  color: var(--ice);
+}
+.dev-gives dd {
+  margin: 0;
+  font: 400 13px/1.6 var(--display);
+  color: var(--mist);
+}
+
+@media (max-width: 900px) {
+  .dev-top { grid-template-columns: 1fr; }
+  .dev-gives { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 4px; }
+  .dev-gives > div:nth-child(odd) { border-left: 0; padding-left: 0; }
+}
+@media (max-width: 560px) {
+  .dev-gives { grid-template-columns: 1fr; }
+  .dev-gives > div { border-left: 0; padding-left: 0; }
+  .dev-gives > div + div { border-top: 1px dashed var(--rule); padding-top: 20px; }
+}
+
+/* ---- questions ---------------------------------------------------------- */
+.faq-head { position: sticky; top: 92px; align-self: start; }
+.faq-ask {
+  margin: 22px 0 0;
+  font: 400 13.5px/1.6 var(--display);
+  color: var(--slate);
+}
+.faq-ask a { color: var(--ok); text-decoration: none; border-bottom: 1px solid rgba(47,224,188,0.35); }
+.faq-ask a:hover { border-bottom-color: var(--ok); }
+
+.faq-group + .faq-group { margin-top: 36px; }
+.faq-group h3 {
+  margin: 0 0 4px;
+  font: 400 10px/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.faq-group details:first-of-type { border-top: 1px solid var(--line); margin-top: 12px; }
+
+@media (max-width: 860px) {
+  .faq-head { position: static; }
+}
+
+/* ---- questions (base) ----------------------------------------------------------
+   A real accordion with no JavaScript: <details> already does this, and a
+   scripted one on a page that ships none would be the only thing on it that
+   could fail to open. */
+.faq {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(28px, 5vw, 80px);
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: clamp(70px, 10vh, 120px) var(--gutter);
+  border-top: 1px solid var(--line);
+}
+.faq-head h2 { max-width: 12ch; }
+.faq-head .lede { max-width: 34ch; margin-top: 18px; }
+
+.faq-list { display: grid; }
+.faq details { border-bottom: 1px solid var(--line); }
+/* Superseded by .faq-group details:first-of-type — groups each open
+   with their own rule. */
+.faq summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  cursor: pointer;
+  list-style: none;
+  font: 600 clamp(15px, 1.5vw, 17px)/1.4 var(--display);
+  color: var(--ice);
+  transition: color 0.16s ease;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary:hover { color: var(--ok); }
+
+/* A plus that becomes a minus. Drawn rather than typed so it lines up with
+   the text at every step of the clamp. */
+.faq-mark {
+  position: relative;
+  flex: 0 0 auto;
+  width: 13px; height: 13px;
+  margin-top: 5px;
+}
+.faq-mark::before,
+.faq-mark::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto 0;
+  height: 1.5px;
+  background: var(--mist);
+  transition: transform 0.2s var(--ease-settle), background 0.16s ease;
+}
+.faq-mark::after { transform: rotate(90deg); }
+.faq details[open] .faq-mark::after { transform: rotate(0deg); }
+.faq details[open] .faq-mark::before,
+.faq details[open] .faq-mark::after { background: var(--ok); }
+
+.faq details > p {
+  max-width: 62ch;
+  margin: 0;
+  padding: 0 0 22px;
+  font: 400 14.5px/1.72 var(--display);
+  color: var(--mist);
+  text-wrap: pretty;
+}
+
+@media (max-width: 860px) {
+  .faq { grid-template-columns: 1fr; }
+  .faq-head .lede { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq-mark::before, .faq-mark::after { transition: none; }
+}
+
+/* ---- the walkthrough ----------------------------------------------------
+   Seven steps down the page rather than five across it. Across, there is room
+   for a sentence; down, there is room for the sentence AND what the step
+   concluded, which is the half that turns a claim into a finding. */
+.walk {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: clamp(70px, 10vh, 120px) var(--gutter);
+  border-top: 1px solid var(--line);
+}
+.walk-head { max-width: 62ch; }
+.walk-head h2 { max-width: 16ch; }
+.walk-head .lede { margin-top: 18px; }
+
+.walk-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0;
+  margin: clamp(40px, 6vh, 64px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+/* Column, so the conclusion can be pushed to the bottom. The bodies differ in
+   length, and left to themselves the evidence blocks sat at seven different
+   heights — which reads as seven unrelated cards rather than one row of
+   steps. */
+.walk-list li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 30px 30px 0;
+  border-top: 1px solid var(--line);
+}
+
+/* A rail that runs from each step's number toward the next, so the column
+   reads as a sequence rather than as seven unrelated cards. */
+.wk-rail {
+  position: absolute;
+  left: 0; top: -1px;
+  width: 34px; height: 1px;
+  background: var(--ok);
+  opacity: 0.55;
+}
+
+.wk-n {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-family: var(--mono);
+}
+.wk-n b { font: 400 11px/1 var(--mono); color: var(--ok); }
+.wk-n span {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+.walk-list h3 {
+  margin: 0 0 10px;
+  font: 700 clamp(17px, 1.7vw, 20px)/1.2 var(--display);
+  letter-spacing: -0.02em;
+  color: var(--ice);
+  max-width: 20ch;
+}
+.wk-body {
+  margin: 0 0 16px;
+  max-width: 40ch;
+  font: 400 13.5px/1.62 var(--display);
+  color: var(--mist);
+  text-wrap: pretty;
+}
+
+/* The conclusion. Mono, because it is the artefact rather than the prose,
+   and it inherits the reading's colour so a step that found a problem and a
+   step that fixed one do not look alike. */
+.wk-ends {
+  display: grid;
+  gap: 7px;
+  margin: 16px 0 0;
+  margin-top: auto;
+  padding: 12px 14px;
+  border-left: 2px solid var(--line2);
+  background: rgba(255, 255, 255, 0.015);
+}
+.wk-ends em {
+  font: 400 9px/1 var(--mono);
+  font-style: normal;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.wk-ends code {
+  font: 400 12px/1.55 var(--mono);
+  color: var(--mist);
+  overflow-wrap: anywhere;
+}
+.wk-ends.bad { border-left-color: var(--bad); background: rgba(255, 95, 78, 0.05); }
+.wk-ends.bad code { color: var(--bad); }
+.wk-ends.ok { border-left-color: var(--ok); background: rgba(47, 224, 188, 0.05); }
+.wk-ends.ok code { color: var(--ok); }
+
+@media (max-width: 640px) {
+  .walk-list li { padding-right: 0; }
+}
+
+/* ---- how it works, as a track you advance -------------------------------
+   The deck at /how-it-works.html is nine full-screen slides you move through
+   yourself, and that movement is the point: the artefact changes as you go,
+   and the order is the argument. Laying the same words out as a grid of cards
+   throws all of it away and leaves a summary of a story.
+
+   scroll-snap gives the same movement with no script, which matters because
+   the deck's own arrows are scripted and that page shows nothing at all when
+   the script does not run. */
+.hiw {
+  padding: clamp(70px, 10vh, 120px) 0 clamp(60px, 8vh, 96px);
+  border-top: 1px solid var(--line);
+  overflow: hidden;
+}
+.hiw-intro {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.hiw-intro h2 { max-width: 14ch; }
+.hiw-intro .lede { margin-top: 18px; max-width: 46ch; }
+
+.hiw-track {
+  display: flex;
+  gap: 20px;
+  margin-top: clamp(34px, 5vh, 54px);
+  /* Percent, not vw: vw includes the scrollbar, which put the first panel
+     32px to the right of the heading above it. The inset resolves to the same
+     vertical every other section's content starts on. */
+  --hiw-inset: max(var(--gutter), calc((100% - var(--content)) / 2));
+  padding: 4px var(--hiw-inset);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--hiw-inset);
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.hiw-track::-webkit-scrollbar { display: none; }
+.hiw-track:focus-visible { outline: 2px solid var(--ok); outline-offset: 4px; }
+
+.hiw-panel {
+  scroll-snap-align: start;
+  flex: 0 0 min(460px, 82vw);
+  display: flex;
+  flex-direction: column;
+  padding: 26px 28px 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+}
+
+.hw-kind {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font: 400 10px/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+/* The node from the deck's wave. Its colour is the step's finding, so a step
+   that found a problem and one that fixed it do not look alike. */
+.hw-node {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line2);
+}
+.hw-node.bad { border-color: var(--bad); background: rgba(255,95,78,0.35); box-shadow: 0 0 10px rgba(255,95,78,0.5); }
+.hw-node.ok  { border-color: var(--ok);  background: rgba(47,224,188,0.3); box-shadow: 0 0 10px rgba(47,224,188,0.45); }
+
+.hiw-panel h3 {
+  margin: 0 0 12px;
+  font: 700 clamp(22px, 2.3vw, 29px)/1.08 var(--display);
+  letter-spacing: -0.035em;
+  color: var(--ice);
+}
+/* The deck highlights the second half of every headline. It is the half that
+   carries the question. */
+.hiw-panel h3 b { color: var(--ok); font-weight: inherit; }
+
+.hw-body {
+  margin: 0 0 18px;
+  font: 400 14px/1.6 var(--display);
+  color: var(--mist);
+  text-wrap: pretty;
+}
+
+.hw-ends {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  border-left: 2px solid var(--line2);
+  background: rgba(255,255,255,0.015);
+}
+.hw-ends em {
+  font: 400 9px/1 var(--mono); font-style: normal;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--slate);
+}
+.hw-ends code { font: 400 12px/1.55 var(--mono); color: var(--mist); overflow-wrap: anywhere; }
+.hw-ends.bad { border-left-color: var(--bad); background: rgba(255,95,78,0.05); }
+.hw-ends.bad code { color: var(--bad); }
+.hw-ends.ok { border-left-color: var(--ok); background: rgba(47,224,188,0.05); }
+.hw-ends.ok code { color: var(--ok); }
+
+/* ---- the wallet's own dialog ---- */
+.hw-prompt {
+  margin-top: auto;
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  background: #0E141A;
+  overflow: hidden;
+}
+.hwp-bar {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 13px;
+  border-bottom: 1px solid var(--line);
+  font: 400 11px/1 var(--mono);
+  color: var(--slate);
+}
+.hwp-dot { width: 11px; height: 11px; border-radius: 3px; background: #2563EB; }
+.hwp-body { padding: 16px 15px 15px; display: grid; gap: 9px; }
+.hwp-body b { font: 700 16px/1.2 var(--display); color: var(--ice); }
+.hwp-body p { margin: 0; font: 400 12.5px/1.5 var(--display); color: var(--mist); }
+/* Deliberately the blue every wallet uses. The point of the slide is that
+   this button looks completely ordinary. */
+.hwp-approve {
+  margin-top: 4px;
+  padding: 11px;
+  border-radius: 9px;
+  background: #2563EB;
+  color: #fff;
+  font: 600 13px/1 var(--display);
+  text-align: center;
+}
+.hwp-body em {
+  font: 400 9.5px/1 var(--mono); font-style: normal;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--slate);
+  text-align: center;
+}
+
+/* ---- the receipt, before and after ---- */
+.hw-slip {
+  margin-top: auto;
+  padding: 15px 17px;
+  border-radius: 4px;
+  background: #F2EEE6;
+  color: #191C1F;
+  box-shadow: 0 18px 30px rgba(0,0,0,0.5);
+}
+.hws-head,
+.hws-foot {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin: 0;
+  font: 400 10px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.hws-head { padding-bottom: 10px; border-bottom: 1px solid rgba(25,28,31,0.25); }
+.hws-head span { color: #C2342A; letter-spacing: 0.1em; }
+.hw-slip.is-ok .hws-head span { color: #0F7355; }
+.hw-slip dl { display: grid; gap: 7px; margin: 11px 0; }
+.hw-slip dl div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.hw-slip dt {
+  font: 400 9.5px/1 var(--mono); letter-spacing: 0.12em;
+  text-transform: uppercase; color: #8C8377;
+}
+.hw-slip dd { margin: 0; font: 700 13px/1 var(--mono); color: #C2342A; }
+.hw-slip.is-ok dd { color: #0F7355; }
+.hws-foot { padding-top: 10px; border-top: 1px solid rgba(25,28,31,0.25); color: #8C8377; }
+
+.hw-count {
+  margin: 18px 0 0;
+  font: 400 10px/1 var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--slate);
+}
+.hw-prompt + .hw-count,
+.hw-slip + .hw-count { margin-top: 18px; }
+.hiw-panel > .hw-ends:last-of-type ~ .hw-count { margin-top: auto; padding-top: 18px; }
+
+/* ---- the close ---- */
+.hiw-close { flex-basis: min(520px, 86vw); }
+.hw-close-acts { display: grid; gap: 12px; margin-bottom: 20px; }
+.hw-sub { display: flex; gap: 8px; align-items: center; padding: 5px 5px 5px 16px;
+  border: 1px solid var(--line2); border-radius: 999px; background: rgba(255,255,255,0.025); }
+.hw-sub:focus-within { border-color: var(--ok); }
+.hw-sub input {
+  flex: 1 1 auto; min-width: 0; padding: 11px 0; border: 0; background: none;
+  color: var(--ice); font: 400 13px/1 var(--mono);
+}
+.hw-sub input:focus { outline: none; }
+.hw-sub input::placeholder { color: var(--slate); }
+.hw-sub button {
+  flex: 0 0 auto; padding: 10px 16px; border: 0; border-radius: 999px;
+  background: var(--ok); color: #06231E;
+  font: 600 11.5px/1 var(--display); cursor: pointer;
+}
+.hw-founders { display: grid; gap: 7px; margin: 0 0 4px; }
+.hw-founders a {
+  font: 400 12px/1.4 var(--display); color: var(--slate); text-decoration: none;
+}
+.hw-founders a:hover { color: var(--mist); }
+.hw-founders b { font-weight: 600; color: var(--ice); }
+
+.hiw-hint {
+  max-width: var(--page);
+  margin: 22px auto 0;
+  padding: 0 var(--gutter);
+  font: 400 10.5px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hiw-track { scroll-behavior: auto; }
 }

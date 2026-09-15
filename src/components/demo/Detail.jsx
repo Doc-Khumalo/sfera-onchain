@@ -1,5 +1,6 @@
 import { reading } from '../../lib/readings.js';
 import { format } from '../../lib/api.js';
+import { Dialog, SheetContent } from '../ui/Dialog.jsx';
 
 /**
  * Permission detail. Field set from Retention §11.2, technical material under
@@ -8,13 +9,23 @@ import { format } from '../../lib/api.js';
  * The "because" list comes from the engine. It is the engine's own reasoning,
  * shown rather than summarised, so a reader can check the conclusion instead
  * of trusting it.
+ *
+ * It opens as a sheet on Radix rather than the fixed <aside> it was, which is
+ * what stops the page scrolling behind it while it is open, traps focus inside
+ * it, returns focus to the row on close, and makes Escape and a click on the
+ * ground work without this file knowing about either.
  */
 export default function Detail({ perm, explorer, canAct = true, onClose, onAct }) {
   const r = reading(perm.reading);
   const granted = perm.unbounded ? 'Unlimited' : format(perm.granted, perm.decimals, perm.symbol);
 
   return (
-    <aside className="detail" aria-label={`${perm.label || 'permission'} detail`}>
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <SheetContent
+        className="detail"
+        title={`${perm.label || 'Permission'} detail`}
+        description={r.means}
+      >
       <header className="d-head">
         <div>
           <p className="rule-label">Permission detail</p>
@@ -103,6 +114,7 @@ export default function Detail({ perm, explorer, canAct = true, onClose, onAct }
           here. Only the holder of the account can withdraw it.
         </p>
       )}
-    </aside>
+      </SheetContent>
+    </Dialog>
   );
 }

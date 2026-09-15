@@ -1,0 +1,895 @@
+/**
+ * The demo, on the same design system as the marketing pages.
+ *
+ * This page had drifted into a second visual language: a left rail with half
+ * the width empty, dotted rules, an underlined input, plain text navigation.
+ * A prospect who arrives here from the homepage's "See what a wallet can still
+ * lose" is meant to be seeing the SAME product, and a page that looks like a
+ * different company is doing the opposite of what the link promised.
+ *
+ * So this layer restates the shell, the console and the ledger in the language
+ * of `/`: full content width, one pill treatment for fields and buttons,
+ * the console header with its figure cells, and the shared state vocabulary
+ * from global.css — which is why .state and .rs-* live there now rather than
+ * being copied.
+ *
+ * It loads AFTER dashboard.css and overrides it rather than replacing it,
+ * because dashboard.css also carries the behaviour-bearing states (settling
+ * rows, handoff, detail) that are correct and should not be disturbed.
+ */
+
+/* ---- shell -------------------------------------------------------------- */
+.demo-band {
+  margin: 0;
+  padding: 9px var(--gutter);
+  border-bottom: 1px solid var(--line);
+  /* Opaque. This band is sticky by design — it says every figure on the page
+     is invented, and that has to hold on every screen — but my restyle gave it
+     a 3% tint with nothing behind it, so the section below scrolled straight
+     through the text. A standing disclaimer that is unreadable half the time
+     is worse than none. */
+  background:
+    linear-gradient(rgba(47, 224, 188, 0.035), rgba(47, 224, 188, 0.035)),
+    var(--void);
+  text-align: center;
+  font: 400 11px/1 var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--mist);
+}
+.demo-band b {
+  color: var(--ok);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ---- the console -------------------------------------------------------
+   `/`'s .a-console, .a-console-head, .a-wallet and .a-chip are what this
+   page renders now, so the frame, the header and the chip all come from
+   alt.css and there is nothing to restate. What is left is the one thing the
+   marketing console has no use for: the controls that sit opposite the
+   wallet's name and act on what is below them. */
+.a-console-acts { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* ---- the verdict's amounts, as console cells ----------------------------
+   These were two big red numbers on a bare rule, which read as a chart legend.
+   They are the most important figures on the page — what this wallet can lose
+   today — so they get the same frame the marketing console gives them. */
+/* Flex rather than an auto-fit grid: with one amount — which is the ordinary
+   case, since most wallets have a single worst exposure — auto-fit stretched
+   that one cell across the whole page and left a small figure stranded at the
+   far left of a very wide box. These size to their contents and stop. */
+.v-amounts {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+  overflow: hidden;
+}
+.v-amounts li {
+  display: grid;
+  flex: 1 1 260px;
+  max-width: 420px;
+  gap: 8px;
+  align-content: start;
+  padding: 20px 22px 22px;
+  border-left: 1px solid var(--line);
+}
+.v-amounts li:first-child { border-left: 0; }
+
+/* The sentence and the figure it is about, beside each other.
+ *
+ * Stacked, the amount sat in a panel the width of the page with a small number
+ * at the far left of it, and everything to the right of the headline was empty
+ * from the kicker down. The figure is the answer to the sentence; it belongs
+ * next to it, in a column it can fill. */
+.v-amounts { width: fit-content; max-width: 100%; }
+
+@media (min-width: 920px) {
+  .verdict.split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+    grid-template-areas:
+      "kicker amounts"
+      "line   amounts"
+      "sub    amounts";
+    align-content: start;
+    column-gap: clamp(32px, 5vw, 76px);
+  }
+  .verdict.split .v-kicker { grid-area: kicker; }
+  .verdict.split .v-line   { grid-area: line; }
+  .verdict.split .v-sub    { grid-area: sub; margin-top: 22px; }
+  .verdict.split .v-amounts {
+    grid-area: amounts;
+    align-self: start;
+    flex-direction: column;
+    width: auto;
+    margin: 0;
+  }
+  /* One column, so the rule between cells runs across rather than down — and
+     no flex basis, which in a column is a HEIGHT: 260px of it, which is what
+     stretched a two-line figure into a panel the depth of the headline. */
+  .verdict.split .v-amounts li {
+    flex: 0 0 auto;
+    max-width: none;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .verdict.split .v-amounts li:first-child { border-top: 0; }
+}
+.va-n {
+  font: 700 clamp(19px, 2vw, 26px)/1.1 var(--mono);
+  color: var(--bad);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+/* A figure of zero. Same size, same face, same column — red is reserved for an
+   amount actually at stake, and zero is not one. It is still the number. */
+.va-n.zero { color: var(--ice); }
+/* What could not join the sum, in its own units. Quiet, because it is a
+   qualification on the figure above rather than a second figure. */
+.va-rest {
+  margin-top: 4px;
+  font: 400 11.5px/1.5 var(--mono);
+  color: var(--slate);
+}
+/* A sentence, not a caption: this is the only place the page explains why
+   there is no figure, so it is set to be read. */
+.va-l { font: 400 12.5px/1.55 var(--display); color: var(--mist); }
+
+/* ---- ledger -------------------------------------------------------------
+   The same console as `/`: one frame, mono column heads, rows that carry
+   their state on a left marker and a tint. */
+.lpanel { border: 0; border-radius: 0; background: none; }
+.lnote {
+  margin: 0;
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+  font: 400 12.5px/1.5 var(--display);
+  color: var(--mist);
+}
+.lnote span { color: var(--slate); }
+
+/* The table is the home page's, from global.css. What is left here is only what sits
+   around it — the panel it lives in and the note above the rows. */
+.lpanel .a-table-wrap { border-top: 1px solid var(--line); }
+
+/* The demo's actions are real controls rather than the marketing table's
+   labels, so they are shadcn buttons wearing the same pill. */
+.a-do [data-slot="button"] {
+  border-radius: 999px;
+  padding-inline: 15px;
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.a-do [data-variant="outline"] {
+  border-color: var(--line2);
+  background: rgba(255,255,255,0.04);
+  color: var(--mist);
+}
+.a-do [data-variant="outline"]:hover { border-color: var(--mist); color: var(--ice); }
+.a-do a { text-decoration: none; }
+
+/* ---- the legend, drawn as the chips it describes ------------------------ */
+.verdict-key {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 14px 34px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.verdict-key li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.verdict-key .state { justify-self: start; }
+.verdict-key p { margin: 0; font: 400 12.5px/1.55 var(--display); color: var(--mist); }
+
+/* The action pair matches the ledger on `/`: a filled pill and a ghost
+   pill, neither of them underlined. */
+.lact a { text-decoration: none; }
+
+@media (max-width: 980px) {
+  /* One column, so each figure keeps its caption on a readable measure. The
+     table below has its own scroll; the console must not get a second one. */
+  .a-figs { grid-template-columns: 1fr; }
+  .a-figs > div { border-left: 0; border-top: 1px solid var(--line); }
+  .a-figs > div:first-child { border-top: 0; }
+}
+
+/* ---- the gate -----------------------------------------------------------
+   Two halves, side by side: what this is on the left, what it does with an
+   address on the right.
+ *
+ * It was one centred column, so a reader scrolled past the explanation to
+ * reach the only control on the screen and the whole right-hand side held
+ * nothing. Before that it was three accidental axes — the heading held at 18ch
+ * and the commitments at 60ch by rules left over from a left rail, inside a
+ * block whose text was centred.
+ *
+ * Everything is left-aligned now and the column edges do the aligning, which
+ * is one rule instead of a max-width on each child hoping to agree with the
+ * others. */
+.dash section.gate {
+  display: grid;
+  align-items: start;
+  padding-block: clamp(40px, 7vh, 78px) clamp(38px, 6vh, 64px);
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  .dash section.gate {
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.75fr);
+    column-gap: clamp(36px, 5vw, 72px);
+  }
+  /* So do the commitments: they are about the screen, not about either half
+     of it, so they run underneath both as one band rather than hanging off
+     the end of a column. Five short lines across the width read as a row of
+     guarantees; the same five stacked in a column read as terms and
+     conditions nobody finishes. */
+  /* `.dash` on each: the stacked rules for these live further down the file
+     and would otherwise win the tie on source order — which is how the band
+     kept the hairline above and below every item it was supposed to drop. */
+  .dash .gate-terms {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px 30px;
+    margin-top: clamp(38px, 5.5vh, 64px);
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .dash .gate-terms li,
+  .dash .gate-terms li:last-child {
+    padding: 0;
+    border: 0;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 899px) {
+  .gate-do { margin-top: clamp(30px, 5vh, 46px); }
+}
+
+.gate-say, .gate-do { min-width: 0; }
+
+.gate h1,
+.gate h2 {
+  max-width: 15ch;
+  margin: 0;
+  font: 800 clamp(34px, 4.4vw, 56px)/1.02 var(--display);
+  letter-spacing: -0.045em;
+  color: var(--ice);
+  text-wrap: balance;
+}
+/* No measure of its own: the column is the measure. A 46ch cap inside a 650px
+   column is the same mistake as the headline's 19ch — two rules deciding one
+   width, and the tighter one wins with a band of dead space beside it. */
+.gate-lede {
+  margin: 22px 0 0;
+  font: 400 clamp(15px, 1.3vw, 17px)/1.62 var(--display);
+  color: var(--mist);
+  text-wrap: pretty;
+}
+/* Not a warning, and not styled as one: a browser with no wallet in it is the
+   ordinary case for someone being shown this for the first time. */
+.gate-none {
+  margin: 0 0 20px;
+  font: 400 13px/1.6 var(--display);
+  color: var(--slate);
+}
+
+.wallet-picks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 0 0 22px;
+}
+
+/* One field. Its contents read left to right, so its label and the line under
+   it hold the field's own left edge. */
+.lookup {
+  --field-inset: 18px;
+  width: 100%;
+  margin: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.lookup label {
+  display: block;
+  margin-bottom: 11px;
+  padding-left: var(--field-inset);
+  font: 700 10px/1 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ok);
+}
+.lookup-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 5px 5px var(--field-inset);
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.lookup-row:focus-within { border-color: var(--ok); background: rgba(47, 224, 188, 0.04); }
+/* The field itself carries the failure, so the message is never the only
+   thing saying which control went wrong. */
+.lookup-row.bad { border-color: var(--bad); background: rgba(255, 95, 78, 0.05); }
+.lookup-row.bad:focus-within { border-color: var(--bad); }
+.lookup input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 12px 0;
+  border: 0;
+  background: none;
+  color: var(--ice);
+  font: 400 14px/1 var(--mono);
+}
+.lookup input:focus { outline: none; }
+.lookup input::placeholder { color: var(--slate); }
+.lookup .btn { flex: 0 0 auto; border-radius: 999px; }
+.lookup .txt {
+  display: block;
+  margin: 14px 0 0;
+  padding-left: var(--field-inset);
+  font: 400 12.5px/1.5 var(--display);
+  color: var(--slate);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.lookup .txt:hover { color: var(--ok); }
+
+.gate-chains {
+  display: flex;
+  justify-content: flex-start;
+  margin: 20px 0 0;
+  padding-left: var(--field-inset);
+}
+.gate-error {
+  display: flex;
+  gap: 8px;
+  margin: 11px 0 0;
+  padding-left: var(--field-inset);
+  font: 400 12.5px/1.55 var(--display);
+  color: var(--bad);
+}
+.gate-error::before { content: '!'; font-weight: 700; }
+
+/* The commitments, under the sentence they qualify. A list rather than a grid
+   of cards: as cards they were the largest object on the screen and the last
+   one had no partner, so a reader met an orphaned box before the field. */
+.gate-terms {
+  margin: clamp(30px, 4.5vh, 50px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.gate-terms li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+  font: 400 12.5px/1.5 var(--display);
+  color: var(--mist);
+}
+.gate-terms li:last-child { border-bottom: 1px solid var(--line); }
+.gt-tick { flex: 0 0 auto; color: var(--ok); font-weight: 700; }
+
+@media (max-width: 620px) {
+  .lookup { --field-inset: 15px; }
+}
+
+/* ---- where you are ------------------------------------------------------
+   Two levels, signalled. Back means one level up the trail, which is the gate
+   from a result and the previous page from the gate. */
+/* The same measure and the same gutter as every section below it. It was
+   capped at --content with no padding, which lines up with the sections only
+   while the window is wider than the page — below that the sections keep their
+   gutter and the trail slid to the very edge of the screen. */
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 20px var(--gutter) 0;
+}
+/* One rule for the trail, because there is one trail. It used to need a
+   second set of overrides for the copy that lived inside the gate's grid. */
+.crumbs { margin-bottom: clamp(26px, 4vh, 44px); }
+
+.crumb-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px 8px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--mist);
+  font: 400 12px/1 var(--mono);
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+}
+.crumb-back svg { width: 14px; height: 14px; transition: transform 0.18s var(--ease-settle); }
+.crumb-back:hover {
+  border-color: var(--mist);
+  color: var(--ice);
+  background: rgba(255, 255, 255, 0.055);
+}
+.crumb-back:hover svg { transform: translateX(-2px); }
+
+.crumbs ol {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 400 12px/1 var(--mono);
+  color: var(--slate);
+}
+/* The separator is drawn rather than typed, so it cannot be read aloud as
+   content by a screen reader working through the list. */
+.crumbs li + li::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  margin-right: 10px;
+  border-top: 1px solid var(--line2);
+  border-right: 1px solid var(--line2);
+  transform: rotate(45deg);
+  vertical-align: middle;
+}
+.crumbs a,
+.crumbs ol button {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: var(--mist);
+  text-decoration: none;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.crumbs a:hover,
+.crumbs ol button:hover { color: var(--ok); border-bottom-color: rgba(47, 224, 188, 0.4); }
+.crumbs [aria-current="page"] { color: var(--ice); }
+.crumbs em { font-style: normal; color: var(--slate); }
+
+@media (max-width: 620px) {
+  .crumbs { gap: 12px; padding-top: 16px; }
+  .crumbs ol { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  }
+
+/* The figures here are a <dl> because they are real readings with real
+   labels; the home page's are spans. Same rules, mapped onto the right elements — and
+   the list's own default margin dropped, which the home page never had to think about
+   because a <div> does not have one. */
+.a-figs { margin: 0; }
+.a-figs > div { display: grid; gap: 7px; justify-items: start; align-content: start;
+  padding: 17px 24px 19px; border-left: 1px solid var(--line); }
+.a-figs > div:first-child { border-left: 0; }
+/* A figure is only as good as the words around it. At --slate these sat at
+   about 2.7:1 against the console, so the labels and captions were barely
+   there and the numbers said nothing — 1, 2, 2, of what? Both are --mist now,
+   which clears 5:1, and the caption gets the half-pixel it needs to be read at
+   a glance rather than deciphered. */
+.a-figs dt { margin: 0; font: 400 10px/1 var(--mono); letter-spacing: .15em;
+  text-transform: uppercase; color: var(--mist); }
+.a-figs dd { margin: 0; font: 700 clamp(20px, 2.1vw, 27px)/1 var(--mono); color: var(--ice);
+  font-variant-numeric: tabular-nums; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.a-figs dd.bad { color: var(--bad); }
+.a-figs dd.ok  { color: var(--ok); }
+/* The caption is what the figure means, so it is set to be read rather than
+   glanced past: a number with an unreadable label is a number about nothing. */
+.a-figs .cap { font: 400 12.5px/1.5 var(--display); color: var(--mist); max-width: 30ch; }
+
+/* The verdict answers, the ledger shows its working: one thought, not two
+   screens. They sat a full section's padding apart, which left a field of
+   empty ground between the sentence and the rows it is about. */
+.dash .verdict { padding-bottom: clamp(24px, 3.5vh, 40px) !important; }
+.dash .ledger-block { padding-top: clamp(20px, 3vh, 34px); }
+
+/* This console sits in the page rather than in a stage. Scoped to the ledger
+   rather than to `.a-console`, because the home page's example console wears
+   the same class and sets its own width from the stage it sits in. */
+.dash .a-console { max-width: var(--content); margin: 14px auto 0; }
+
+/* The fade came across with alt.css, and it belongs there: on a console of ten
+   example rows it says "there are more". Here the rows are real and there are
+   five, so the same gradient dims the last permission a reader actually has
+   and the note explaining why nothing can be acted on. A page that hides real
+   findings to look tidy is the opposite of this one's argument. */
+/* Scoped, because bundling does not guarantee this file lands after alt.css
+   and an equal-specificity override is then a coin toss. */
+.dash .a-console {
+  -webkit-mask-image: none;
+          mask-image: none;
+}
+
+/* The sweep across the console while the chain is being read. theme.css draws
+   it; this only keeps it behind the rows rather than over them, and stops it
+   swallowing a click meant for the table underneath. */
+.dash .a-console { position: relative; }
+.dash .a-console > .scan-line { z-index: 1; pointer-events: none; }
+
+/* ---- the chain picker ----------------------------------------------------
+   The stacked marks, as a control. It has to read as the same object `/`
+   shows and still answer the pointer, so it carries no chrome of its own until
+   it is hovered or open — a border drawn around the stack at rest would make
+   the marketing console and this one different objects again. */
+.cpick {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 11px 5px 7px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.cpick:hover,
+.cpick[data-state="open"] {
+  border-color: var(--line2);
+  background: rgba(255, 255, 255, 0.03);
+}
+.cpick:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
+.cpick .cs-label { color: var(--ice); }
+.cpick-mark { width: 10px; height: 6px; flex: 0 0 auto; color: var(--slate); }
+.cpick[data-state="open"] .cpick-mark { transform: rotate(180deg); }
+
+.cmenu {
+  width: 290px;
+  max-height: min(60vh, 420px);
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.9);
+  z-index: 50;
+}
+.cmenu:focus-visible { outline: none; }
+
+/* The field first, because the list is longer than a glance. */
+.cmenu-find {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--ice);
+  font: 400 12.5px/1 var(--mono);
+}
+.cmenu-find:focus { outline: none; border-color: var(--ok); }
+.cmenu-find::placeholder { color: var(--slate); }
+
+.cmenu-list {
+  flex: 1 1 auto;
+  margin: 7px 0 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.cmenu-list button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--mist);
+  font: 400 13px/1 var(--display);
+  text-align: left;
+  cursor: pointer;
+}
+.cmenu-list button:hover { background: rgba(255, 255, 255, 0.04); color: var(--ice); }
+.cmenu-list button:focus-visible { outline: 2px solid var(--ok); outline-offset: -2px; }
+/* The one being shown. Marked rather than merely highlighted, so it survives
+   the pointer moving over something else. */
+.cmenu-list button[aria-current] { background: rgba(47, 224, 188, 0.1); color: var(--ok); }
+.cm-name { flex: 1 1 auto; min-width: 0; }
+/* How many permissions were found there. Slate, and never red: it is a count
+   of what was read, not a judgement on any of it. */
+.cmenu-list em {
+  flex: 0 0 auto;
+  font: 400 11.5px/1 var(--mono);
+  font-style: normal;
+  color: var(--slate);
+  font-variant-numeric: tabular-nums;
+}
+/* Every chain, drawn as one mark. */
+.cm-all {
+  flex: 0 0 auto;
+  width: 18px; height: 18px;
+  border: 1px dashed var(--line2);
+  border-radius: 50%;
+}
+.cmenu-none {
+  margin: 10px 9px 6px;
+  font: 400 12px/1.5 var(--display);
+  color: var(--slate);
+}
+
+/* ---- the row's own menu --------------------------------------------------
+   One verb in the open and the rest a click away, so ten permissions are not
+   forty controls. The trigger is quiet until the row is under the pointer:
+   three dots on every row, drawn at full strength, is a column of noise. */
+.rowmenu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--slate);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.rowmenu-trigger svg { width: 14px; height: 4px; fill: currentColor; }
+tr:hover .rowmenu-trigger,
+.rowmenu-trigger:focus-visible,
+.rowmenu-trigger[data-state="open"] { opacity: 1; color: var(--ice); border-color: var(--line2); }
+.rowmenu-trigger:focus-visible { outline: 2px solid var(--ok); outline-offset: 1px; }
+
+.rowmenu {
+  width: 296px;
+  padding: 8px;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.9);
+  text-align: left;
+  z-index: 50;
+}
+.rowmenu:focus-visible { outline: none; }
+.rowmenu-head {
+  margin: 0;
+  padding: 6px 9px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.rowmenu-head b { display: block; font: 600 13px/1.2 var(--display); color: var(--ice); }
+.rowmenu-head span { display: block; margin-top: 3px; font: 400 11px/1 var(--mono); color: var(--slate); }
+
+.rowmenu-list { margin: 6px 0 0; padding: 0; list-style: none; }
+.rowmenu-list button,
+.rowmenu-list a {
+  display: block;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--ice);
+  font: 400 13px/1.25 var(--display);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.rowmenu-list em {
+  display: block;
+  margin-top: 2px;
+  font: 400 11.5px/1.35 var(--display);
+  font-style: normal;
+  color: var(--mist);
+}
+.rowmenu-list button:hover,
+.rowmenu-list a:hover { background: rgba(255, 255, 255, 0.04); }
+.rowmenu-list button:focus-visible,
+.rowmenu-list a:focus-visible { outline: 2px solid var(--ok); outline-offset: -2px; }
+/* Offered but not available. It stays on the menu, because a control that
+   disappears teaches nothing about what this does; the note underneath says
+   why it cannot be used. */
+.rowmenu-list button[disabled] { opacity: 0.4; cursor: not-allowed; }
+.rowmenu-list button[disabled]:hover { background: none; }
+
+/* ---- the boundary editor ---- */
+.rowmenu-limit { padding: 10px 9px 4px; }
+.rowmenu-limit label {
+  display: block;
+  margin-bottom: 8px;
+  font: 700 10px/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ok);
+}
+.rowmenu-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 14px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.rowmenu-field:focus-within { border-color: var(--ok); background: rgba(47, 224, 188, 0.04); }
+.rowmenu-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 9px 0;
+  border: 0;
+  background: none;
+  color: var(--ice);
+  font: 400 14px/1 var(--mono);
+}
+.rowmenu-field input:focus { outline: none; }
+.rowmenu-field input::placeholder { color: var(--slate); }
+.rowmenu-field span { flex: 0 0 auto; font: 400 12px/1 var(--mono); color: var(--mist); }
+
+/* The amount it is actually reaching: a limit set there changes nothing the
+   wallet is doing and removes everything it is not. */
+.rowmenu-suggest {
+  display: block;
+  width: 100%;
+  margin-top: 9px;
+  padding: 7px 9px;
+  border: 1px dashed var(--line2);
+  border-radius: 9px;
+  background: none;
+  color: var(--mist);
+  font: 400 11.5px/1.3 var(--mono);
+  text-align: left;
+  cursor: pointer;
+}
+.rowmenu-suggest:hover { border-color: var(--ok); color: var(--ok); }
+.rowmenu-bad { margin: 9px 0 0; font: 400 12px/1.45 var(--display); color: var(--bad); }
+.rowmenu-go { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.rowmenu-go .a-pill { border: 0; cursor: pointer; }
+.rowmenu-back {
+  border: 0;
+  background: none;
+  color: var(--slate);
+  font: 400 12px/1 var(--display);
+  cursor: pointer;
+}
+.rowmenu-back:hover { color: var(--ice); }
+.rowmenu-note {
+  margin: 10px 9px 4px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font: 400 11.5px/1.5 var(--display);
+  color: var(--slate);
+}
+
+/* ---- a row that is settled ----------------------------------------------
+   Most permissions need nothing, and the column says so quietly with a tick
+   rather than offering a control that would undo something already right. */
+.a-none.done::before {
+  content: '✓';
+  margin-right: 6px;
+  color: var(--ok);
+}
+/* The rows that are actually asking something carry a little more weight. */
+.a-table tbody tr.is-task td:nth-child(2) { color: var(--ice); }
+
+/* ---- nothing found, shown properly --------------------------------------
+   The table keeps its shape and reads zero. An empty frame with the
+   explanation in a paragraph below it taught a reader nothing about what this
+   table is or what it would have held. */
+.a-chain-none {
+  display: inline-block;
+  width: 22px; height: 22px;
+  border: 1px dashed var(--line2);
+  border-radius: 50%;
+}
+.is-nothing td { color: var(--slate); }
+.is-nothing .a-table td b,
+.is-nothing b { color: var(--mist) !important; }
+
+/* ---- toasts --------------------------------------------------------------
+   What went wrong, beside the page rather than instead of it. Bottom right,
+   because the page's own answer is top left and a failure must not be the
+   first thing read on a screen that still has something true on it. */
+.toast-viewport {
+  position: fixed;
+  right: clamp(16px, 3vw, 28px);
+  bottom: clamp(16px, 3vh, 28px);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(380px, calc(100vw - 32px));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+}
+.toast {
+  display: grid;
+  gap: 7px;
+  padding: 15px 17px 14px;
+  border: 1px solid var(--line2);
+  border-left-width: 3px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #0E151D, #0A0F15);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.9);
+}
+/* The left edge carries the same two marks the rows do, and nothing else. */
+.toast-bad  { border-left-color: var(--bad); }
+.toast-warn { border-left-color: #E8B75B; }
+.toast-ok   { border-left-color: var(--ok); }
+
+.toast-title { font: 600 13.5px/1.35 var(--display); color: var(--ice); }
+.toast-body { font: 400 12.5px/1.5 var(--display); color: var(--mist); }
+.toast-end { display: flex; align-items: center; gap: 14px; margin-top: 3px; }
+.toast-end .a-pill { border: 0; cursor: pointer; }
+.toast-close {
+  border: 0;
+  background: none;
+  color: var(--slate);
+  font: 400 12px/1 var(--display);
+  cursor: pointer;
+}
+.toast-close:hover { color: var(--ice); }
+
+.toast[data-state="open"] { animation: toastIn 240ms var(--ease-settle); }
+.toast[data-state="closed"] { animation: toastIn 160ms var(--ease-settle) reverse; }
+.toast[data-swipe="move"] { transform: translateX(var(--radix-toast-swipe-move-x)); }
+.toast[data-swipe="end"] { animation: toastIn 160ms var(--ease-settle) reverse; }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast[data-state="open"], .toast[data-state="closed"] { animation: none; }
+}
+
+/* ---- narrow ---------------------------------------------------------------
+   One column, one gutter, and everything on the left edge. The filters sat
+   right-aligned under a heading that had the whole width to itself, which on a
+   phone reads as two unrelated objects; the wallet's address and the chain
+   picker did the same. Nothing here changes what is shown — only where the
+   room for it comes from. */
+@media (max-width: 760px) {
+  /* The trail is the widest line on the screen and the address is its point,
+     so it is the part that may run off the end rather than the part that
+     wraps into three lines. */
+  .crumbs ol { min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; }
+  .crumbs ol::-webkit-scrollbar { display: none; }
+
+  .ledger-head { gap: 12px; }
+  .filters { margin-left: 0; }
+  .filters button { padding: 7px 13px; font-size: 12px; }
+
+  /* The console head stacks, so the picker gets the width its label needs
+     rather than a chevron hanging off the end of a squeezed row. */
+  .a-console-head { gap: 12px; }
+  .a-console-acts { width: 100%; }
+  .cpick { padding-left: 0; }
+
+  /* The sections sit closer together: a phone scroll is the whole page, and
+     a desktop's breathing room reads as a gap with something missing in it. */
+  .dash section { padding-block: clamp(22px, 4vh, 34px); }
+  .dash section.gate { padding-block: clamp(30px, 6vh, 56px) clamp(26px, 4vh, 44px); }
+  .v-sub { margin-top: 20px; }
+
+  .toast-viewport { right: 12px; left: 12px; bottom: 12px; width: auto; }
+}

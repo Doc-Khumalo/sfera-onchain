@@ -300,6 +300,24 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
  mask:radial-gradient(105% 72% at 50% 44%,#0000 20%,#000 82%)}
 .app>*:not(.field){position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.field b{animation:none}}
+
+/* Framed, the host page has already said who we are. */
+.framed .bar{display:none}
+.framed .app{padding-top:clamp(10px,1.6vh,18px)}
+
+/* The arrows belong beside the thing they move. In the corner they read as
+   page furniture; flanking the card they read as its controls. */
+.frame{position:relative}
+.arrows{
+  position:absolute;inset:0;pointer-events:none;
+  display:flex;align-items:center;justify-content:space-between;
+  padding-inline:clamp(6px,2.4vw,34px);gap:0;z-index:4
+}
+.arrows button{pointer-events:auto}
+@media (max-width:640px){
+  .arrows{padding-inline:2px}
+  .arrows button{width:34px;height:34px}
+}
 </style>
 <div class="app" id="app">
   <div class="field" aria-hidden="true"><b class="grid"></b><b class="unbound"></b><b class="bound"></b></div>
@@ -309,8 +327,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
   </header>
   <main class="deck">
     <div class="scene">
-      <div class="frame"><div class="belt" id="belt">
-        <div class="card"><div class="copy"><div class="snum">Transaction control</div><h2>Know what you <em>sign.</em></h2><p>An application asks for permission to spend your tokens. Your wallet shows you one button. We read what is really being requested, and rewrite it to fit what you were doing.</p></div></div>
+      <div class="frame"><div class="arrows"><button id="prev" aria-label="Previous">&#8592;</button><button id="next" aria-label="Next">&#8594;</button></div>
+          <div class="belt" id="belt">
+        <div class="card"><div class="copy"><div class="snum">Transaction control</div><h2>Know what you <em>sign.</em></h2><p>Nine steps between one button and the authority it actually grants. Move through them &dash; and if this belongs in what you are building, build it with us.</p><div class="who"><span>Leslie Khumalo &middot; <a href="https://www.linkedin.com/in/khumalo-leslie/">Engineering</a></span><span>Blagoja Mojsoski &middot; <a href="https://www.linkedin.com/in/blagoja-mojsoski-228b79b1/">Product and quality</a></span></div></div></div>
         <div class="card"><div class="copy"><div class="snum">01 &middot; Intent</div><h2>What were you doing?</h2><p>The action you started, before anyone asked you to approve anything.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">Swap <b>100 USDC</b> with app.example.xyz</span></div></div></div>
         <div class="card"><div class="copy"><div class="snum">02 &middot; Inspect</div><h2>What is it <em>asking</em> for?</h2><p>The raw call decoded into the authority it creates. Not the label on the button, the object underneath it.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">approve(spender, <em>2^256&minus;1</em>) &middot; ERC-20 &middot; no expiry field</span></div></div></div>
         <div class="card bad"><div class="copy"><div class="snum">03 &middot; Decide</div><h2>Far <em>wider</em> than needed.</h2><p>You are spending a hundred. The request reaches your whole balance and every deposit you make after it, permanently.</p><div class="conc"><span class="ck">Concludes</span><span class="cv"><em>Over-requested.</em> The action needs 100. The request reaches the entire balance and every future deposit.</span></div></div></div>
@@ -349,8 +368,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
   <footer class="rail">
     <div class="count"><b id="cNow">01</b><s> / 09</s></div>
     <div class="hint"><span class="nudge"></span>Scroll or <kbd>&rarr;</kbd></div>
-    <div class="arrows"><button id="prev" aria-label="Previous">&#8592;</button><button id="next" aria-label="Next">&#8594;</button></div>
-  </footer>
+      </footer>
 </div>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -380,9 +398,9 @@ function chrome(){
   app.classList.toggle("warn",BAD.includes(i));
   /* step 01 shows the one button, 02 onward shows what it actually meant */
   /* the trap on the opening screen, then what it actually meant */
-  sheet.classList.toggle("off",i!==0);
+  sheet.classList.toggle("off",true);
   perm.classList.toggle("off",i<1||i===N-1);
-  app.classList.toggle("bare",i===N-1);
+  app.classList.toggle("bare",i===0||i===N-1);
   const should=i>=FIX;
   if(should!==fixed){fixed=should;setPerm(fixed)}
 }
@@ -485,12 +503,35 @@ $("#prev").addEventListener("click",()=>go(i-1));
 /* the wheel moves the belt itself, one to one, then it settles to the nearest step */
 /* the belt rests wherever you leave it, it is never pulled to a node */
 const STEP_PX=430;
+
+/* Embedded, this deck must not eat the wheel. Standalone it IS the page, so
+   swallowing the scroll is right; inside a frame on another page it traps the
+   reader, who then has to move the pointer off it to carry on reading. Framed,
+   the wheel and the finger belong to the page around us and the arrows and the
+   keyboard drive the deck. */
+const FRAMED = window.self !== window.top;
+
 addEventListener("wheel",e=>{
+  /* The axis decides who the gesture belongs to. Framed, a vertical wheel is
+     the reader moving down the page around us and must pass through; a
+     horizontal one is aimed at the deck. Standalone both are ours, and taking
+     deltaX as well means a trackpad swipe works there too. */
+  const sideways=Math.abs(e.deltaX)>Math.abs(e.deltaY);
+  if(FRAMED && !sideways) return;
   e.preventDefault();
   wave.classList.remove("ease");
-  pos=Math.max(0,Math.min(N-1,pos+e.deltaY/STEP_PX));
+  pos=Math.max(0,Math.min(N-1,pos+(sideways?e.deltaX:e.deltaY)/STEP_PX));
   render();
 },{passive:false});
+
+if(FRAMED){
+  /* The page this is embedded in carries its own logo and its own call to
+     action; a second set inside the frame is the same brand twice. */
+  document.documentElement.classList.add("framed");
+  const hint=document.querySelector(".hint");
+  if(hint) hint.textContent="Swipe or use the arrows";
+  document.documentElement.style.overscrollBehavior="auto";
+}
 
 addEventListener("keydown",e=>{
   const k=e.key;
@@ -507,8 +548,11 @@ addEventListener("touchstart",e=>{
 },{passive:true});
 addEventListener("touchmove",e=>{
   if(!t0) return;
-  e.preventDefault();
   const dx=t0.x-e.touches[0].clientX, dy=t0.y-e.touches[0].clientY;
+  /* Same rule for the finger: framed, a vertical drag scrolls the page and a
+     horizontal one moves the deck. Standalone, either does. */
+  if(FRAMED && Math.abs(dy)>Math.abs(dx)) return;
+  e.preventDefault();
   const d=Math.abs(dx)>Math.abs(dy)?dx:dy;
   pos=Math.max(0,Math.min(N-1,p0+d/Math.max(180,innerWidth*0.5)));
   render();

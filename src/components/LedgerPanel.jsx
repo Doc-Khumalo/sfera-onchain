@@ -66,7 +66,7 @@ export default function LedgerPanel({ chainStack = null }) {
         <div className="lp-stat">
           <span className="lp-read">Reachable by others, right now</span>
           <span className="roll usd lp-sum roll-sum">
-            <span className="rnum"><i className="g" /><i className="p" /></span>
+            <span className="rnum"><i className="m" /><i className="g" /><i className="p" /></span>
           </span>
           <span className="lp-verdict">
             <span className="was">
@@ -105,10 +105,10 @@ export default function LedgerPanel({ chainStack = null }) {
 
             <span className="lp-amt">
               <span className={`roll ${r.token === 'WETH' ? 'd4' : 'd2'} roll-a${i + 1}`}>
-                <span className="rnum"><i className="g" /><i className="p" /></span>
+                <span className="rnum"><i className="m" /><i className="g" /><i className="p" /></span>
               </span>
               <span className={`roll usd roll-u${i + 1}`}>
-                <span className="rnum"><i className="g" /><i className="p" /></span>
+                <span className="rnum"><i className="m" /><i className="g" /><i className="p" /></span>
               </span>
             </span>
 

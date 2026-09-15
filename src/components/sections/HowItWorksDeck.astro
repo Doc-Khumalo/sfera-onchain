@@ -1,0 +1,48 @@
+---
+/**
+ * The how-it-works deck, lifted.
+ *
+ * public/how-it-works.html is a self-contained page: its own markup, its own
+ * stylesheet, its own script. It is placed here unchanged.
+ *
+ * A previous attempt "lifted" it by scoping every selector under .hiw,
+ * prefixing its keyframes, stripping its script and rewiring its navigation to
+ * :target. That is a rewrite, and it produced a deck missing its artefacts and
+ * its rail — because once you are editing it, you are responsible for every
+ * piece you did not carry across. A frame carries all of them, because it
+ * carries the page.
+ *
+ * It also settles the collisions for free. That page and home.css both define
+ * .card, .field, .rail, .btn and .logo; in a frame they cannot reach each
+ * other, so neither has to be renamed.
+ *
+ * What comes with it: the deck runs its own script, so this section — and only
+ * this section — depends on JavaScript. The rest of the page still ships none.
+ * That is the deck's existing limitation travelling with the deck, and the fix
+ * belongs in that file rather than in a copy of it.
+ */
+---
+
+<section class="hiw" id="how">
+  <iframe
+    src="/how-it-works.html"
+    title="How it works — step by step"
+    loading="lazy"
+  ></iframe>
+</section>
+
+<style>
+  .hiw {
+    border-top: 1px solid var(--line);
+    background: var(--void);
+  }
+  .hiw iframe {
+    display: block;
+    width: 100%;
+    /* The deck lays itself out against the viewport, so the frame has to give
+       it a viewport-shaped box or its own clamps collapse. */
+    height: min(860px, 92vh);
+    min-height: 620px;
+    border: 0;
+  }
+</style>

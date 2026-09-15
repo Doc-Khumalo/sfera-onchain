@@ -1,17 +1,342 @@
 ---
+/**
+ * The home page.
+ *
+ * It was `/`, the alternative to a homepage that argued by sequence. That
+ * one is retired — kept in the repo as `_retired-home.astro`, which Astro does
+ * not build, so it is recoverable without being reachable.
+ *
+ * * It leads with one console carrying a whole wallet's standing authority, and
+ * runs the control loop across it: read, decide, act, settle, verify.
+ *
+ * The table shows ALL SIX readings the engine can emit (src/lib/readings.js)
+ * across nine chains, because both halves are the claim. A wallet is not one
+ * chain and a permission is not one state, and a table showing two readings on
+ * two chains argues for a much smaller product than this one.
+ *
+ *   UNBOUNDED  Ethereum   Uniswap Permit2    -> limited on screen
+ *   UNBOUNDED  Ethereum   OpenSea Seaport    -> revoked on screen
+ *   OVER_WIDE  Arbitrum   GMX Router          finite, but bigger than the balance
+ *   BOUNDED    Base       Aerodrome Router    capped and dated
+ *   UNKNOWN    Linea      SyncSwap Router     the contract would not answer
+ *   EXPIRED    Polygon    1inch Router        still set, and reaches nothing
+ *   REMOVED    BNB Chain  PancakeSwap Router  revoked earlier
+ *   BOUNDED    Optimism   Velodrome Router
+ *   BOUNDED    Avalanche  Trader Joe Router
+ *   BOUNDED    Scroll     Ambient Router
+ *
+ * Three of these do work no competitor's table does.
+ *
+ * OVER_WIDE is the reading almost nobody has: finite, so it looks fine, but
+ * larger than the balance it applies to, so deposits not yet made are covered
+ * too. A tool that only flags "unlimited" reports this one as safe.
+ *
+ * EXPIRED is deliberately distinct from REMOVED: 1,200 is still set on chain
+ * and reaches nothing, which is exactly the case a reader misjudges when a
+ * tool reports allowances without reporting expiry.
+ *
+ * UNKNOWN is the honest one, and it is here on purpose. The contract did not
+ * answer the calls needed to read it, so we say so rather than rendering it as
+ * clean — and DECISION §75 forbids offering a correction for it, because
+ * narrowing an authority we could not read is how false confidence starts.
+ * Showing the gap is the credibility.
+ *
+ * THE COUNTERPARTIES ARE REAL AND NAMING THEM IS NOT AN ACCUSATION. An
+ * unlimited ERC-20 approval to Uniswap's Permit2, or setApprovalForAll to
+ * OpenSea's Seaport, is the ordinary way these applications work and is
+ * granted by the user, not taken. Inventing ExampleSwap implied the problem
+ * belongs to disreputable software; it does not, and the whole thesis is that
+ * standing authority is the norm rather than the exception. The figures
+ * against them are invented, the wallet is marked an example, and nothing
+ * here says any of these applications has done anything wrong.
+ *
+ * VIEW ONLY. Nothing in the table is interactive — it is a depiction of a
+ * product that is not shipped yet, and controls that did nothing would be
+ * worse than none.
+ *
+ * Ships no JavaScript, like `/`.
+ */
 import Base from '../layouts/Base.astro';
-import Home from '../components/Home.jsx';
-import HeaderTheme from '../components/HeaderTheme.astro';
-import Reveal from '../components/Reveal.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { CONTACT } from '../data/site.js';
+import ChainStack from '../components/ChainStack.jsx';
+import ConsoleTable from '../components/sections/ConsoleTable.jsx';
+import Stats from '../components/sections/Stats.jsx';
+import HowItWorksDeck from '../components/sections/HowItWorksDeck.astro';
+import Faq from '../components/sections/Faq.jsx';
+import Developers from '../components/sections/Developers.jsx';
+/* theme.css only, and only for its Tailwind utilities: the asset marks in the
+   console below are drawn by ui/TokenMark.jsx, which is written in them. The
+   ledger's own layers — dashboard.css and demo.css — went back to /demo with
+   the ledger. */
+import '../styles/theme.css';
 import '../styles/home.css';
+import '../styles/alt.css';
+
+/* Three wallets, cycled. A table that always shows the same rows with the same
+   amounts is a screenshot: watch it twice and you know what comes next, which
+   is the opposite of how a product reading live chain state should feel.
+   Each wallet gets the same twelve seconds and the same beats, because the loop
+   is the constant — only what it is looking at changes.
+
+   Every header total is the sum of its own reachable column:
+     set 1   8,420 + 1,920 + 6,180 + 2,500 + 500 + 1,250 + 340   =  21,110
+     set 2  a treasury: 1,240,000 + 386,000 + 410,000 + 180,000
+            + 64,000 + 95,500 + 22,300                          = 2,397,800
+     set 3   2,150 +   380 +  1,900 +   750 + 300 + 1,100 + 180  =   6,760
+   and each falls by exactly what its limit and its revoke remove. */
+const WALLETS = [
+  {
+    id: '0x7a3f…19c4',
+    rows: [
+      { app: 'Uniswap', via: 'Permit2', asset: 'USDC', chain: 'ethereum', chainName: 'Ethereum',
+        fault: 1, status: 'bad', grant: 'Unlimited', grantTo: '100.00 USDC', tone: 'bad', toneTo: 'ok',
+        roll: 'd2', ends: 'never', endsTo: 'on use',
+        state: 'Unbounded', stateTo: 'Bounded', stateTone: 'st-bad', stateToneTo: 'st-ok',
+        verb: 'Limit', done: 'Limited' },
+      { app: 'OpenSea', via: 'Seaport', asset: 'Collection', chain: 'ethereum', chainName: 'Ethereum',
+        fault: 2, status: 'bad', grant: 'All items', grantTo: 'None', tone: 'bad', toneTo: 'gone',
+        suffix: 'NFTs', usd: true, ends: 'never', endsTo: 'removed',
+        state: 'Unbounded', stateTo: 'Removed', stateTone: 'st-bad', stateToneTo: 'st-gone',
+        verb: 'Revoke', done: 'Revoked' },
+      { app: 'GMX', via: 'Router', asset: 'USDC', chain: 'arbitrum', chainName: 'Arbitrum',
+        status: 'wide', grant: '50,000.00', tone: 'warn', still: '6,180.00', ends: 'never',
+        state: 'Over-wide', stateTone: 'st-wide', act: 'Limit' },
+      { app: 'Aerodrome', via: 'Router', asset: 'USDC', chain: 'base', chainName: 'Base',
+        status: 'ok', third: true, ends: '12 Sep', state: 'Bounded', stateTone: 'st-ok', act: 'None needed',
+        grant: '2,500.00', tone: 'ok' },
+      { app: 'SyncSwap', via: 'Router', asset: 'Unreadable', chain: 'linea', chainName: 'Linea',
+        status: 'unk', grant: '—', tone: 'quiet', still: '—', ends: '—',
+        state: 'Unknown', stateTone: 'st-unk', act: 'Cannot correct' },
+      { app: '1inch', via: 'Router', asset: 'USDT', chain: 'polygon', chainName: 'Polygon',
+        status: 'old', grant: '1,200.00', tone: 'quiet', still: '0.00', ends: 'expired 1 Sep',
+        state: 'Expired', stateTone: 'st-old', act: '—' },
+      { app: 'PancakeSwap', via: 'Router', asset: 'USDT', chain: 'bnb', chainName: 'BNB Chain',
+        status: 'gone', grant: 'None', tone: 'gone', still: '0.00', ends: 'revoked 4 Sep',
+        state: 'Removed', stateTone: 'st-gone', act: '—' },
+      { app: 'Velodrome', via: 'Router', asset: 'DAI', chain: 'optimism', chainName: 'Optimism',
+        status: 'ok', grant: '500.00', tone: 'ok', still: '500.00', ends: '30 Sep',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+      { app: 'Trader Joe', via: 'Router', asset: 'USDC', chain: 'avalanche', chainName: 'Avalanche',
+        status: 'ok', grant: '1,250.00', tone: 'ok', still: '1,250.00', ends: '8 Oct',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+      { app: 'Ambient', via: 'Router', asset: 'USDC', chain: 'scroll', chainName: 'Scroll',
+        status: 'ok', grant: '340.00', tone: 'ok', still: '340.00', ends: '22 Oct',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+    ],
+  },
+  {
+    id: '0x4c19…8ba2',
+    rows: [
+      { app: 'Aave v3', via: 'Pool', asset: 'USDT', chain: 'ethereum', chainName: 'Ethereum',
+        fault: 1, status: 'bad', grant: 'Unlimited', grantTo: '50,000.00 USDT', tone: 'bad', toneTo: 'ok',
+        roll: 'd2', ends: 'never', endsTo: 'on use',
+        state: 'Unbounded', stateTo: 'Bounded', stateTone: 'st-bad', stateToneTo: 'st-ok',
+        verb: 'Limit', done: 'Limited' },
+      { app: 'Blur', via: 'Marketplace', asset: 'Collection', chain: 'ethereum', chainName: 'Ethereum',
+        fault: 2, status: 'bad', grant: 'All items', grantTo: 'None', tone: 'bad', toneTo: 'gone',
+        suffix: 'NFTs', usd: true, ends: 'never', endsTo: 'removed',
+        state: 'Unbounded', stateTo: 'Removed', stateTone: 'st-bad', stateToneTo: 'st-gone',
+        verb: 'Revoke', done: 'Revoked' },
+      { app: 'Curve', via: 'Pool', asset: 'crvUSD', chain: 'ethereum', chainName: 'Ethereum',
+        status: 'wide', grant: '1,800,000.00', tone: 'warn', still: '410,000.00', ends: 'never',
+        state: 'Over-wide', stateTone: 'st-wide', act: 'Limit' },
+      { app: 'Morpho', via: 'Vault', asset: 'USDC', chain: 'base', chainName: 'Base',
+        status: 'ok', third: true, ends: '19 Sep', state: 'Bounded', stateTone: 'st-ok', act: 'None needed',
+        grant: '4,000.00', tone: 'ok' },
+      { app: 'Venus', via: 'Comptroller', asset: 'Unreadable', chain: 'bnb', chainName: 'BNB Chain',
+        status: 'unk', grant: '—', tone: 'quiet', still: '—', ends: '—',
+        state: 'Unknown', stateTone: 'st-unk', act: 'Cannot correct' },
+      { app: 'QuickSwap', via: 'Router', asset: 'USDC', chain: 'polygon', chainName: 'Polygon',
+        status: 'old', grant: '120,000.00', tone: 'quiet', still: '0.00', ends: 'expired 27 Aug',
+        state: 'Expired', stateTone: 'st-old', act: '—' },
+      { app: 'Camelot', via: 'Router', asset: 'ARB', chain: 'arbitrum', chainName: 'Arbitrum',
+        status: 'gone', grant: 'None', tone: 'gone', still: '0.00', ends: 'revoked 11 Sep',
+        state: 'Removed', stateTone: 'st-gone', act: '—' },
+      { app: 'Synthetix', via: 'Core', asset: 'sUSD', chain: 'optimism', chainName: 'Optimism',
+        status: 'ok', grant: '64,000.00', tone: 'ok', still: '64,000.00', ends: '2 Oct',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+      { app: 'Benqi', via: 'Market', asset: 'AVAX', chain: 'avalanche', chainName: 'Avalanche',
+        status: 'ok', grant: '95,500.00', tone: 'ok', still: '95,500.00', ends: '14 Oct',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+      { app: 'Lynex', via: 'Router', asset: 'USDC', chain: 'linea', chainName: 'Linea',
+        status: 'ok', grant: '22,300.00', tone: 'ok', still: '22,300.00', ends: '29 Oct',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+    ],
+  },
+  {
+    id: '0x9e02…5f71',
+    rows: [
+      { app: 'CoW Swap', via: 'Vault Relayer', asset: 'USDC', chain: 'ethereum', chainName: 'Ethereum',
+        fault: 1, status: 'bad', grant: 'Unlimited', grantTo: '75.00 USDC', tone: 'bad', toneTo: 'ok',
+        roll: 'd2', ends: 'never', endsTo: 'on use',
+        state: 'Unbounded', stateTo: 'Bounded', stateTone: 'st-bad', stateToneTo: 'st-ok',
+        verb: 'Limit', done: 'Limited' },
+      { app: 'Rarible', via: 'Exchange', asset: 'Collection', chain: 'ethereum', chainName: 'Ethereum',
+        fault: 2, status: 'bad', grant: 'All items', grantTo: 'None', tone: 'bad', toneTo: 'gone',
+        suffix: 'NFTs', usd: true, ends: 'never', endsTo: 'removed',
+        state: 'Unbounded', stateTo: 'Removed', stateTone: 'st-bad', stateToneTo: 'st-gone',
+        verb: 'Revoke', done: 'Revoked' },
+      { app: 'Balancer', via: 'Vault', asset: 'WMATIC', chain: 'polygon', chainName: 'Polygon',
+        status: 'wide', grant: '18,000.00', tone: 'warn', still: '1,900.00', ends: 'never',
+        state: 'Over-wide', stateTone: 'st-wide', act: 'Limit' },
+      { app: 'Moonwell', via: 'Market', asset: 'USDC', chain: 'base', chainName: 'Base',
+        status: 'ok', third: true, ends: '6 Oct', state: 'Bounded', stateTone: 'st-ok', act: 'None needed',
+        grant: '1,100.00', tone: 'ok' },
+      { app: 'Ambient', via: 'Router', asset: 'Unreadable', chain: 'scroll', chainName: 'Scroll',
+        status: 'unk', grant: '—', tone: 'quiet', still: '—', ends: '—',
+        state: 'Unknown', stateTone: 'st-unk', act: 'Cannot correct' },
+      { app: 'SushiSwap', via: 'Router', asset: 'USDC', chain: 'avalanche', chainName: 'Avalanche',
+        status: 'old', grant: '800.00', tone: 'quiet', still: '0.00', ends: 'expired 9 Sep',
+        state: 'Expired', stateTone: 'st-old', act: '—' },
+      { app: 'Beefy', via: 'Vault', asset: 'BNB', chain: 'bnb', chainName: 'BNB Chain',
+        status: 'gone', grant: 'None', tone: 'gone', still: '0.00', ends: 'revoked 30 Aug',
+        state: 'Removed', stateTone: 'st-gone', act: '—' },
+      { app: 'Kwenta', via: 'Margin', asset: 'sUSD', chain: 'optimism', chainName: 'Optimism',
+        status: 'ok', grant: '300.00', tone: 'ok', still: '300.00', ends: '17 Oct',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+      { app: 'Stargate', via: 'Router', asset: 'USDC', chain: 'arbitrum', chainName: 'Arbitrum',
+        status: 'ok', grant: '750.00', tone: 'ok', still: '750.00', ends: '25 Oct',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+      { app: 'Mendi', via: 'Market', asset: 'USDC', chain: 'linea', chainName: 'Linea',
+        status: 'ok', grant: '180.00', tone: 'ok', still: '180.00', ends: '1 Nov',
+        state: 'Bounded', stateTone: 'st-ok', act: 'None needed' },
+    ],
+  },
+];
+
+/* The console swaps one wallet's rows for another's every twelve seconds, in
+   place, mid-page. If the sets differ in length the table changes height and
+   everything below it jumps — so the invariant is enforced here rather than
+   left to whoever edits WALLETS next. A build that breaks it does not ship.
+
+   The rows are also the same SHAPE by construction: exactly one carries a
+   second line under its reachable figure (the NFT floor value), so no set is
+   a line taller than another. */
+const ROW_COUNT = WALLETS[0].rows.length;
+WALLETS.forEach((w, i) => {
+  if (w.rows.length !== ROW_COUNT) {
+    throw new Error(
+      `alt.astro: wallet ${i + 1} (${w.id}) has ${w.rows.length} rows, ` +
+      `but wallet 1 has ${ROW_COUNT}. Every wallet must carry the same number ` +
+      `of rows or the console changes height when it cycles and the page jumps.`
+    );
+  }
+  const twoLine = w.rows.filter((r) => r.usd).length;
+  if (twoLine !== 1) {
+    throw new Error(
+      `alt.astro: wallet ${i + 1} (${w.id}) has ${twoLine} rows with a second ` +
+      `line under the reachable figure; every wallet must have exactly one, ` +
+      `or its table is a line taller or shorter than the others.`
+    );
+  }
+});
 
 ---
 
-<Base>
-  {/* No client:* directive — renders to HTML at build time, ships no JS. */}
-  <Home />
+<Base title="Sfera Onchain — Control what happens before you sign.">
+  <div class="alt">
+    <SiteHeader />
 
-  {/* Progressive enhancement only. Neither is required to read the page. */}
-  <HeaderTheme />
-  <Reveal />
+    <section class="a-hero">
+      <h1>Control what you sign.</h1>
+      <p class="a-lede">
+        Most of this category warns. We read what an application is really
+        asking for, cut it to what you were doing, and keep the authority
+        visible for as long as it exists.
+      </p>
+
+      {/* One input, and it lives on the page that uses it.
+       *
+       * This was the probe form itself, which meant a reader met a text field
+       * here, submitted it, and — if they had arrived without an address —
+       * met a second text field on /demo. Two inputs for one job reads as an
+       * unfinished hand-off. The field stays where the work happens; this is
+       * the invitation to go there.
+       *
+       * It keeps the probe's promise underneath it, because "read-only, no
+       * wallet needed" is what makes the click feel safe, and moving that to
+       * the next page would mean asking for the click before answering the
+       * question it raises. */}
+      <div class="a-cta">
+        <a class="a-btn a-btn-mint a-btn-lg" href="/demo">
+          See what a wallet can still lose
+          <svg viewBox="0 0 16 16" aria-hidden="true" class="a-cta-arrow">
+            <path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <p class="a-cta-note">
+          Read-only, and no wallet needed. Nothing is signed, stored, or sent
+          anywhere.
+        </p>
+        <ChainStack label="+ more, all read the same way" />
+      </div>
+    </section>
+
+    <section class="a-stage" id="product" aria-label="Example wallet, corrected">
+      <div class="a-console">
+        <span class="a-scan" aria-hidden="true"></span>
+
+        {/* Two tiers: who the wallet is, then what is true of it. One row
+            tried to carry both and crushed three figures and their captions
+            into a third of the width. */}
+        <div class="a-console-head">
+          <span class="a-wallet">
+            <span class="a-avatar" aria-hidden="true"></span>
+            <b class="a-wids">
+              {WALLETS.map((w, i) => <span class={`a-wid-${i + 1}`}>{w.id}</span>)}
+            </b>
+            <span class="a-chip a-chip-quiet">Example wallet</span>
+          </span>
+          {/* The rows span chains, so a single chain chip would have been
+              wrong as well as smaller. */}
+          <ChainStack compact />
+        </div>
+
+        <div class="a-figs">
+          <span><em>Reachable now</em>
+            <b class="roll usd a-count au-exp"><span class="rnum"><i class="m" /><i class="g" /><i class="p" /></span></b>
+            <i>what others can take today</i>
+          </span>
+          <span><em>Open</em>
+            <b class="roll a-count au-open"><span class="rnum"><i class="m" /><i class="g" /><i class="p" /></span></b>
+            <i>live permissions</i>
+          </span>
+          {/* Named for what it is. A dollar figure beside a bare word like
+              "reduced" reads as money owed, when it is the opposite. */}
+          <span><em>Put beyond reach, 30d</em>
+            <b class="ok roll usd a-count au-red"><span class="rnum"><i class="m" /><i class="g" /><i class="p" /></span></b>
+            <i>removed, not spent</i>
+          </span>
+        </div>
+
+        <ConsoleTable wallets={WALLETS} />
+      </div>
+
+      {/* Verify is the half nobody else ships. The claim is not that we sent a
+          transaction, it is that we asked the chain again afterwards. */}
+      <p class="a-verified">
+        <span class="a-tick" aria-hidden="true">✓</span>
+        Read back at block 21,904,118 — allowance 100.00 USDC, collection
+        approval absent. <span class="quiet">Example figures.</span>
+      </p>
+    </section>
+
+    {/* Shared with `/` outright, so the two entry points differ only above
+        this line and the comparison stays about the hero. */}
+    <main class="a-below">
+      <Stats />
+      <Developers />
+
+      <Faq contact={CONTACT} />
+      {/* The deck itself, in place of the Ask — whose invitation is panel
+          nine of it, in the same words. */}
+      <HowItWorksDeck />
+    </main>
+    {/* No footer. Everything it carried now sits closer to where it is wanted:
+        the founders and the invitation are the deck's closing panel, and its
+        "See it step by step" link pointed at a page that is now embedded on
+        this one. A footer whose every line is answered above it is furniture. */}
+  </div>
 </Base>

@@ -5,20 +5,42 @@
  * recognisably the same company, and nothing else. Every selector is scoped
  * under .alt so this file cannot reach the other page.
  *
- * The composition is a tableau rather than a sequence: one console carrying
- * the wallet's standing authority, two cards in front of it carrying the
- * correction and its proof. Depth does the work that eighteen seconds of
- * animation does on `/`.
+ * The composition is one console carrying a whole wallet's standing authority,
+ * with the control loop run across it on a 12s cycle.
+ *
+ * Two floating cards used to sit in front of it holding the comparison and its
+ * proof. They covered the rows showing what an already-closed permission looks
+ * like, which is most of what makes the live corrections legible, so the
+ * comparison moved into the rows and the proof into a read-back line beneath.
+ *
+ * The console's bottom fade is a MASK, not an overlay gradient. An overlay
+ * leaves the console's own border drawn at full strength across the fade,
+ * which reads as a hard edge and is the one thing the fade exists to avoid.
+ *
+ * Selectors are scoped under .alt, EXCEPT that the closing sections below the
+ * fold are shared with `/` and styled by home.css — so nothing here may set an
+ * inherited property on .alt itself.
  */
 
 .alt {
-  --mint: var(--ok);
-  --a-card: #0C1319;
+  /* --mint is in global.css: it is used by rules there too. */
+  /* Where a field's text starts. Shared by the hero probe and the subscribe
+     form so the two cannot drift apart, and so the probe's label, note and
+     chain marks stay on the same vertical as its placeholder. */
+  --field-inset: 18px;
   background: var(--void);
-  color: var(--mist);
   min-height: 100vh;
-  overflow-x: hidden;
+  /* clip, not hidden. `overflow: hidden` makes this a scroll container, which
+     silently breaks `position: sticky` for every descendant — the questions
+     column would scroll away instead of holding. `clip` cuts the same
+     overflow without becoming a scroll port. */
+  overflow-x: clip;
 }
+
+/* The page colour belongs to this page's own sections, not to the whole
+   subtree. The closing sections below are shared with `/` and styled by
+   home.css, which lets headings inherit --ice from body; a colour set on
+   .alt would quietly grey out every one of them. */
 
 /* A single wash behind the headline, so the type sits in light rather than
    on flat black. Fixed, because it should not scroll away from the hero. */
@@ -35,93 +57,18 @@
 }
 .alt > * { position: relative; z-index: 1; }
 
-/* ---- nav ---- */
-.a-nav {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  max-width: var(--page);
-  margin: 0 auto;
-  padding: 22px var(--gutter);
-  border-bottom: 1px solid var(--line);
-}
-.a-mark {
-  font: 800 17px/1 var(--display);
-  letter-spacing: -0.03em;
-  color: var(--ice);
-  text-decoration: none;
-  margin-right: auto;
-}
-.a-mark span { color: var(--mint); }
-.a-nav nav { display: flex; gap: 30px; }
-.a-nav nav a {
-  font: 400 12.5px/1 var(--mono);
-  color: var(--mist);
-  text-decoration: none;
-  transition: color 0.18s ease;
-}
-.a-nav nav a:hover { color: var(--ice); }
-
-.a-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 22px;
-  border: 1px solid transparent;
-  font: 400 12px/1 var(--mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: transform 0.18s var(--ease-settle), box-shadow 0.18s ease,
-              background 0.18s ease, border-color 0.18s ease;
-}
-.a-btn-sm { padding: 9px 15px; letter-spacing: 0.04em; text-transform: none; font-size: 12px; }
-.a-btn-solid { background: var(--ice); color: var(--void); }
-.a-btn-mint  { background: var(--mint); color: #06231E; box-shadow: 0 0 0 rgba(47, 224, 188, 0); }
-.a-btn-ghost { border-color: var(--line2); color: var(--ice); background: rgba(255,255,255,0.02); }
-.a-btn-solid:hover { transform: translateY(-1px); }
-.a-btn-mint:hover  { transform: translateY(-1px); box-shadow: 0 8px 34px -6px rgba(47, 224, 188, 0.5); }
-.a-btn-ghost:hover { border-color: var(--mist); }
+/* Header lives in global.css — / and /demo share it. */
 
 /* ---- hero ---- */
 .a-hero {
-  /* Wide enough that "Control what happens" holds one line at the largest
-     step. The explicit break after it is then the only break, and the
-     headline reads as two deliberate lines rather than three ragged ones. */
-  max-width: 1140px;
+  max-width: 760px;
   margin: 0 auto;
   padding: clamp(70px, 11vh, 128px) var(--gutter) 0;
   text-align: center;
 }
-.a-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0 0 30px;
-  padding: 7px 16px 7px 13px;
-  border: 1px solid var(--line2);
-  border-radius: 999px;
-  background: rgba(47, 224, 188, 0.03);
-  font: 400 11px/1 var(--mono);
-  letter-spacing: 0.17em;
-  text-transform: uppercase;
-  color: var(--mist);
-}
-.a-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--mint);
-  box-shadow: 0 0 10px var(--mint);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .a-dot { animation: aPulse 2.6s var(--ease-loop) infinite; }
-  @keyframes aPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-}
-
 .a-hero h1 {
   margin: 0;
-  font: 800 clamp(42px, 6.5vw, 84px)/0.99 var(--display);
+  font: 800 clamp(36px, 4.6vw, 58px)/1.02 var(--display);
   letter-spacing: -0.045em;
   color: var(--ice);
   text-wrap: balance;
@@ -133,14 +80,32 @@
   color: var(--mist);
   text-wrap: pretty;
 }
-.a-cta { display: flex; gap: 12px; justify-content: center; margin-top: 38px; }
+/* The hero's call to action. One button, the promise under it, the marks
+   under that — the same vertical rhythm the field had, without asking for an
+   address on a page that cannot read one. */
+.a-cta { display: grid; justify-items: center; gap: 18px; margin-top: 36px; }
+.a-btn-lg {
+  gap: 10px;
+  padding: 16px 30px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+.a-cta-arrow { width: 15px; height: 15px; transition: transform 0.18s var(--ease-settle); }
+.a-btn-lg:hover .a-cta-arrow { transform: translateX(3px); }
+.a-cta-note {
+  max-width: 46ch;
+  margin: 0;
+  font: 400 12.5px/1.6 var(--display);
+  color: var(--slate);
+}
+.a-cta .cstack { margin: 0; }
 
 /* ---- the stage ---- */
 .a-stage {
   position: relative;
   max-width: var(--page);
   margin: clamp(60px, 9vh, 104px) auto 0;
-  padding: 0 var(--gutter) clamp(90px, 13vh, 150px);
+  padding: 0 var(--gutter) clamp(52px, 7vh, 88px);
 }
 
 .a-console {
@@ -148,19 +113,22 @@
   border-radius: 14px;
   background: linear-gradient(180deg, #0B1117, #080D12);
   overflow: hidden;
-  /* The lower rows fade rather than stop. The console is context for the
-     cards in front of it, and a hard bottom edge competes with them. */
-  -webkit-mask-image: linear-gradient(180deg, #000 58%, transparent 99%);
-          mask-image: linear-gradient(180deg, #000 58%, transparent 99%);
+  /* The last rows dissolve rather than stopping, so the table reads as a
+     window onto more of them. A mask, so the console's own border and corners
+     fade with everything else — an overlay gradient leaves the bottom border
+     drawn at full strength across the fade, which reads as a hard edge and is
+     exactly what this is meant to avoid. */
+  -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent 99%);
+          mask-image: linear-gradient(180deg, #000 72%, transparent 99%);
 }
 
 .a-console-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 18px;
   flex-wrap: wrap;
-  padding: 18px 24px;
+  padding: 16px 24px;
   border-bottom: 1px solid var(--line);
   background: rgba(255,255,255,0.012);
 }
@@ -180,258 +148,81 @@
 }
 .a-chip-quiet { border-style: dashed; color: var(--slate); }
 
-.a-figs { display: flex; gap: 34px; }
-.a-figs span { display: grid; gap: 5px; justify-items: end; }
-/* A caption under each figure. The third one needs it most: a dollar amount
-   beside a bare word like "reduced" reads as money owed, when it is the
-   opposite — authority taken out of reach, and so money NOT at risk. */
+/* Three equal cells with rules between them, rather than three things
+   crowded against the right edge. Each gets the width to hold its own
+   caption on one or two comfortable lines. */
+.a-figs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+.a-figs > span {
+  display: grid;
+  gap: 7px;
+  justify-items: start;
+  align-content: start;
+  padding: 17px 24px 19px;
+  border-left: 1px solid var(--line);
+}
+.a-figs > span:first-child { border-left: 0; }
+
+/* The label and the caption are what the figure means, so they are read, not
+   glimpsed: --slate put them at roughly 2.7:1 against this console. */
+.a-figs em {
+  font: 400 10px/1 var(--mono);
+  font-style: normal;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.a-figs b {
+  font: 700 clamp(20px, 2.1vw, 27px)/1 var(--mono);
+  color: var(--ice);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
 /* Direct child only: the rolls carry their own <i> spellings, and a loose
    descendant selector restyles the digits instead of the caption. */
 .a-figs > span > i {
-  font: 400 9.5px/1.25 var(--display);
+  font: 400 11.5px/1.45 var(--display);
   font-style: normal;
-  color: var(--slate);
-  max-width: 18ch;
-  text-align: right;
-  text-wrap: balance;
-}
-.a-figs em {
-  font: 400 9.5px/1 var(--mono);
-  font-style: normal;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-.a-figs b {
-  font: 700 17px/1 var(--mono);
-  color: var(--ice);
-  font-variant-numeric: tabular-nums;
+  color: var(--mist);
+  max-width: 26ch;
 }
 .a-figs .bad { color: var(--bad); }
 .a-figs .ok  { color: var(--mint); }
 
-.a-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-/* Fixed columns. Left to itself the browser gives the application column
-   everything, because its cells are the only ones with two lines, and the
-   figures that matter end up scattered at the far edge. */
-.a-table th:nth-child(1) { width: 27%; }
-.a-table th:nth-child(2) { width: 14%; }
-.a-table th:nth-child(3) { width: 20%; }
-.a-table th:nth-child(4) { width: 20%; }
-.a-table th:nth-child(5) { width: 19%; }
-.a-table th {
-  padding: 13px 24px;
-  text-align: left;
-  font: 400 9.5px/1 var(--mono);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--slate);
-  border-bottom: 1px solid var(--line);
-}
-.a-table td {
-  padding: 15px 24px;
-  border-bottom: 1px solid var(--line);
-  font: 400 13px/1.3 var(--mono);
+/* A closed permission has nothing left to do to it. Saying so is better than
+   offering a control that would do nothing. */
+
+/* ---- the read-back ------------------------------------------------------ */
+.a-verified {
+  /* A sentence, not a row of items: flex was laying the trailing note out as
+     its own column. */
+  max-width: 82ch;
+  margin: 18px 0 0;
+  font: 400 12.5px/1.6 var(--mono);
   color: var(--mist);
-  vertical-align: middle;
-  white-space: nowrap;
+  animation: verifyIn var(--run) var(--ease-settle) infinite;
 }
-.a-table tbody tr:last-child td { border-bottom: 0; }
-.a-table td b { display: block; font: 600 14px/1.2 var(--display); color: var(--ice); }
-.a-table td em {
-  display: block;
-  margin-top: 3px;
-  font: 400 11.5px/1 var(--mono);
-  font-style: normal;
-  color: var(--slate);
-}
-.a-table td.bad   { color: var(--bad); }
-.a-table td.warn  { color: #E8B75B; }
-.a-table td.ok    { color: var(--mint); }
-.a-table td.quiet { color: var(--slate); }
+.a-tick { color: var(--ok); font-weight: 700; margin-right: 7px; }
+.a-verified .quiet { color: var(--slate); }
 
-/* The first two rows carry the fault, so they carry a trace of it. */
-.a-table tbody tr:nth-child(-n+2) { background: linear-gradient(90deg, rgba(255,95,78,0.045), transparent 55%); }
-.a-table tbody tr:nth-child(-n+2) td:first-child { box-shadow: inset 2px 0 0 rgba(255,95,78,0.45); }
+/* The shared closing sections start their own rhythm. */
+.a-below { display: block; }
 
-/* ---- the two cards in front ---- */
-.a-card {
-  position: absolute;
-  width: min(390px, 82vw);
-  padding: 20px 22px 22px;
-  border: 1px solid;
-  border-radius: 12px;
-  background: var(--a-card);
-  display: grid;
-  gap: 15px;
-}
-.a-card-bad {
-  left: max(var(--gutter), 3%);
-  bottom: clamp(56px, 8vh, 92px);
-  border-color: rgba(255, 95, 78, 0.42);
-  box-shadow: 0 30px 70px -28px rgba(255, 95, 78, 0.5), 0 0 60px -30px rgba(255, 95, 78, 0.6);
-  transform: rotate(-0.9deg);
-}
-.a-card-ok {
-  right: max(var(--gutter), 3%);
-  bottom: clamp(18px, 3vh, 40px);
-  width: min(340px, 78vw);
-  border-color: rgba(47, 224, 188, 0.42);
-  box-shadow: 0 30px 70px -28px rgba(47, 224, 188, 0.4), 0 0 60px -30px rgba(47, 224, 188, 0.5);
-  transform: rotate(0.7deg);
-}
-
-.a-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  font: 400 10px/1 var(--mono);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--bad);
-}
-.a-card-head .ok { color: var(--mint); }
-.a-tag {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font: 700 9px/1 var(--mono);
-  letter-spacing: 0.12em;
-}
-.a-tag-bad { background: rgba(255,95,78,0.15); color: var(--bad); }
-
-.a-versus { display: flex; gap: 30px; align-items: flex-start; }
-.a-versus span { display: grid; gap: 7px; }
-.a-versus em {
-  font: 400 9.5px/1 var(--mono);
-  font-style: normal;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-.a-versus b {
-  font: 700 clamp(24px, 2.4vw, 31px)/1 var(--display);
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.a-versus .ok  { color: var(--mint); }
-.a-versus .bad { color: var(--bad); }
-
-.a-meta {
-  margin: 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-  font: 400 11px/1.7 var(--mono);
-  color: var(--slate);
-}
-.a-card-cta { display: flex; gap: 9px; }
-.a-card-cta .a-btn-mint { flex: 1; }
-
-.a-verified-l {
-  margin: 0;
-  font: 400 9.5px/1 var(--mono);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-.a-verified-n {
-  margin: -6px 0 0;
-  font: 700 clamp(28px, 2.8vw, 36px)/1 var(--display);
-  letter-spacing: -0.035em;
-  color: var(--mint);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---- rail ---- */
-.a-rail {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-  max-width: var(--page);
-  margin: 0 auto;
-  padding: 20px var(--gutter);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.a-rail ol { display: flex; gap: 34px; margin: 0; padding: 0; list-style: none; }
-.a-rail li {
-  font: 400 11px/1 var(--mono);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-/* Fix and Verify are lit because they are the two steps the rest of this
-   category does not take: a warning product stops at Decide. */
-.a-rail li.lit { color: var(--mint); }
-.a-rail p {
-  margin: 0;
-  font: 400 11px/1 var(--mono);
-  letter-spacing: 0.07em;
-  color: var(--slate);
-}
-
-/* ---- stats ---- */
-.a-stats {
-  display: flex;
-  gap: clamp(28px, 5vw, 74px);
-  flex-wrap: wrap;
-  max-width: var(--page);
-  margin: 0 auto;
-  padding: 26px var(--gutter) 60px;
-}
-.a-stats p { margin: 0; display: flex; align-items: baseline; gap: 9px; font: 400 13px/1.4 var(--mono); }
-.a-stats b { font-weight: 700; color: var(--ice); }
-.a-stats b.bad { color: var(--bad); }
-.a-stats span { color: var(--mist); }
-.a-stats a { color: var(--slate); text-decoration: none; }
-.a-stats a:hover { color: var(--mist); }
-
-/* ---- narrow ----
-   Absolute cards stop being a tableau once they overlap the table they are
-   meant to sit in front of, so below the breakpoint they become blocks in
-   the flow and the console stops fading. */
-@media (max-width: 1080px) {
-  .a-card { position: static; width: auto; transform: none; margin-top: 18px; }
-  .a-stage { padding-bottom: 60px; }
-  .a-console { -webkit-mask-image: none; mask-image: none; }
-  .a-figs { gap: 22px; }
-}
 @media (max-width: 760px) {
-  .a-nav nav { display: none; }
-  /* Fixed columns squeeze the mono cells into each other well before the
-     text gets a chance to wrap, and it cannot wrap: these are figures and
-     addresses that must not break. So the table keeps its natural width and
-     the console scrolls under it. The mask goes too, or it would fade the
-     rows a reader has just scrolled to. */
-  .a-console { overflow: auto hidden; -webkit-mask-image: none; mask-image: none; }
-  .a-table { table-layout: auto; min-width: 680px; }
   .a-console-head { flex-direction: column; align-items: flex-start; gap: 14px; }
-  .a-figs span { justify-items: start; }
-  /* The header left-aligns here, so its captions must follow. */
-  .a-figs > span > i { text-align: left; }
-  .a-versus { gap: 20px; }
-  .a-rail ol { gap: 18px 20px; flex-wrap: wrap; }
-  /* Let the attribution fall under its figure rather than tearing the
-     sentence across a line break. */
-  .a-stats p { flex-wrap: wrap; row-gap: 2px; }
-  .a-stats a { flex-basis: 100%; }
+  /* Stacked, and tighter: three cells at desktop padding push the first row
+     most of a screen down. The rules turn horizontal with them. */
+  .a-figs { grid-template-columns: 1fr; }
+  .a-figs > span {
+    padding: 13px 18px 15px;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .a-figs > span:first-child { border-top: 0; }
 }
-
-
-/* The reachable cell stacks its figure over the floor value where the asset
-   is not itself a dollar amount. */
-.a-reach { display: grid; gap: 4px; justify-items: start; line-height: 1; }
-.a-reach-n { display: inline-flex; align-items: baseline; white-space: nowrap; }
-.a-reach-usd { font-size: 11px; color: var(--slate); }
-.a-nfts { color: inherit; }
-
-/* Revoked is not removed from the table: the asset is still yours and the
-   application still exists. Only the authority is gone, so it settles slate
-   rather than mint or red. */
-.a-table td .gone { color: var(--mist); }
-.a-btn-done { background: rgba(47,224,188,0.16); color: var(--ok); cursor: default; }
 
 /* The console is the positioning context for the read sweep. */
 .a-console { position: relative; }
@@ -461,316 +252,551 @@
  * needs an allowance, so it is cut to what the action required; DemoMarket
  * needs none, so it is removed. Limited settles mint, revoked settles slate.
  */
-/* One cycle: about five and a half seconds of work, then six and a half at
-   rest in the corrected state, which is what a reader mostly sees. The reset
-   is a single snap rather than a rewind — watching a wallet un-fix itself is
-   not something this product does. */
-.alt { --run: 12s; }
+/* Three wallets, twelve seconds each. Within a segment: about five and a half
+   seconds of work, then six at rest in the corrected state, which is what a
+   reader mostly sees. Each reset is a snap rather than a rewind — watching a
+   wallet un-fix itself is not something this product does. */
+.alt { --run: 36s; }
 
-.a-count, .a-count .g, .a-count .p {
+.a-count, .a-count .m, .a-count .g, .a-count .p {
   animation-duration: var(--run);
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
 
 @keyframes auExp {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  0.8333% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  2.7083% { --ti: 8; --lo: 173; --pl: 8173; --fr: 0; }
-  4.5833% { --ti: 12; --lo: 372; --pl: 12372; --fr: 0; }
-  6.4583% { --ti: 13; --lo: 914; --pl: 13914; --fr: 0; }
-  8.3333% { --ti: 14; --lo: 140; --pl: 14140; --fr: 0; }
-  21.6667% { --ti: 14; --lo: 140; --pl: 14140; --fr: 0; }
-  23.3333% { --ti: 9; --lo: 331; --pl: 9331; --fr: 0; }
-  25% { --ti: 6; --lo: 860; --pl: 6860; --fr: 0; }
-  26.6667% { --ti: 5; --lo: 953; --pl: 5953; --fr: 0; }
-  28.3333% { --ti: 5; --lo: 820; --pl: 5820; --fr: 0; }
-  30% { --ti: 5; --lo: 820; --pl: 5820; --fr: 0; }
-  31.6667% { --ti: 4; --lo: 710; --pl: 4710; --fr: 0; }
-  33.3333% { --ti: 4; --lo: 140; --pl: 4140; --fr: 0; }
-  35% { --ti: 3; --lo: 931; --pl: 3931; --fr: 0; }
-  36.6667% { --ti: 3; --lo: 900; --pl: 3900; --fr: 0; }
-  99.1667% { --ti: 3; --lo: 900; --pl: 3900; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0.2778% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0.9028% { --m: 0; --k: 12; --ti: 12; --lo: 202; --pl: 12202; --fr: 0; }
+  1.5278% { --m: 0; --k: 18; --ti: 18; --lo: 471; --pl: 18471; --fr: 0; }
+  2.1528% { --m: 0; --k: 20; --ti: 20; --lo: 772; --pl: 20772; --fr: 0; }
+  2.7778% { --m: 0; --k: 21; --ti: 21; --lo: 110; --pl: 21110; --fr: 0; }
+  7.2222% { --m: 0; --k: 21; --ti: 21; --lo: 110; --pl: 21110; --fr: 0; }
+  7.7778% { --m: 0; --k: 16; --ti: 16; --lo: 301; --pl: 16301; --fr: 0; }
+  8.3333% { --m: 0; --k: 13; --ti: 13; --lo: 830; --pl: 13830; --fr: 0; }
+  8.8889% { --m: 0; --k: 12; --ti: 12; --lo: 923; --pl: 12923; --fr: 0; }
+  9.4444% { --m: 0; --k: 12; --ti: 12; --lo: 790; --pl: 12790; --fr: 0; }
+  10% { --m: 0; --k: 12; --ti: 12; --lo: 790; --pl: 12790; --fr: 0; }
+  10.5556% { --m: 0; --k: 11; --ti: 11; --lo: 680; --pl: 11680; --fr: 0; }
+  11.1111% { --m: 0; --k: 11; --ti: 11; --lo: 110; --pl: 11110; --fr: 0; }
+  11.6667% { --m: 0; --k: 10; --ti: 10; --lo: 901; --pl: 10901; --fr: 0; }
+  12.2222% { --m: 0; --k: 10; --ti: 10; --lo: 870; --pl: 10870; --fr: 0; }
+  32.7778% { --m: 0; --k: 10; --ti: 10; --lo: 870; --pl: 10870; --fr: 0; }
+  32.7847% { --m: 0; --k: 4; --ti: 4; --lo: 587; --pl: 4587; --fr: 0; }
+  32.7917% { --m: 0; --k: 1; --ti: 1; --lo: 359; --pl: 1359; --fr: 0; }
+  32.7986% { --m: 0; --k: 0; --ti: 0; --lo: 174; --pl: 174; --fr: 0; }
+  32.8056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  33.6111% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.2361% { --m: 1; --k: 385; --ti: 1385; --lo: 928; --pl: 1385928; --fr: 0; }
+  34.8611% { --m: 2; --k: 98; --ti: 2098; --lo: 75; --pl: 2098075; --fr: 0; }
+  35.4861% { --m: 2; --k: 359; --ti: 2359; --lo: 435; --pl: 2359435; --fr: 0; }
+  36.1111% { --m: 2; --k: 397; --ti: 2397; --lo: 800; --pl: 2397800; --fr: 0; }
+  40.5556% { --m: 2; --k: 397; --ti: 2397; --lo: 800; --pl: 2397800; --fr: 0; }
+  41.1111% { --m: 1; --k: 709; --ti: 1709; --lo: 980; --pl: 1709980; --fr: 0; }
+  41.6667% { --m: 1; --k: 356; --ti: 1356; --lo: 550; --pl: 1356550; --fr: 0; }
+  42.2222% { --m: 1; --k: 226; --ti: 1226; --lo: 840; --pl: 1226840; --fr: 0; }
+  42.7778% { --m: 1; --k: 207; --ti: 1207; --lo: 800; --pl: 1207800; --fr: 0; }
+  43.3333% { --m: 1; --k: 207; --ti: 1207; --lo: 800; --pl: 1207800; --fr: 0; }
+  43.8889% { --m: 0; --k: 984; --ti: 984; --lo: 692; --pl: 984692; --fr: 0; }
+  44.4444% { --m: 0; --k: 870; --ti: 870; --lo: 50; --pl: 870050; --fr: 0; }
+  45% { --m: 0; --k: 827; --ti: 827; --lo: 976; --pl: 827976; --fr: 0; }
+  45.5556% { --m: 0; --k: 821; --ti: 821; --lo: 800; --pl: 821800; --fr: 0; }
+  66.1111% { --m: 0; --k: 821; --ti: 821; --lo: 800; --pl: 821800; --fr: 0; }
+  66.1181% { --m: 0; --k: 346; --ti: 346; --lo: 800; --pl: 346800; --fr: 0; }
+  66.125% { --m: 0; --k: 102; --ti: 102; --lo: 725; --pl: 102725; --fr: 0; }
+  66.1319% { --m: 0; --k: 13; --ti: 13; --lo: 149; --pl: 13149; --fr: 0; }
+  66.1389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.9444% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  67.5694% { --m: 0; --k: 3; --ti: 3; --lo: 907; --pl: 3907; --fr: 0; }
+  68.1944% { --m: 0; --k: 5; --ti: 5; --lo: 915; --pl: 5915; --fr: 0; }
+  68.8194% { --m: 0; --k: 6; --ti: 6; --lo: 652; --pl: 6652; --fr: 0; }
+  69.4444% { --m: 0; --k: 6; --ti: 6; --lo: 760; --pl: 6760; --fr: 0; }
+  73.8889% { --m: 0; --k: 6; --ti: 6; --lo: 760; --pl: 6760; --fr: 0; }
+  74.4444% { --m: 0; --k: 5; --ti: 5; --lo: 561; --pl: 5561; --fr: 0; }
+  75% { --m: 0; --k: 4; --ti: 4; --lo: 944; --pl: 4944; --fr: 0; }
+  75.5556% { --m: 0; --k: 4; --ti: 4; --lo: 718; --pl: 4718; --fr: 0; }
+  76.1111% { --m: 0; --k: 4; --ti: 4; --lo: 685; --pl: 4685; --fr: 0; }
+  76.6667% { --m: 0; --k: 4; --ti: 4; --lo: 685; --pl: 4685; --fr: 0; }
+  77.2222% { --m: 0; --k: 4; --ti: 4; --lo: 465; --pl: 4465; --fr: 0; }
+  77.7778% { --m: 0; --k: 4; --ti: 4; --lo: 352; --pl: 4352; --fr: 0; }
+  78.3333% { --m: 0; --k: 4; --ti: 4; --lo: 311; --pl: 4311; --fr: 0; }
+  78.8889% { --m: 0; --k: 4; --ti: 4; --lo: 305; --pl: 4305; --fr: 0; }
+  99.4444% { --m: 0; --k: 4; --ti: 4; --lo: 305; --pl: 4305; --fr: 0; }
+  99.4514% { --m: 0; --k: 1; --ti: 1; --lo: 817; --pl: 1817; --fr: 0; }
+  99.4583% { --m: 0; --k: 0; --ti: 0; --lo: 538; --pl: 538; --fr: 0; }
+  99.4653% { --m: 0; --k: 0; --ti: 0; --lo: 69; --pl: 69; --fr: 0; }
+  99.4722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auExpG { 0%, 2.6983% { opacity: 0; } 2.7083%, 99.24% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
-@keyframes auExpP { 0%, 2.6983% { opacity: 1; } 2.7083%, 99.24% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
-@keyframes auExpC { 0% { color: var(--bad); } 21.6667% { color: var(--bad); } 28.3333% { color: var(--ice); } 99.1667% { color: var(--ice); } 99.25% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auExpM { 0%, 34.2261% { opacity: 0; } 34.2361%, 43.8789% { opacity: 1; } 43.8889%, 100% { opacity: 0; } }
+@keyframes auExpG { 0%, 0.8928% { opacity: 0; } 0.9028%, 32.7886% { opacity: 1; } 32.7986%, 43.8789% { opacity: 0; } 43.8889%, 66.1289% { opacity: 1; } 66.1389%, 67.5594% { opacity: 0; } 67.5694%, 99.4483% { opacity: 1; } 99.4583%, 100% { opacity: 0; } }
+@keyframes auExpP { 0%, 0.8928% { opacity: 1; } 0.9028%, 32.7886% { opacity: 0; } 32.7986%, 34.2261% { opacity: 1; } 34.2361%, 66.1289% { opacity: 0; } 66.1389%, 67.5594% { opacity: 1; } 67.5694%, 99.4483% { opacity: 0; } 99.4583%, 100% { opacity: 1; } }
+@keyframes auExpC { 0% { color: var(--bad); } 7.2222% { color: var(--bad); } 9.4444% { color: var(--ice); } 32.8056% { color: var(--bad); } 40.5556% { color: var(--bad); } 42.7778% { color: var(--ice); } 66.1389% { color: var(--bad); } 73.8889% { color: var(--bad); } 76.1111% { color: var(--ice); } 99.4722% { color: var(--bad); } 99.7222% { color: var(--bad); } 99.75% { color: var(--bad); } 100% { color: var(--bad); } }
 @keyframes auOpen {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  1.5% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  3.2083% { --ti: 0; --lo: 3; --pl: 3; --fr: 0; }
-  4.9167% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  6.625% { --ti: 0; --lo: 5; --pl: 5; --fr: 0; }
-  8.3333% { --ti: 0; --lo: 5; --pl: 5; --fr: 0; }
-  30% { --ti: 0; --lo: 5; --pl: 5; --fr: 0; }
-  31.6667% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  33.3333% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  35% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  36.6667% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  99.1667% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0.2778% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0.9028% { --m: 0; --k: 0; --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  1.5278% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  2.1528% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  2.7778% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  10% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  10.5556% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  11.1111% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  11.6667% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  12.2222% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  32.7778% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  32.7847% { --m: 0; --k: 0; --ti: 0; --lo: 3; --pl: 3; --fr: 0; }
+  32.7917% { --m: 0; --k: 0; --ti: 0; --lo: 1; --pl: 1; --fr: 0; }
+  32.7986% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.8056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  33.6111% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.2361% { --m: 0; --k: 0; --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  34.8611% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  35.4861% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  36.1111% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  43.3333% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  43.8889% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  44.4444% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  45% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  45.5556% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  66.1111% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  66.1181% { --m: 0; --k: 0; --ti: 0; --lo: 3; --pl: 3; --fr: 0; }
+  66.125% { --m: 0; --k: 0; --ti: 0; --lo: 1; --pl: 1; --fr: 0; }
+  66.1319% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.9444% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  67.5694% { --m: 0; --k: 0; --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  68.1944% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  68.8194% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  69.4444% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  76.6667% { --m: 0; --k: 0; --ti: 0; --lo: 7; --pl: 7; --fr: 0; }
+  77.2222% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  77.7778% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  78.3333% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  78.8889% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  99.4444% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  99.4514% { --m: 0; --k: 0; --ti: 0; --lo: 3; --pl: 3; --fr: 0; }
+  99.4583% { --m: 0; --k: 0; --ti: 0; --lo: 1; --pl: 1; --fr: 0; }
+  99.4653% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
+@keyframes auOpenM { 0%, 100% { opacity: 0; } }
 @keyframes auOpenG { 0%, 100% { opacity: 0; } }
 @keyframes auOpenP { 0%, 100% { opacity: 1; } }
 @keyframes auRed {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  2.1667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  3.7083% { --ti: 23; --lo: 814; --pl: 23814; --fr: 0; }
-  5.25% { --ti: 36; --lo: 50; --pl: 36050; --fr: 0; }
-  6.7917% { --ti: 40; --lo: 541; --pl: 40541; --fr: 0; }
-  8.3333% { --ti: 41; --lo: 200; --pl: 41200; --fr: 0; }
-  21.6667% { --ti: 41; --lo: 200; --pl: 41200; --fr: 0; }
-  23.3333% { --ti: 46; --lo: 9; --pl: 46009; --fr: 0; }
-  25% { --ti: 48; --lo: 480; --pl: 48480; --fr: 0; }
-  26.6667% { --ti: 49; --lo: 387; --pl: 49387; --fr: 0; }
-  28.3333% { --ti: 49; --lo: 520; --pl: 49520; --fr: 0; }
-  30% { --ti: 49; --lo: 520; --pl: 49520; --fr: 0; }
-  31.6667% { --ti: 50; --lo: 630; --pl: 50630; --fr: 0; }
-  33.3333% { --ti: 51; --lo: 200; --pl: 51200; --fr: 0; }
-  35% { --ti: 51; --lo: 409; --pl: 51409; --fr: 0; }
-  36.6667% { --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
-  99.1667% { --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0.2778% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  0.9028% { --m: 0; --k: 23; --ti: 23; --lo: 814; --pl: 23814; --fr: 0; }
+  1.5278% { --m: 0; --k: 36; --ti: 36; --lo: 50; --pl: 36050; --fr: 0; }
+  2.1528% { --m: 0; --k: 40; --ti: 40; --lo: 541; --pl: 40541; --fr: 0; }
+  2.7778% { --m: 0; --k: 41; --ti: 41; --lo: 200; --pl: 41200; --fr: 0; }
+  7.2222% { --m: 0; --k: 41; --ti: 41; --lo: 200; --pl: 41200; --fr: 0; }
+  7.7778% { --m: 0; --k: 46; --ti: 46; --lo: 9; --pl: 46009; --fr: 0; }
+  8.3333% { --m: 0; --k: 48; --ti: 48; --lo: 480; --pl: 48480; --fr: 0; }
+  8.8889% { --m: 0; --k: 49; --ti: 49; --lo: 387; --pl: 49387; --fr: 0; }
+  9.4444% { --m: 0; --k: 49; --ti: 49; --lo: 520; --pl: 49520; --fr: 0; }
+  10% { --m: 0; --k: 49; --ti: 49; --lo: 520; --pl: 49520; --fr: 0; }
+  10.5556% { --m: 0; --k: 50; --ti: 50; --lo: 630; --pl: 50630; --fr: 0; }
+  11.1111% { --m: 0; --k: 51; --ti: 51; --lo: 200; --pl: 51200; --fr: 0; }
+  11.6667% { --m: 0; --k: 51; --ti: 51; --lo: 409; --pl: 51409; --fr: 0; }
+  12.2222% { --m: 0; --k: 51; --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
+  32.7778% { --m: 0; --k: 51; --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
+  32.7847% { --m: 0; --k: 21; --ti: 21; --lo: 708; --pl: 21708; --fr: 0; }
+  32.7917% { --m: 0; --k: 6; --ti: 6; --lo: 430; --pl: 6430; --fr: 0; }
+  32.7986% { --m: 0; --k: 0; --ti: 0; --lo: 823; --pl: 823; --fr: 0; }
+  32.8056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  33.6111% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.2361% { --m: 1; --k: 814; --ti: 1814; --lo: 920; --pl: 1814920; --fr: 0; }
+  34.8611% { --m: 2; --k: 747; --ti: 2747; --lo: 500; --pl: 2747500; --fr: 0; }
+  35.4861% { --m: 3; --k: 89; --ti: 3089; --lo: 760; --pl: 3089760; --fr: 0; }
+  36.1111% { --m: 3; --k: 140; --ti: 3140; --lo: 0; --pl: 3140000; --fr: 0; }
+  40.5556% { --m: 3; --k: 140; --ti: 3140; --lo: 0; --pl: 3140000; --fr: 0; }
+  41.1111% { --m: 3; --k: 827; --ti: 3827; --lo: 820; --pl: 3827820; --fr: 0; }
+  41.6667% { --m: 4; --k: 181; --ti: 4181; --lo: 250; --pl: 4181250; --fr: 0; }
+  42.2222% { --m: 4; --k: 310; --ti: 4310; --lo: 960; --pl: 4310960; --fr: 0; }
+  42.7778% { --m: 4; --k: 330; --ti: 4330; --lo: 0; --pl: 4330000; --fr: 0; }
+  43.3333% { --m: 4; --k: 330; --ti: 4330; --lo: 0; --pl: 4330000; --fr: 0; }
+  43.8889% { --m: 4; --k: 553; --ti: 4553; --lo: 108; --pl: 4553108; --fr: 0; }
+  44.4444% { --m: 4; --k: 667; --ti: 4667; --lo: 750; --pl: 4667750; --fr: 0; }
+  45% { --m: 4; --k: 709; --ti: 4709; --lo: 824; --pl: 4709824; --fr: 0; }
+  45.5556% { --m: 4; --k: 716; --ti: 4716; --lo: 0; --pl: 4716000; --fr: 0; }
+  66.1111% { --m: 4; --k: 716; --ti: 4716; --lo: 0; --pl: 4716000; --fr: 0; }
+  66.1181% { --m: 1; --k: 990; --ti: 1990; --lo: 152; --pl: 1990152; --fr: 0; }
+  66.125% { --m: 0; --k: 589; --ti: 589; --lo: 500; --pl: 589500; --fr: 0; }
+  66.1319% { --m: 0; --k: 75; --ti: 75; --lo: 456; --pl: 75456; --fr: 0; }
+  66.1389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.9444% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  67.5694% { --m: 0; --k: 5; --ti: 5; --lo: 433; --pl: 5433; --fr: 0; }
+  68.1944% { --m: 0; --k: 8; --ti: 8; --lo: 225; --pl: 8225; --fr: 0; }
+  68.8194% { --m: 0; --k: 9; --ti: 9; --lo: 250; --pl: 9250; --fr: 0; }
+  69.4444% { --m: 0; --k: 9; --ti: 9; --lo: 400; --pl: 9400; --fr: 0; }
+  73.8889% { --m: 0; --k: 9; --ti: 9; --lo: 400; --pl: 9400; --fr: 0; }
+  74.4444% { --m: 0; --k: 10; --ti: 10; --lo: 599; --pl: 10599; --fr: 0; }
+  75% { --m: 0; --k: 11; --ti: 11; --lo: 216; --pl: 11216; --fr: 0; }
+  75.5556% { --m: 0; --k: 11; --ti: 11; --lo: 442; --pl: 11442; --fr: 0; }
+  76.1111% { --m: 0; --k: 11; --ti: 11; --lo: 475; --pl: 11475; --fr: 0; }
+  76.6667% { --m: 0; --k: 11; --ti: 11; --lo: 475; --pl: 11475; --fr: 0; }
+  77.2222% { --m: 0; --k: 11; --ti: 11; --lo: 695; --pl: 11695; --fr: 0; }
+  77.7778% { --m: 0; --k: 11; --ti: 11; --lo: 808; --pl: 11808; --fr: 0; }
+  78.3333% { --m: 0; --k: 11; --ti: 11; --lo: 849; --pl: 11849; --fr: 0; }
+  78.8889% { --m: 0; --k: 11; --ti: 11; --lo: 855; --pl: 11855; --fr: 0; }
+  99.4444% { --m: 0; --k: 11; --ti: 11; --lo: 855; --pl: 11855; --fr: 0; }
+  99.4514% { --m: 0; --k: 5; --ti: 5; --lo: 3; --pl: 5003; --fr: 0; }
+  99.4583% { --m: 0; --k: 1; --ti: 1; --lo: 482; --pl: 1482; --fr: 0; }
+  99.4653% { --m: 0; --k: 0; --ti: 0; --lo: 190; --pl: 190; --fr: 0; }
+  99.4722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auRedG { 0%, 3.6983% { opacity: 0; } 3.7083%, 99.24% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
-@keyframes auRedP { 0%, 3.6983% { opacity: 1; } 3.7083%, 99.24% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
-@keyframes auR1 {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  3.3333% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  4.7917% { --ti: 4; --lo: 866; --pl: 4866; --fr: 76; }
-  6.25% { --ti: 7; --lo: 367; --pl: 7367; --fr: 50; }
-  7.7083% { --ti: 8; --lo: 285; --pl: 8285; --fr: 28; }
-  9.1667% { --ti: 8; --lo: 420; --pl: 8420; --fr: 0; }
-  21.6667% { --ti: 8; --lo: 420; --pl: 8420; --fr: 0; }
-  23.3333% { --ti: 3; --lo: 611; --pl: 3611; --fr: 4; }
-  25% { --ti: 1; --lo: 140; --pl: 1140; --fr: 0; }
-  26.6667% { --ti: 0; --lo: 233; --pl: 233; --fr: 12; }
-  28.3333% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  99.1667% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+@keyframes auRedM { 0%, 34.2261% { opacity: 0; } 34.2361%, 66.115% { opacity: 1; } 66.125%, 100% { opacity: 0; } }
+@keyframes auRedG { 0%, 0.8928% { opacity: 0; } 0.9028%, 32.7886% { opacity: 1; } 32.7986%, 66.115% { opacity: 0; } 66.125%, 66.1289% { opacity: 1; } 66.1389%, 67.5594% { opacity: 0; } 67.5694%, 99.4553% { opacity: 1; } 99.4653%, 100% { opacity: 0; } }
+@keyframes auRedP { 0%, 0.8928% { opacity: 1; } 0.9028%, 32.7886% { opacity: 0; } 32.7986%, 34.2261% { opacity: 1; } 34.2361%, 66.1289% { opacity: 0; } 66.1389%, 67.5594% { opacity: 1; } 67.5694%, 99.4553% { opacity: 0; } 99.4653%, 100% { opacity: 1; } }
+@keyframes auS1R1 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.1111% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.5972% { --m: 0; --k: 4; --ti: 4; --lo: 866; --pl: 4866; --fr: 76; }
+  2.0833% { --m: 0; --k: 7; --ti: 7; --lo: 367; --pl: 7367; --fr: 50; }
+  2.5694% { --m: 0; --k: 8; --ti: 8; --lo: 285; --pl: 8285; --fr: 28; }
+  3.0556% { --m: 0; --k: 8; --ti: 8; --lo: 420; --pl: 8420; --fr: 0; }
+  7.2222% { --m: 0; --k: 8; --ti: 8; --lo: 420; --pl: 8420; --fr: 0; }
+  7.7778% { --m: 0; --k: 3; --ti: 3; --lo: 611; --pl: 3611; --fr: 4; }
+  8.3333% { --m: 0; --k: 1; --ti: 1; --lo: 140; --pl: 1140; --fr: 0; }
+  8.8889% { --m: 0; --k: 0; --ti: 0; --lo: 233; --pl: 233; --fr: 12; }
+  9.4444% { --m: 0; --k: 0; --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  32.7778% { --m: 0; --k: 0; --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
+  32.7847% { --m: 0; --k: 0; --ti: 0; --lo: 42; --pl: 42; --fr: 20; }
+  32.7917% { --m: 0; --k: 0; --ti: 0; --lo: 12; --pl: 12; --fr: 50; }
+  32.7986% { --m: 0; --k: 0; --ti: 0; --lo: 1; --pl: 1; --fr: 60; }
+  32.8056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auR1G { 0%, 4.7817% { opacity: 0; } 4.7917%, 26.6567% { opacity: 1; } 26.6667%, 100% { opacity: 0; } }
-@keyframes auR1P { 0%, 4.7817% { opacity: 1; } 4.7917%, 26.6567% { opacity: 0; } 26.6667%, 100% { opacity: 1; } }
-@keyframes auR1C { 0% { color: var(--bad); } 21.6667% { color: var(--bad); } 28.3333% { color: var(--ok); } 99.1667% { color: var(--ok); } 99.25% { color: var(--bad); } 100% { color: var(--bad); } }
-@keyframes auR2 {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  3.9167% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  5.3333% { --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
-  6.75% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  8.1667% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  9.5833% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  30% { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
-  31.6667% { --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
-  33.3333% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  35% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  36.6667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  99.1667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+@keyframes auS1R1M { 0%, 100% { opacity: 0; } }
+@keyframes auS1R1G { 0%, 1.5872% { opacity: 0; } 1.5972%, 8.8789% { opacity: 1; } 8.8889%, 100% { opacity: 0; } }
+@keyframes auS1R1P { 0%, 1.5872% { opacity: 1; } 1.5972%, 8.8789% { opacity: 0; } 8.8889%, 100% { opacity: 1; } }
+@keyframes auS1R1C { 0% { color: var(--bad); } 7.2222% { color: var(--bad); } 9.4444% { color: var(--ok); } 32.8056% { color: var(--bad); } 99.7222% { color: var(--bad); } 99.75% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auS1R2 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.3056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.7778% { --m: 0; --k: 0; --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
+  2.25% { --m: 0; --k: 0; --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  2.7222% { --m: 0; --k: 0; --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  3.1944% { --m: 0; --k: 0; --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  10% { --m: 0; --k: 0; --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  10.5556% { --m: 0; --k: 0; --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
+  11.1111% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  11.6667% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  12.2222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.7778% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.7847% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.7917% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.7986% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.8056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auR2G { 0%, 100% { opacity: 0; } }
-@keyframes auR2P { 0%, 100% { opacity: 1; } }
-@keyframes auR2C { 0% { color: var(--bad); } 30% { color: var(--bad); } 36.6667% { color: var(--mist); } 99.1667% { color: var(--mist); } 99.25% { color: var(--bad); } 100% { color: var(--bad); } }
-@keyframes auR2u {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  3.9167% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  5.3333% { --ti: 1; --lo: 110; --pl: 1110; --fr: 0; }
-  6.75% { --ti: 1; --lo: 680; --pl: 1680; --fr: 0; }
-  8.1667% { --ti: 1; --lo: 889; --pl: 1889; --fr: 0; }
-  9.5833% { --ti: 1; --lo: 920; --pl: 1920; --fr: 0; }
-  30% { --ti: 1; --lo: 920; --pl: 1920; --fr: 0; }
-  31.6667% { --ti: 0; --lo: 810; --pl: 810; --fr: 0; }
-  33.3333% { --ti: 0; --lo: 240; --pl: 240; --fr: 0; }
-  35% { --ti: 0; --lo: 31; --pl: 31; --fr: 0; }
-  36.6667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  99.1667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+@keyframes auS1R2M { 0%, 100% { opacity: 0; } }
+@keyframes auS1R2G { 0%, 100% { opacity: 0; } }
+@keyframes auS1R2P { 0%, 100% { opacity: 1; } }
+@keyframes auS1R2C { 0% { color: var(--bad); } 10% { color: var(--bad); } 12.2222% { color: var(--mist); } 32.8056% { color: var(--bad); } 99.7222% { color: var(--bad); } 99.75% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auS1R2u {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.3056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.7778% { --m: 0; --k: 1; --ti: 1; --lo: 110; --pl: 1110; --fr: 0; }
+  2.25% { --m: 0; --k: 1; --ti: 1; --lo: 680; --pl: 1680; --fr: 0; }
+  2.7222% { --m: 0; --k: 1; --ti: 1; --lo: 889; --pl: 1889; --fr: 0; }
+  3.1944% { --m: 0; --k: 1; --ti: 1; --lo: 920; --pl: 1920; --fr: 0; }
+  10% { --m: 0; --k: 1; --ti: 1; --lo: 920; --pl: 1920; --fr: 0; }
+  10.5556% { --m: 0; --k: 0; --ti: 0; --lo: 810; --pl: 810; --fr: 0; }
+  11.1111% { --m: 0; --k: 0; --ti: 0; --lo: 240; --pl: 240; --fr: 0; }
+  11.6667% { --m: 0; --k: 0; --ti: 0; --lo: 31; --pl: 31; --fr: 0; }
+  12.2222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.7778% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.7847% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.7917% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.7986% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  32.8056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auR2uG { 0%, 5.3233% { opacity: 0; } 5.3333%, 31.6567% { opacity: 1; } 31.6667%, 100% { opacity: 0; } }
-@keyframes auR2uP { 0%, 5.3233% { opacity: 1; } 5.3333%, 31.6567% { opacity: 0; } 31.6667%, 100% { opacity: 1; } }
-@keyframes auR3 {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  4.5% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  5.875% { --ti: 1; --lo: 445; --pl: 1445; --fr: 0; }
-  7.25% { --ti: 2; --lo: 187; --pl: 2187; --fr: 50; }
-  8.625% { --ti: 2; --lo: 460; --pl: 2460; --fr: 0; }
-  10% { --ti: 2; --lo: 500; --pl: 2500; --fr: 0; }
-  99.1667% { --ti: 2; --lo: 500; --pl: 2500; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+@keyframes auS1R2uM { 0%, 100% { opacity: 0; } }
+@keyframes auS1R2uG { 0%, 1.7678% { opacity: 0; } 1.7778%, 10.5456% { opacity: 1; } 10.5556%, 100% { opacity: 0; } }
+@keyframes auS1R2uP { 0%, 1.7678% { opacity: 1; } 1.7778%, 10.5456% { opacity: 0; } 10.5556%, 100% { opacity: 1; } }
+@keyframes auS1R3 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.1111% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  1.5972% { --m: 0; --k: 1; --ti: 1; --lo: 445; --pl: 1445; --fr: 0; }
+  2.0833% { --m: 0; --k: 2; --ti: 2; --lo: 187; --pl: 2187; --fr: 50; }
+  2.5694% { --m: 0; --k: 2; --ti: 2; --lo: 460; --pl: 2460; --fr: 0; }
+  3.0556% { --m: 0; --k: 2; --ti: 2; --lo: 500; --pl: 2500; --fr: 0; }
+  32.7778% { --m: 0; --k: 2; --ti: 2; --lo: 500; --pl: 2500; --fr: 0; }
+  32.7847% { --m: 0; --k: 1; --ti: 1; --lo: 55; --pl: 1055; --fr: 0; }
+  32.7917% { --m: 0; --k: 0; --ti: 0; --lo: 312; --pl: 312; --fr: 50; }
+  32.7986% { --m: 0; --k: 0; --ti: 0; --lo: 40; --pl: 40; --fr: 0; }
+  32.8056% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auR3G { 0%, 5.865% { opacity: 0; } 5.875%, 99.24% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
-@keyframes auR3P { 0%, 5.865% { opacity: 1; } 5.875%, 99.24% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
-@keyframes auR4 {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  5.0833% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  6.4167% { --ti: 0; --lo: 57; --pl: 57; --fr: 80; }
-  7.75% { --ti: 0; --lo: 87; --pl: 87; --fr: 50; }
-  9.0833% { --ti: 0; --lo: 98; --pl: 98; --fr: 40; }
-  10.4167% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  99.1667% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+@keyframes auS1R3M { 0%, 100% { opacity: 0; } }
+@keyframes auS1R3G { 0%, 1.5872% { opacity: 0; } 1.5972%, 32.7817% { opacity: 1; } 32.7917%, 100% { opacity: 0; } }
+@keyframes auS1R3P { 0%, 1.5872% { opacity: 1; } 1.5972%, 32.7817% { opacity: 0; } 32.7917%, 100% { opacity: 1; } }
+@keyframes auS2R1 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.4444% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.9306% { --m: 0; --k: 716; --ti: 716; --lo: 720; --pl: 716720; --fr: 0; }
+  35.4167% { --m: 1; --k: 85; --ti: 1085; --lo: 0; --pl: 1085000; --fr: 0; }
+  35.9028% { --m: 1; --k: 220; --ti: 1220; --lo: 160; --pl: 1220160; --fr: 0; }
+  36.3889% { --m: 1; --k: 240; --ti: 1240; --lo: 0; --pl: 1240000; --fr: 0; }
+  40.5556% { --m: 1; --k: 240; --ti: 1240; --lo: 0; --pl: 1240000; --fr: 0; }
+  41.1111% { --m: 0; --k: 552; --ti: 552; --lo: 180; --pl: 552180; --fr: 0; }
+  41.6667% { --m: 0; --k: 198; --ti: 198; --lo: 750; --pl: 198750; --fr: 0; }
+  42.2222% { --m: 0; --k: 69; --ti: 69; --lo: 40; --pl: 69040; --fr: 0; }
+  42.7778% { --m: 0; --k: 50; --ti: 50; --lo: 0; --pl: 50000; --fr: 0; }
+  66.1111% { --m: 0; --k: 50; --ti: 50; --lo: 0; --pl: 50000; --fr: 0; }
+  66.1181% { --m: 0; --k: 21; --ti: 21; --lo: 100; --pl: 21100; --fr: 0; }
+  66.125% { --m: 0; --k: 6; --ti: 6; --lo: 250; --pl: 6250; --fr: 0; }
+  66.1319% { --m: 0; --k: 0; --ti: 0; --lo: 800; --pl: 800; --fr: 0; }
+  66.1389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auR4G { 0%, 100% { opacity: 0; } }
-@keyframes auR4P { 0%, 100% { opacity: 1; } }
-@keyframes auR5 {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  5.6667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  6.9583% { --ti: 0; --lo: 693; --pl: 693; --fr: 60; }
-  8.25% { --ti: 1; --lo: 50; --pl: 1050; --fr: 0; }
-  9.5417% { --ti: 1; --lo: 180; --pl: 1180; --fr: 80; }
-  10.8333% { --ti: 1; --lo: 200; --pl: 1200; --fr: 0; }
-  99.1667% { --ti: 1; --lo: 200; --pl: 1200; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+@keyframes auS2R1M { 0%, 35.4067% { opacity: 0; } 35.4167%, 41.1011% { opacity: 1; } 41.1111%, 100% { opacity: 0; } }
+@keyframes auS2R1G { 0%, 34.9206% { opacity: 0; } 34.9306%, 35.4067% { opacity: 1; } 35.4167%, 41.1011% { opacity: 0; } 41.1111%, 66.1219% { opacity: 1; } 66.1319%, 100% { opacity: 0; } }
+@keyframes auS2R1P { 0%, 34.9206% { opacity: 1; } 34.9306%, 66.1219% { opacity: 0; } 66.1319%, 100% { opacity: 1; } }
+@keyframes auS2R1C { 0% { color: var(--bad); } 40.5556% { color: var(--bad); } 42.7778% { color: var(--ok); } 66.1389% { color: var(--bad); } 99.7222% { color: var(--bad); } 99.75% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auS2R2 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.6389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  35.1111% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  35.5833% { --m: 0; --k: 0; --ti: 0; --lo: 10; --pl: 10; --fr: 0; }
+  36.0556% { --m: 0; --k: 0; --ti: 0; --lo: 11; --pl: 11; --fr: 0; }
+  36.5278% { --m: 0; --k: 0; --ti: 0; --lo: 11; --pl: 11; --fr: 0; }
+  43.3333% { --m: 0; --k: 0; --ti: 0; --lo: 11; --pl: 11; --fr: 0; }
+  43.8889% { --m: 0; --k: 0; --ti: 0; --lo: 5; --pl: 5; --fr: 0; }
+  44.4444% { --m: 0; --k: 0; --ti: 0; --lo: 1; --pl: 1; --fr: 0; }
+  45% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  45.5556% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1111% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1181% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.125% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1319% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auR5G { 0%, 8.24% { opacity: 0; } 8.25%, 99.24% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
-@keyframes auR5P { 0%, 8.24% { opacity: 1; } 8.25%, 99.24% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
-@keyframes auNeed {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  10.8333% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  11.875% { --ti: 0; --lo: 57; --pl: 57; --fr: 80; }
-  12.9167% { --ti: 0; --lo: 87; --pl: 87; --fr: 50; }
-  13.9583% { --ti: 0; --lo: 98; --pl: 98; --fr: 40; }
-  15% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  99.1667% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+@keyframes auS2R2M { 0%, 100% { opacity: 0; } }
+@keyframes auS2R2G { 0%, 100% { opacity: 0; } }
+@keyframes auS2R2P { 0%, 100% { opacity: 1; } }
+@keyframes auS2R2C { 0% { color: var(--bad); } 43.3333% { color: var(--bad); } 45.5556% { color: var(--mist); } 66.1389% { color: var(--bad); } 99.7222% { color: var(--bad); } 99.75% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auS2R2u {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.6389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  35.1111% { --m: 0; --k: 223; --ti: 223; --lo: 108; --pl: 223108; --fr: 0; }
+  35.5833% { --m: 0; --k: 337; --ti: 337; --lo: 750; --pl: 337750; --fr: 0; }
+  36.0556% { --m: 0; --k: 379; --ti: 379; --lo: 824; --pl: 379824; --fr: 0; }
+  36.5278% { --m: 0; --k: 386; --ti: 386; --lo: 0; --pl: 386000; --fr: 0; }
+  43.3333% { --m: 0; --k: 386; --ti: 386; --lo: 0; --pl: 386000; --fr: 0; }
+  43.8889% { --m: 0; --k: 162; --ti: 162; --lo: 892; --pl: 162892; --fr: 0; }
+  44.4444% { --m: 0; --k: 48; --ti: 48; --lo: 250; --pl: 48250; --fr: 0; }
+  45% { --m: 0; --k: 6; --ti: 6; --lo: 176; --pl: 6176; --fr: 0; }
+  45.5556% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1111% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1181% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.125% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1319% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  66.1389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auNeedG { 0%, 100% { opacity: 0; } }
-@keyframes auNeedP { 0%, 100% { opacity: 1; } }
-@keyframes auAllow {
-  0% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  39.1667% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  40.2083% { --ti: 0; --lo: 57; --pl: 57; --fr: 80; }
-  41.25% { --ti: 0; --lo: 87; --pl: 87; --fr: 50; }
-  42.2917% { --ti: 0; --lo: 98; --pl: 98; --fr: 40; }
-  43.3333% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  99.1667% { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  99.25% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  100% { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+@keyframes auS2R2uM { 0%, 100% { opacity: 0; } }
+@keyframes auS2R2uG { 0%, 35.1011% { opacity: 0; } 35.1111%, 45.5456% { opacity: 1; } 45.5556%, 100% { opacity: 0; } }
+@keyframes auS2R2uP { 0%, 35.1011% { opacity: 1; } 35.1111%, 45.5456% { opacity: 0; } 45.5556%, 100% { opacity: 1; } }
+@keyframes auS2R3 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.4444% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  34.9306% { --m: 0; --k: 104; --ti: 104; --lo: 40; --pl: 104040; --fr: 0; }
+  35.4167% { --m: 0; --k: 157; --ti: 157; --lo: 500; --pl: 157500; --fr: 0; }
+  35.9028% { --m: 0; --k: 177; --ti: 177; --lo: 120; --pl: 177120; --fr: 0; }
+  36.3889% { --m: 0; --k: 180; --ti: 180; --lo: 0; --pl: 180000; --fr: 0; }
+  66.1111% { --m: 0; --k: 180; --ti: 180; --lo: 0; --pl: 180000; --fr: 0; }
+  66.1181% { --m: 0; --k: 75; --ti: 75; --lo: 960; --pl: 75960; --fr: 0; }
+  66.125% { --m: 0; --k: 22; --ti: 22; --lo: 500; --pl: 22500; --fr: 0; }
+  66.1319% { --m: 0; --k: 2; --ti: 2; --lo: 880; --pl: 2880; --fr: 0; }
+  66.1389% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
 }
-@keyframes auAllowG { 0%, 100% { opacity: 0; } }
-@keyframes auAllowP { 0%, 100% { opacity: 1; } }
+@keyframes auS2R3M { 0%, 100% { opacity: 0; } }
+@keyframes auS2R3G { 0%, 34.9206% { opacity: 0; } 34.9306%, 66.1289% { opacity: 1; } 66.1389%, 100% { opacity: 0; } }
+@keyframes auS2R3P { 0%, 34.9206% { opacity: 1; } 34.9306%, 66.1289% { opacity: 0; } 66.1389%, 100% { opacity: 1; } }
+@keyframes auS3R1 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  67.7778% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  68.2639% { --m: 0; --k: 1; --ti: 1; --lo: 242; --pl: 1242; --fr: 70; }
+  68.75% { --m: 0; --k: 1; --ti: 1; --lo: 881; --pl: 1881; --fr: 25; }
+  69.2361% { --m: 0; --k: 2; --ti: 2; --lo: 115; --pl: 2115; --fr: 60; }
+  69.7222% { --m: 0; --k: 2; --ti: 2; --lo: 150; --pl: 2150; --fr: 0; }
+  73.8889% { --m: 0; --k: 2; --ti: 2; --lo: 150; --pl: 2150; --fr: 0; }
+  74.4444% { --m: 0; --k: 0; --ti: 0; --lo: 950; --pl: 950; --fr: 65; }
+  75% { --m: 0; --k: 0; --ti: 0; --lo: 334; --pl: 334; --fr: 38; }
+  75.5556% { --m: 0; --k: 0; --ti: 0; --lo: 108; --pl: 108; --fr: 20; }
+  76.1111% { --m: 0; --k: 0; --ti: 0; --lo: 75; --pl: 75; --fr: 0; }
+  99.4444% { --m: 0; --k: 0; --ti: 0; --lo: 75; --pl: 75; --fr: 0; }
+  99.4514% { --m: 0; --k: 0; --ti: 0; --lo: 31; --pl: 31; --fr: 65; }
+  99.4583% { --m: 0; --k: 0; --ti: 0; --lo: 9; --pl: 9; --fr: 38; }
+  99.4653% { --m: 0; --k: 0; --ti: 0; --lo: 1; --pl: 1; --fr: 20; }
+  99.4722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auS3R1M { 0%, 100% { opacity: 0; } }
+@keyframes auS3R1G { 0%, 68.2539% { opacity: 0; } 68.2639%, 74.4344% { opacity: 1; } 74.4444%, 100% { opacity: 0; } }
+@keyframes auS3R1P { 0%, 68.2539% { opacity: 1; } 68.2639%, 74.4344% { opacity: 0; } 74.4444%, 100% { opacity: 1; } }
+@keyframes auS3R1C { 0% { color: var(--bad); } 73.8889% { color: var(--bad); } 76.1111% { color: var(--ok); } 99.4722% { color: var(--bad); } 99.7222% { color: var(--bad); } 99.75% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auS3R2 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  67.9722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  68.4444% { --m: 0; --k: 0; --ti: 0; --lo: 1; --pl: 1; --fr: 0; }
+  68.9167% { --m: 0; --k: 0; --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
+  69.3889% { --m: 0; --k: 0; --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
+  69.8611% { --m: 0; --k: 0; --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
+  76.6667% { --m: 0; --k: 0; --ti: 0; --lo: 2; --pl: 2; --fr: 0; }
+  77.2222% { --m: 0; --k: 0; --ti: 0; --lo: 1; --pl: 1; --fr: 0; }
+  77.7778% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  78.3333% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  78.8889% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4444% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4514% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4583% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4653% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auS3R2M { 0%, 100% { opacity: 0; } }
+@keyframes auS3R2G { 0%, 100% { opacity: 0; } }
+@keyframes auS3R2P { 0%, 100% { opacity: 1; } }
+@keyframes auS3R2C { 0% { color: var(--bad); } 76.6667% { color: var(--bad); } 78.8889% { color: var(--mist); } 99.4722% { color: var(--bad); } 99.7222% { color: var(--bad); } 99.75% { color: var(--bad); } 100% { color: var(--bad); } }
+@keyframes auS3R2u {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  67.9722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  68.4444% { --m: 0; --k: 0; --ti: 0; --lo: 220; --pl: 220; --fr: 0; }
+  68.9167% { --m: 0; --k: 0; --ti: 0; --lo: 332; --pl: 332; --fr: 0; }
+  69.3889% { --m: 0; --k: 0; --ti: 0; --lo: 374; --pl: 374; --fr: 0; }
+  69.8611% { --m: 0; --k: 0; --ti: 0; --lo: 380; --pl: 380; --fr: 0; }
+  76.6667% { --m: 0; --k: 0; --ti: 0; --lo: 380; --pl: 380; --fr: 0; }
+  77.2222% { --m: 0; --k: 0; --ti: 0; --lo: 160; --pl: 160; --fr: 0; }
+  77.7778% { --m: 0; --k: 0; --ti: 0; --lo: 48; --pl: 48; --fr: 0; }
+  78.3333% { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
+  78.8889% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4444% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4514% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4583% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4653% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.4722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auS3R2uM { 0%, 100% { opacity: 0; } }
+@keyframes auS3R2uG { 0%, 100% { opacity: 0; } }
+@keyframes auS3R2uP { 0%, 100% { opacity: 1; } }
+@keyframes auS3R3 {
+  0% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  67.7778% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  68.2639% { --m: 0; --k: 0; --ti: 0; --lo: 635; --pl: 635; --fr: 80; }
+  68.75% { --m: 0; --k: 0; --ti: 0; --lo: 962; --pl: 962; --fr: 50; }
+  69.2361% { --m: 0; --k: 1; --ti: 1; --lo: 82; --pl: 1082; --fr: 40; }
+  69.7222% { --m: 0; --k: 1; --ti: 1; --lo: 100; --pl: 1100; --fr: 0; }
+  99.4444% { --m: 0; --k: 1; --ti: 1; --lo: 100; --pl: 1100; --fr: 0; }
+  99.4514% { --m: 0; --k: 0; --ti: 0; --lo: 464; --pl: 464; --fr: 20; }
+  99.4583% { --m: 0; --k: 0; --ti: 0; --lo: 137; --pl: 137; --fr: 50; }
+  99.4653% { --m: 0; --k: 0; --ti: 0; --lo: 17; --pl: 17; --fr: 60; }
+  99.4722% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.7222% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  99.75% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+  100% { --m: 0; --k: 0; --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
+}
+@keyframes auS3R3M { 0%, 100% { opacity: 0; } }
+@keyframes auS3R3G { 0%, 69.2261% { opacity: 0; } 69.2361%, 99.4414% { opacity: 1; } 99.4514%, 100% { opacity: 0; } }
+@keyframes auS3R3P { 0%, 69.2261% { opacity: 1; } 69.2361%, 99.4414% { opacity: 0; } 99.4514%, 100% { opacity: 1; } }
 
 .au-exp { animation-name: auExp, auExpC; }
+.au-exp .m { animation-name: auExpM; }
 .au-exp .g { animation-name: auExpG; }
 .au-exp .p { animation-name: auExpP; }
 .au-open { animation-name: auOpen; }
+.au-open .m { animation-name: auOpenM; }
 .au-open .g { animation-name: auOpenG; }
 .au-open .p { animation-name: auOpenP; }
 .au-red { animation-name: auRed; }
+.au-red .m { animation-name: auRedM; }
 .au-red .g { animation-name: auRedG; }
 .au-red .p { animation-name: auRedP; }
-.au-r1 { animation-name: auR1, auR1C; }
-.au-r1 .g { animation-name: auR1G; }
-.au-r1 .p { animation-name: auR1P; }
-.au-r2 { animation-name: auR2, auR2C; }
-.au-r2 .g { animation-name: auR2G; }
-.au-r2 .p { animation-name: auR2P; }
-.au-r2u { animation-name: auR2u; }
-.au-r2u .g { animation-name: auR2uG; }
-.au-r2u .p { animation-name: auR2uP; }
-.au-r3 { animation-name: auR3; }
-.au-r3 .g { animation-name: auR3G; }
-.au-r3 .p { animation-name: auR3P; }
-.au-r4 { animation-name: auR4; }
-.au-r4 .g { animation-name: auR4G; }
-.au-r4 .p { animation-name: auR4P; }
-.au-r5 { animation-name: auR5; }
-.au-r5 .g { animation-name: auR5G; }
-.au-r5 .p { animation-name: auR5P; }
-.au-need { animation-name: auNeed; }
-.au-need .g { animation-name: auNeedG; }
-.au-need .p { animation-name: auNeedP; }
-.au-allow { animation-name: auAllow; }
-.au-allow .g { animation-name: auAllowG; }
-.au-allow .p { animation-name: auAllowP; }
-
-@keyframes swOut1 { 0%, 23% { opacity: 1; } 25%, 99.1667% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
-@keyframes swIn1 { 0%, 25% { opacity: 0; transform: translateY(3px); } 27%, 99.1667% { opacity: 1; transform: none; } 99.25%, 100% { opacity: 0; transform: translateY(3px); } }
-@keyframes swOut2 { 0%, 31.3333% { opacity: 1; } 33.3333%, 99.1667% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
-@keyframes swIn2 { 0%, 33.3333% { opacity: 0; transform: translateY(3px); } 35.3333%, 99.1667% { opacity: 1; transform: none; } 99.25%, 100% { opacity: 0; transform: translateY(3px); } }
-
-/* The decision card arrives when there is a decision to make; the read-back
-   card when there is something to read back. */
-@keyframes cardIn1 {
-  0%, 10% { opacity: 0; transform: translateY(16px) rotate(-0.9deg); }
-  14.1667%, 99.1667% { opacity: 1; transform: translateY(0) rotate(-0.9deg); }
-  99.25%, 100% { opacity: 0; transform: translateY(16px) rotate(-0.9deg); }
-}
-@keyframes cardIn2 {
-  0%, 38.3333% { opacity: 0; transform: translateY(16px) rotate(0.7deg); }
-  45%, 99.1667% { opacity: 1; transform: translateY(0) rotate(0.7deg); }
-  99.25%, 100% { opacity: 0; transform: translateY(16px) rotate(0.7deg); }
-}
-@keyframes btnPress {
-  0%, 16.6667% { transform: none; }
-  17.6667%, 18.5% { transform: scale(0.955); }
-  19.6667%, 100% { transform: none; }
-}
-/* The label lands with the chain, not with the click. Pressing Limit does not
-   make a permission limited; the transaction settling does. A button reading
-   "Limited" above a ledger still reading Unlimited would be claiming the very
-   thing this product exists to stop other software claiming. */
-@keyframes btnOut { 0%, 23% { opacity: 1; } 25%, 99.1667% { opacity: 0; } 99.25%, 100% { opacity: 1; } }
-@keyframes btnIn  { 0%, 25% { opacity: 0; } 27%, 99.1667% { opacity: 1; } 99.25%, 100% { opacity: 0; } }
-@keyframes altOut { 0%, 19.1667% { opacity: 1; } 22.1667%, 99.1667% { opacity: 0.22; } 99.25%, 100% { opacity: 1; } }
-
-@keyframes rowF1 {
-  0%, 2.5% { background: transparent; }
-  5%, 21.6667% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); }
-  28.3333%, 99.1667% { background: rgba(47,224,188,0.055); }
-  99.25%, 100% { background: transparent; }
-}
-@keyframes rowF2 {
-  0%, 3% { background: transparent; }
-  5.5%, 30% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); }
-  36.6667%, 99.1667% { background: rgba(255,255,255,0.025); }
-  99.25%, 100% { background: transparent; }
-}
-@keyframes markF1 {
-  0%, 4.9167% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); }
-  5%, 21.6667% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); }
-  28.3333%, 99.1667% { box-shadow: inset 2px 0 0 rgba(47,224,188,0.55); }
-  99.25%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); }
-}
-@keyframes markF2 {
-  0%, 5.4167% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); }
-  5.5%, 30% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); }
-  36.6667%, 99.1667% { box-shadow: inset 2px 0 0 rgba(125,147,164,0.4); }
-  99.25%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); }
-}
-/* The read is work, not a spinner: the sweep is the engine moving through
-   pairs, and it runs only while the figures are arriving. */
-@keyframes aSweep {
-  0% { transform: translateX(-110%); opacity: 1; }
-  9.1667% { transform: translateX(400%); opacity: 1; }
-  10%, 100% { transform: translateX(400%); opacity: 0; }
-}
-
-@keyframes rail0 { 0%, 0.8233% { color: var(--slate); } 0.8333%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
-.a-rail li:nth-child(1) { animation: rail0 var(--run) linear infinite; }
-@keyframes rail1 { 0%, 9.99% { color: var(--slate); } 10%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
-.a-rail li:nth-child(2) { animation: rail1 var(--run) linear infinite; }
-@keyframes rail2 { 0%, 16.6567% { color: var(--slate); } 16.6667%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
-.a-rail li:nth-child(3) { animation: rail2 var(--run) linear infinite; }
-@keyframes rail3 { 0%, 21.6567% { color: var(--slate); } 21.6667%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
-.a-rail li:nth-child(4) { animation: rail3 var(--run) linear infinite; }
-@keyframes rail4 { 0%, 38.3233% { color: var(--slate); } 38.3333%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
-.a-rail li:nth-child(5) { animation: rail4 var(--run) linear infinite; }
-@keyframes rail5 { 0%, 46.6567% { color: var(--slate); } 46.6667%, 99.1667% { color: var(--ok); } 99.25%, 100% { color: var(--slate); } }
-.a-rail li:nth-child(6) { animation: rail5 var(--run) linear infinite; }
-/* Monitor is the only step that does not end. */
-@keyframes railPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
-.a-rail li:last-child { animation: rail5 var(--run) linear infinite, railPulse 3s var(--ease-loop) 5.6s infinite; }
+.au-s1r1 { animation-name: auS1R1, auS1R1C; }
+.au-s1r1 .m { animation-name: auS1R1M; }
+.au-s1r1 .g { animation-name: auS1R1G; }
+.au-s1r1 .p { animation-name: auS1R1P; }
+.au-s1r2 { animation-name: auS1R2, auS1R2C; }
+.au-s1r2 .m { animation-name: auS1R2M; }
+.au-s1r2 .g { animation-name: auS1R2G; }
+.au-s1r2 .p { animation-name: auS1R2P; }
+.au-s1r2u { animation-name: auS1R2u; }
+.au-s1r2u .m { animation-name: auS1R2uM; }
+.au-s1r2u .g { animation-name: auS1R2uG; }
+.au-s1r2u .p { animation-name: auS1R2uP; }
+.au-s1r3 { animation-name: auS1R3; }
+.au-s1r3 .m { animation-name: auS1R3M; }
+.au-s1r3 .g { animation-name: auS1R3G; }
+.au-s1r3 .p { animation-name: auS1R3P; }
+.au-s2r1 { animation-name: auS2R1, auS2R1C; }
+.au-s2r1 .m { animation-name: auS2R1M; }
+.au-s2r1 .g { animation-name: auS2R1G; }
+.au-s2r1 .p { animation-name: auS2R1P; }
+.au-s2r2 { animation-name: auS2R2, auS2R2C; }
+.au-s2r2 .m { animation-name: auS2R2M; }
+.au-s2r2 .g { animation-name: auS2R2G; }
+.au-s2r2 .p { animation-name: auS2R2P; }
+.au-s2r2u { animation-name: auS2R2u; }
+.au-s2r2u .m { animation-name: auS2R2uM; }
+.au-s2r2u .g { animation-name: auS2R2uG; }
+.au-s2r2u .p { animation-name: auS2R2uP; }
+.au-s2r3 { animation-name: auS2R3; }
+.au-s2r3 .m { animation-name: auS2R3M; }
+.au-s2r3 .g { animation-name: auS2R3G; }
+.au-s2r3 .p { animation-name: auS2R3P; }
+.au-s3r1 { animation-name: auS3R1, auS3R1C; }
+.au-s3r1 .m { animation-name: auS3R1M; }
+.au-s3r1 .g { animation-name: auS3R1G; }
+.au-s3r1 .p { animation-name: auS3R1P; }
+.au-s3r2 { animation-name: auS3R2, auS3R2C; }
+.au-s3r2 .m { animation-name: auS3R2M; }
+.au-s3r2 .g { animation-name: auS3R2G; }
+.au-s3r2 .p { animation-name: auS3R2P; }
+.au-s3r2u { animation-name: auS3R2u; }
+.au-s3r2u .m { animation-name: auS3R2uM; }
+.au-s3r2u .g { animation-name: auS3R2uG; }
+.au-s3r2u .p { animation-name: auS3R2uP; }
+.au-s3r3 { animation-name: auS3R3; }
+.au-s3r3 .m { animation-name: auS3R3M; }
+.au-s3r3 .g { animation-name: auS3R3G; }
+.au-s3r3 .p { animation-name: auS3R3P; }
 
 /* ---- what each element runs ---------------------------------------- */
 .a-sw { display: inline-grid; justify-items: start; }
@@ -779,16 +805,17 @@
   animation-duration: var(--run); animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
-.a-r1 .was { animation-name: swOut1; }
-.a-r1 .now { animation-name: swIn1; }
-.a-r2 .was { animation-name: swOut2; }
-.a-r2 .now { animation-name: swIn2; }
 
-.a-fault1 { animation: rowF1 var(--run) linear infinite; }
-.a-fault2 { animation: rowF2 var(--run) linear infinite; }
-.a-fault1 > td:first-child { animation: markF1 var(--run) linear infinite; }
-.a-fault2 > td:first-child { animation: markF2 var(--run) linear infinite; }
+/* The wallet's own address, three deep in one cell so the header cannot jump
+   as the console moves from one wallet to the next. */
+.a-wids { display: inline-grid; justify-items: start; }
+.a-wids > span {
+  grid-area: 1 / 1;
+  animation-duration: var(--run); animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
 
+/* The read is work, not a spinner, and every wallet gets read. */
 .a-scan {
   position: absolute; inset-block: 0; width: 26%;
   background: linear-gradient(90deg, transparent, rgba(47,224,188,0.09), transparent);
@@ -796,58 +823,121 @@
   animation: aSweep var(--run) linear infinite;
 }
 
-.a-card-bad { animation: cardIn1 var(--run) var(--ease-settle) infinite; }
-.a-card-ok  { animation: cardIn2 var(--run) var(--ease-settle) infinite; }
-
-.a-act { display: inline-grid; flex: 1; }
-.a-act > span {
-  grid-area: 1 / 1;
-  animation-duration: var(--run); animation-timing-function: linear;
-  animation-iteration-count: infinite;
+@supports not (transition-behavior: allow-discrete) {
+  .a-set-2, .a-set-3 { display: none; }
 }
-.a-act .was { animation-name: btnOut; }
-.a-act .now { animation-name: btnIn; }
-.a-btn-press { animation: btnPress var(--run) var(--ease-settle) infinite; }
-/* Once a permission is limited, the alternative is spent. */
-.a-alt-act { animation: altOut var(--run) linear infinite; }
+@supports (transition-behavior: allow-discrete) {
+@keyframes setVis1 { 0%, 33.3233% { visibility: visible; } 33.3333%, 100% { visibility: collapse; } }
+.a-set-1 { animation: setVis1 var(--run) linear infinite; }
+@keyframes idVis1 { 0%, 33.3233% { opacity: 1; } 33.3333%, 100% { opacity: 0; } }
+.a-wid-1 { animation: idVis1 var(--run) linear infinite; }
+@keyframes setVis2 { 0%, 33.3233% { visibility: collapse; } 33.3333%, 66.6567% { visibility: visible; } 66.6667%, 100% { visibility: collapse; } }
+.a-set-2 { animation: setVis2 var(--run) linear infinite; }
+@keyframes idVis2 { 0%, 33.3233% { opacity: 0; } 33.3333%, 66.6567% { opacity: 1; } 66.6667%, 100% { opacity: 0; } }
+.a-wid-2 { animation: idVis2 var(--run) linear infinite; }
+@keyframes setVis3 { 0%, 66.6567% { visibility: collapse; } 66.6667%, 99.99% { visibility: visible; } }
+.a-set-3 { animation: setVis3 var(--run) linear infinite; }
+@keyframes idVis3 { 0%, 66.6567% { opacity: 0; } 66.6667%, 99.99% { opacity: 1; } }
+.a-wid-3 { animation: idVis3 var(--run) linear infinite; }
+@keyframes swS1aOut { 0%, 7.6667% { opacity: 1; } 8.3333%, 32.7778% { opacity: 0; } 32.8056%, 100% { opacity: 1; } }
+@keyframes swS1aIn { 0%, 8.3333% { opacity: 0; transform: translateY(3px); } 9%, 32.7778% { opacity: 1; transform: none; } 32.8056%, 100% { opacity: 0; transform: translateY(3px); } }
+@keyframes swS1bOut { 0%, 10.4444% { opacity: 1; } 11.1111%, 32.7778% { opacity: 0; } 32.8056%, 100% { opacity: 1; } }
+@keyframes swS1bIn { 0%, 11.1111% { opacity: 0; transform: translateY(3px); } 11.7778%, 32.7778% { opacity: 1; transform: none; } 32.8056%, 100% { opacity: 0; transform: translateY(3px); } }
+.a-s1-r1 .was { animation-name: swS1aOut; }
+.a-s1-r1 .now { animation-name: swS1aIn; }
+.a-s1-r2 .was { animation-name: swS1bOut; }
+.a-s1-r2 .now { animation-name: swS1bIn; }
+@keyframes rowS1a { 0%, 0.8333% { background: transparent; } 1.6667%, 7.2222% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); } 9.4444%, 32.7778% { background: rgba(47,224,188,0.055); } 32.8056%, 100% { background: transparent; } }
+@keyframes rowS1b { 0%, 1% { background: transparent; } 1.8333%, 10% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); } 12.2222%, 32.7778% { background: rgba(255,255,255,0.025); } 32.8056%, 100% { background: transparent; } }
+@keyframes markS1a { 0%, 1.6389% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } 1.6667%, 7.2222% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); } 9.4444%, 32.7778% { box-shadow: inset 2px 0 0 rgba(47,224,188,0.55); } 32.8056%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } }
+@keyframes markS1b { 0%, 1.8056% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } 1.8333%, 10% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); } 12.2222%, 32.7778% { box-shadow: inset 2px 0 0 rgba(125,147,164,0.4); } 32.8056%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } }
+.a-s1-f1 { animation: rowS1a var(--run) linear infinite; }
+.a-s1-f2 { animation: rowS1b var(--run) linear infinite; }
+.a-s1-f1 > td:first-child { animation: markS1a var(--run) linear infinite; }
+.a-s1-f2 > td:first-child { animation: markS1b var(--run) linear infinite; }
+@keyframes pressS1a { 0%, 5.5556% { transform: none; } 5.8889%, 6.1667% { transform: scale(0.94); } 6.5556%, 100% { transform: none; } }
+@keyframes pressS1b { 0%, 8.6111% { transform: none; } 8.9444%, 9.2222% { transform: scale(0.94); } 9.6111%, 100% { transform: none; } }
+.a-s1-p1 { animation: pressS1a var(--run) var(--ease-settle) infinite; }
+.a-s1-p2 { animation: pressS1b var(--run) var(--ease-settle) infinite; }
+@keyframes swS2aOut { 0%, 41% { opacity: 1; } 41.6667%, 66.1111% { opacity: 0; } 66.1389%, 100% { opacity: 1; } }
+@keyframes swS2aIn { 0%, 41.6667% { opacity: 0; transform: translateY(3px); } 42.3333%, 66.1111% { opacity: 1; transform: none; } 66.1389%, 100% { opacity: 0; transform: translateY(3px); } }
+@keyframes swS2bOut { 0%, 43.7778% { opacity: 1; } 44.4444%, 66.1111% { opacity: 0; } 66.1389%, 100% { opacity: 1; } }
+@keyframes swS2bIn { 0%, 44.4444% { opacity: 0; transform: translateY(3px); } 45.1111%, 66.1111% { opacity: 1; transform: none; } 66.1389%, 100% { opacity: 0; transform: translateY(3px); } }
+.a-s2-r1 .was { animation-name: swS2aOut; }
+.a-s2-r1 .now { animation-name: swS2aIn; }
+.a-s2-r2 .was { animation-name: swS2bOut; }
+.a-s2-r2 .now { animation-name: swS2bIn; }
+@keyframes rowS2a { 0%, 34.1667% { background: transparent; } 35%, 40.5556% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); } 42.7778%, 66.1111% { background: rgba(47,224,188,0.055); } 66.1389%, 100% { background: transparent; } }
+@keyframes rowS2b { 0%, 34.3333% { background: transparent; } 35.1667%, 43.3333% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); } 45.5556%, 66.1111% { background: rgba(255,255,255,0.025); } 66.1389%, 100% { background: transparent; } }
+@keyframes markS2a { 0%, 34.9722% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } 35%, 40.5556% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); } 42.7778%, 66.1111% { box-shadow: inset 2px 0 0 rgba(47,224,188,0.55); } 66.1389%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } }
+@keyframes markS2b { 0%, 35.1389% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } 35.1667%, 43.3333% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); } 45.5556%, 66.1111% { box-shadow: inset 2px 0 0 rgba(125,147,164,0.4); } 66.1389%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } }
+.a-s2-f1 { animation: rowS2a var(--run) linear infinite; }
+.a-s2-f2 { animation: rowS2b var(--run) linear infinite; }
+.a-s2-f1 > td:first-child { animation: markS2a var(--run) linear infinite; }
+.a-s2-f2 > td:first-child { animation: markS2b var(--run) linear infinite; }
+@keyframes pressS2a { 0%, 38.8889% { transform: none; } 39.2222%, 39.5% { transform: scale(0.94); } 39.8889%, 100% { transform: none; } }
+@keyframes pressS2b { 0%, 41.9444% { transform: none; } 42.2778%, 42.5556% { transform: scale(0.94); } 42.9444%, 100% { transform: none; } }
+.a-s2-p1 { animation: pressS2a var(--run) var(--ease-settle) infinite; }
+.a-s2-p2 { animation: pressS2b var(--run) var(--ease-settle) infinite; }
+@keyframes swS3aOut { 0%, 74.3333% { opacity: 1; } 75%, 99.4444% { opacity: 0; } 99.4722%, 100% { opacity: 1; } }
+@keyframes swS3aIn { 0%, 75% { opacity: 0; transform: translateY(3px); } 75.6667%, 99.4444% { opacity: 1; transform: none; } 99.4722%, 100% { opacity: 0; transform: translateY(3px); } }
+@keyframes swS3bOut { 0%, 77.1111% { opacity: 1; } 77.7778%, 99.4444% { opacity: 0; } 99.4722%, 100% { opacity: 1; } }
+@keyframes swS3bIn { 0%, 77.7778% { opacity: 0; transform: translateY(3px); } 78.4444%, 99.4444% { opacity: 1; transform: none; } 99.4722%, 100% { opacity: 0; transform: translateY(3px); } }
+.a-s3-r1 .was { animation-name: swS3aOut; }
+.a-s3-r1 .now { animation-name: swS3aIn; }
+.a-s3-r2 .was { animation-name: swS3bOut; }
+.a-s3-r2 .now { animation-name: swS3bIn; }
+@keyframes rowS3a { 0%, 67.5% { background: transparent; } 68.3333%, 73.8889% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); } 76.1111%, 99.4444% { background: rgba(47,224,188,0.055); } 99.4722%, 100% { background: transparent; } }
+@keyframes rowS3b { 0%, 67.6667% { background: transparent; } 68.5%, 76.6667% { background: linear-gradient(90deg, rgba(255,95,78,0.075), transparent 55%); } 78.8889%, 99.4444% { background: rgba(255,255,255,0.025); } 99.4722%, 100% { background: transparent; } }
+@keyframes markS3a { 0%, 68.3056% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } 68.3333%, 73.8889% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); } 76.1111%, 99.4444% { box-shadow: inset 2px 0 0 rgba(47,224,188,0.55); } 99.4722%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } }
+@keyframes markS3b { 0%, 68.4722% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } 68.5%, 76.6667% { box-shadow: inset 2px 0 0 rgba(255,95,78,0.55); } 78.8889%, 99.4444% { box-shadow: inset 2px 0 0 rgba(125,147,164,0.4); } 99.4722%, 100% { box-shadow: inset 2px 0 0 rgba(255,95,78,0); } }
+.a-s3-f1 { animation: rowS3a var(--run) linear infinite; }
+.a-s3-f2 { animation: rowS3b var(--run) linear infinite; }
+.a-s3-f1 > td:first-child { animation: markS3a var(--run) linear infinite; }
+.a-s3-f2 > td:first-child { animation: markS3b var(--run) linear infinite; }
+@keyframes pressS3a { 0%, 72.2222% { transform: none; } 72.5556%, 72.8333% { transform: scale(0.94); } 73.2222%, 100% { transform: none; } }
+@keyframes pressS3b { 0%, 75.2778% { transform: none; } 75.6111%, 75.8889% { transform: scale(0.94); } 76.2778%, 100% { transform: none; } }
+.a-s3-p1 { animation: pressS3a var(--run) var(--ease-settle) infinite; }
+.a-s3-p2 { animation: pressS3b var(--run) var(--ease-settle) infinite; }
+@keyframes aSweep { 0% { transform: translateX(-110%); opacity: 1; } 3.0556% { transform: translateX(400%); opacity: 1; } 3.3333% { transform: translateX(400%); opacity: 0; } 33.3333% { transform: translateX(-110%); opacity: 1; } 36.3889% { transform: translateX(400%); opacity: 1; } 36.6667% { transform: translateX(400%); opacity: 0; } 66.6667% { transform: translateX(-110%); opacity: 1; } 69.7222% { transform: translateX(400%); opacity: 1; } 70% { transform: translateX(400%); opacity: 0; } 100% { transform: translateX(400%); opacity: 0; } }
+@keyframes verifyIn { 0% { opacity: 0; transform: translateY(6px); } 12.7778% { opacity: 0; transform: translateY(6px); } 14.4444%, 32.7778% { opacity: 1; transform: none; } 32.8056% { opacity: 0; transform: translateY(6px); } 46.1111% { opacity: 0; transform: translateY(6px); } 47.7778%, 66.1111% { opacity: 1; transform: none; } 66.1389% { opacity: 0; transform: translateY(6px); } 79.4444% { opacity: 0; transform: translateY(6px); } 81.1111%, 99.4444% { opacity: 1; transform: none; } 99.4722% { opacity: 0; transform: translateY(6px); } 100% { opacity: 0; } }
+}
 
 /* A figure that never reaches a thousand has no grouped spelling to show, and
    an invisible one still claims its share of the grid cell. */
-.au-open .g, .au-r2 .g { display: none; }
+/* A figure that never reaches a thousand has no grouped spelling to show, and
+   an invisible one still claims its share of the grid cell — which is the gap
+   between "0" and "NFTs". These names changed when the console went to three
+   wallets and this rule was left pointing at the old ones. */
+.au-open .g,
+.au-s1r2 .g, .au-s2r2 .g, .au-s3r2 .g { display: none; }
+/* Likewise a millions spelling on a figure that never reaches one. */
+.au-open .m,
+.au-s1r2 .m, .au-s2r2 .m, .au-s3r2 .m,
+.au-s1r2u .m, .au-s3r2u .m { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Settle on the corrected state — that is the page's argument — rather than
-     the registered initial value of zero, which would claim a wallet with
-     nothing in it. */
+  /* One wallet, settled on its corrected state — that is the page's argument.
+     Without this the registered initial value of zero would claim a wallet
+     with nothing in it. */
   .alt *, .alt *::before, .alt *::after { animation: none !important; }
+  .a-set-2, .a-set-3 { display: none !important; }
+  .a-wids > span:not(.a-wid-1) { display: none; }
   .a-count .g, .a-count .p { opacity: 0; }
   .a-sw .was { opacity: 0; }
-  .a-act .was { opacity: 0; }
-  .a-alt-act { opacity: 0.22; }
   .a-scan { display: none; }
-  .a-rail li { color: var(--ok); }
-  .a-fault1 { background: rgba(47,224,188,0.055); }
-  .a-fault2 { background: rgba(255,255,255,0.025); }
-  .au-exp { --ti: 3; --lo: 900; --pl: 3900; --fr: 0; }
+  .a-verified { opacity: 1; }
+  .a-s1-f1 { background: rgba(47,224,188,0.055); }
+  .a-s1-f2 { background: rgba(255,255,255,0.025); }
+  .au-s1r1 { --pl: 100; --fr: 0; } .au-s1r1 .p { opacity: 1; }
+  .au-s1r2 { --pl: 0; --fr: 0; } .au-s1r2 .p { opacity: 1; }
+  .au-s1r2u { --pl: 0; --fr: 0; } .au-s1r2u .p { opacity: 1; }
+  .au-s1r3 { --ti: 2; --lo: 500; --fr: 0; } .au-s1r3 .g { opacity: 1; }
+  .au-exp { --m: 0; --k: 10; --ti: 10; --lo: 870; --pl: 10870; --fr: 0; }
   .au-exp .g { opacity: 1; }
-  .au-open { --ti: 0; --lo: 4; --pl: 4; --fr: 0; }
+  .au-open { --m: 0; --k: 0; --ti: 0; --lo: 6; --pl: 6; --fr: 0; }
   .au-open .p { opacity: 1; }
-  .au-red { --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
+  .au-red { --m: 0; --k: 51; --ti: 51; --lo: 440; --pl: 51440; --fr: 0; }
   .au-red .g { opacity: 1; }
-  .au-r1 { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  .au-r1 .p { opacity: 1; }
-  .au-r2 { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  .au-r2 .p { opacity: 1; }
-  .au-r2u { --ti: 0; --lo: 0; --pl: 0; --fr: 0; }
-  .au-r2u .p { opacity: 1; }
-  .au-r3 { --ti: 2; --lo: 500; --pl: 2500; --fr: 0; }
-  .au-r3 .g { opacity: 1; }
-  .au-r4 { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  .au-r4 .p { opacity: 1; }
-  .au-r5 { --ti: 1; --lo: 200; --pl: 1200; --fr: 0; }
-  .au-r5 .g { opacity: 1; }
-  .au-need { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  .au-need .p { opacity: 1; }
-  .au-allow { --ti: 0; --lo: 100; --pl: 100; --fr: 0; }
-  .au-allow .p { opacity: 1; }
 }
+

@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import Home from '../components/Home.jsx';
+import HeaderTheme from '../components/HeaderTheme.astro';
+import Reveal from '../components/Reveal.astro';
+import '../styles/home.css';
+
+---
+
+<Base>
+  {/* No client:* directive — renders to HTML at build time, ships no JS. */}
+  <Home />
+
+  {/* Progressive enhancement only. Neither is required to read the page. */}
+  <HeaderTheme />
+  <Reveal />
+</Base>

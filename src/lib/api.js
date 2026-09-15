@@ -54,15 +54,53 @@ export function permissions(chainId, address) {
   return get(`/v1/permissions/${chainId}/${address}`);
 }
 
-/** Returns unsigned calldata. The engine cannot sign and neither can we. */
-export function remediation(chainId, holder, token, spender) {
-  return get(`/v1/remediation/${chainId}/${holder}/${token}/${spender}`);
+/**
+ * Returns unsigned calldata. The engine cannot sign and neither can we.
+ *
+ * `amount` asks for a boundary rather than a removal — approve(spender, n)
+ * instead of approve(spender, 0) — in base units, as a decimal string.
+ *
+ * THE ENGINE DOES NOT HONOUR IT YET. Today it answers every call with
+ * action: "REVOKE" whatever is asked of it. The parameter is sent anyway
+ * because the alternative is a control that quietly means something else, and
+ * the caller checks the action it got back against the one it asked for
+ * (see demo/Handoff.jsx). When the engine learns to build a limit, the page
+ * starts offering one without another line changing here.
+ */
+export function remediation(chainId, holder, token, spender, amount) {
+  const q = amount ? `?amount=${encodeURIComponent(amount)}` : '';
+  return get(`/v1/remediation/${chainId}/${holder}/${token}/${spender}${q}`);
+}
+
+/**
+ * Assets denominated in dollars, which are shown to the cent and never fewer.
+ *
+ * "2,500 USDC" and "2,500.00 USDC" are the same number and do not read as the
+ * same kind of thing: the first reads as a count, the second as money. Every
+ * ticker carrying USD qualifies, plus the dollar stablecoins that do not spell
+ * it — so USDC, USDT, crvUSD, sUSD and DAI all settle on two places and align
+ * with one another down the column.
+ */
+const DOLLARS = /USD/i;
+const ALSO_DOLLARS = new Set(['DAI', 'FRAX', 'MIM', 'USDE', 'GHO']);
+
+export function isDollar(symbol) {
+  if (!symbol) return false;
+  return DOLLARS.test(symbol) || ALSO_DOLLARS.has(symbol.toUpperCase());
 }
 
 /**
  * Quantities cross the wire as decimal strings, because JSON numbers are IEEE
  * 754 doubles and cannot hold a uint256. Formatting therefore happens here,
  * against BigInt, and never by parsing into a float.
+ *
+ * Dollar assets are fixed at two places. Everything else keeps up to four and
+ * drops trailing zeros, because 0.0001 WETH is a real amount and 1.0000 WETH
+ * is a made-up precision.
+ *
+ * ROUNDING IS HALF-UP, WHICH ROUNDS TOWARDS THE LARGER EXPOSURE. A figure here
+ * is what somebody else can take; understating it by a rounding is the one
+ * direction that makes a wallet look safer than it is.
  */
 export function format(raw, decimals, symbol) {
   if (raw === null || raw === undefined) return 'Not established';
@@ -73,16 +111,35 @@ export function format(raw, decimals, symbol) {
     return 'Not established';
   }
 
-  const d = BigInt(10) ** BigInt(decimals || 0);
-  const whole = v / d;
-  const frac = v % d;
+  const d = decimals || 0;
+  const tail = symbol ? ` ${symbol}` : '';
+
+  if (isDollar(symbol)) {
+    const places = 2n;
+    const unit = 10n ** places;
+    /* Rescale to hundredths, rounding half-up on the way down. */
+    let n;
+    if (d > 2) {
+      const scale = BigInt(10) ** BigInt(d - 2);
+      n = (v + scale / 2n) / scale;
+    } else {
+      n = v * BigInt(10) ** BigInt(2 - d);
+    }
+    const whole = n / unit;
+    const frac = n % unit;
+    return `${whole.toLocaleString('en-US')}.${frac.toString().padStart(2, '0')}${tail}`;
+  }
+
+  const den = BigInt(10) ** BigInt(d);
+  const whole = v / den;
+  const frac = v % den;
 
   let text = whole.toLocaleString('en-US');
-  if (frac > 0n && decimals > 0) {
-    const f = frac.toString().padStart(decimals, '0').replace(/0+$/, '').slice(0, 4);
+  if (frac > 0n && d > 0) {
+    const f = frac.toString().padStart(d, '0').replace(/0+$/, '').slice(0, 4);
     if (f) text += '.' + f;
   }
-  return symbol ? `${text} ${symbol}` : text;
+  return text + tail;
 }
 
 export { ApiError };

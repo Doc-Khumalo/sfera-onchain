@@ -1,31 +1,40 @@
 /* ---------------------------------------------------------------
-   /demo — the permission ledger.
+   /demo — the behaviour the ledger needs, and nothing about its look.
 
-   Same printed document as the homepage: cream stock, dashed rules,
-   leader dots, a red stamp for unbounded authority and a green seal
-   for bounded. No cards, no shells. A ledger is a ruled page, so the
-   table is ruled rather than boxed.
+   This file used to describe a different page: a printed document with
+   dashed rules, leader dots and a left rail. That design was replaced by
+   the one in demo.css, and for a while both were loaded — which meant the
+   current design won only where it had remembered to restate a property,
+   and the old one won everywhere else. The heading on the gate sat off
+   its own axis for exactly that reason: `max-width: 18ch`, left behind
+   from a left-aligned hero, inside a block that had since been centred.
+
+   So the overlap is gone. Anything both files described now lives in
+   demo.css alone, and what remains here is the layer that carries
+   behaviour rather than style: the states a row moves through, the
+   handoff, the detail panel, the notices. One page, described once.
    --------------------------------------------------------------- */
-
 /* The island is hydrated, so Astro wraps its sections in <astro-island>.
    display:contents puts them back in main's flow, and the selectors below
    reach through it rather than assuming a direct child. */
 astro-island { display: contents; }
 
-main section,
-.demo-foot section {
+/* Scoped to the ledger's own root rather than to `main`, so that mounting it
+   inside another page cannot re-set the padding and the measure of every
+   section on that page. */
+.dash section {
   max-width: var(--page);
   margin-inline: auto;
   padding: clamp(34px, 5.5vh, 64px) var(--gutter);
 }
 
-main h2 {
+.dash h2 {
   margin: 0 0 18px;
   font: 700 clamp(24px, 3vw, 36px)/1.08 var(--display);
   letter-spacing: -0.038em;
 }
 
-.lede {
+.dash .lede {
   margin: 0 0 22px;
   max-width: 56ch;
   color: var(--mist);
@@ -45,84 +54,13 @@ main h2 {
 
 .rule-label.seal { color: var(--ok); }
 
-/* ---- masthead --------------------------------------------------- */
-
-.bar {
-  display: flex;
-  align-items: baseline;
-  gap: 20px;
-  max-width: var(--page);
-  margin-inline: auto;
-  padding: 18px var(--gutter) 16px;
-  background: color-mix(in srgb, var(--void) 82%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line);
-  color: var(--ice);
-}
-
-.logo { margin: 0; font: 800 17px/1 var(--display); letter-spacing: -0.02em; }
-.logo em { font-style: normal; color: var(--ok); }
-
-.bar-nav { margin-left: auto; display: flex; gap: 24px; }
-
-.bar-nav a {
-  font-family: var(--display);
-  font-size: 13.5px;
-  letter-spacing: 0;
-  color: var(--mist);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  padding-bottom: 2px;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.bar-nav a:hover { color: var(--ice); border-bottom-color: var(--ok); }
-
 /* ---- the standing disclosure ------------------------------------ */
-
-/* This never scrolls away. The figures are invented, and a page of
-   invented figures shown to an investor has to say so on every screen. */
-.demo-band {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 9px var(--gutter);
-  background: var(--deck);
-  border-bottom: 1px solid var(--line);
-  color: var(--mist);
-  font-family: var(--display);
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  text-align: center;
-}
-
-/* A live indicator earns the accent because it is stating a fact about the
-   connection, not a judgement about authority. */
-.demo-band b {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--ok);
-  font-weight: 700;
-}
-
-.demo-band b::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 3px var(--ok-dim);
-}
 
 /* ---- buttons ---------------------------------------------------- */
 
-.btn {
+/* Carried by the portalled dialogs too, which is why ui/Dialog.jsx tags its
+   content `dash`: a button inside the handoff panel is this page's button. */
+.dash .btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -141,13 +79,13 @@ main h2 {
   transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
 }
 
-.btn:hover:not([disabled]) { background: #54EDCE; border-color: #54EDCE; }
+.dash .btn:hover:not([disabled]) { background: #54EDCE; border-color: #54EDCE; }
 
-.btn.ghost { background: none; color: var(--ice); border-color: var(--line2); }
-.btn.ghost:hover:not([disabled]) { border-color: var(--ok); color: var(--ok); background: none; }
-.btn.sm { padding: 7px 14px; font-size: 10px; }
+.dash .btn.ghost { background: none; color: var(--ice); border-color: var(--line2); }
+.dash .btn.ghost:hover:not([disabled]) { border-color: var(--ok); color: var(--ok); background: none; }
+.dash .btn.sm { padding: 7px 14px; font-size: 10px; }
 
-.btn[disabled] { opacity: 0.38; cursor: not-allowed; }
+.dash .btn[disabled] { opacity: 0.38; cursor: not-allowed; }
 
 .txt {
   padding: 0;
@@ -165,97 +103,7 @@ main h2 {
 .txt:hover:not([disabled]) { color: var(--ice); }
 .txt[disabled] { opacity: 0.38; cursor: not-allowed; }
 
-/* ---- the gate --------------------------------------------------- */
-
-.gate { padding-block: clamp(52px, 10vh, 96px) clamp(44px, 7vh, 72px) !important; }
-
-.gate-kicker {
-  margin: 0 0 14px;
-  padding-bottom: 9px;
-  border-bottom: 1px solid var(--ice);
-  max-width: 15ch;
-  font-family: var(--display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-}
-
-.gate h1 {
-  margin: 0 0 18px;
-  max-width: 18ch;
-  font: 800 clamp(33px, 5.4vw, 60px)/1.02 var(--display);
-  letter-spacing: -0.042em;
-}
-
-.gate-lede {
-  margin: 0 0 30px;
-  max-width: 52ch;
-  color: var(--mist);
-  font-size: clamp(15px, 1.3vw, 16.5px);
-  line-height: 1.62;
-}
-
-.gate-terms {
-  margin: 34px 0 0;
-  padding: 0;
-  list-style: none;
-  max-width: 60ch;
-}
-
-.gate-terms li {
-  padding: 9px 0;
-  border-bottom: 1px dashed var(--rule);
-  font-family: var(--display);
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  color: var(--mist);
-}
-
 .gate-terms li:first-child { border-top: 1px dashed var(--rule); }
-
-/* ---- wallet strip ----------------------------------------------- */
-
-.wallet-strip {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  padding-block: 20px !important;
-  border-bottom: 1px solid var(--ice);
-}
-
-.w-id { display: flex; align-items: baseline; gap: 10px; }
-
-.w-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--ok);
-  translate: 0 -1px;
-}
-
-.w-addr {
-  font: 700 15px/1 var(--mono);
-  letter-spacing: 0.02em;
-}
-
-.w-net {
-  font-family: var(--display);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-
-.w-note {
-  margin: 0;
-  font-family: var(--display);
-  font-size: 10.5px;
-  color: var(--slate);
-}
-
-.wallet-strip .btn { margin-left: auto; }
 
 /* ---- summary ---------------------------------------------------- */
 
@@ -295,50 +143,6 @@ main h2 {
   font: 400 12.5px/1.45 var(--display);
   letter-spacing: 0.02em;
   color: var(--mist);
-}
-
-/* ---- coverage disclosure ---------------------------------------- */
-
-.coverage-note dl { margin: 0; }
-
-.coverage-note dl > div {
-  display: grid;
-  grid-template-columns: 190px 1fr;
-  gap: 20px;
-  padding: 11px 0;
-  border-bottom: 1px dashed var(--rule);
-}
-
-.coverage-note dl > div:first-child { border-top: 1px dashed var(--rule); }
-
-.coverage-note dt {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-family: var(--display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.coverage-note dt span { color: var(--slate); font-variant-numeric: tabular-nums; }
-
-.coverage-note dd {
-  margin: 0;
-  font-size: 14px;
-  color: var(--mist);
-  line-height: 1.5;
-}
-
-.cov-warn {
-  margin: 16px 0 0;
-  max-width: 62ch;
-  padding-left: 14px;
-  border-left: 3px solid var(--bad);
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--ice);
 }
 
 /* ---- ledger ----------------------------------------------------- */
@@ -478,18 +282,6 @@ main h2 {
   color: var(--slate);
 }
 
-.verdict-key {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 34px;
-  margin: 22px 0 0;
-  padding-top: 16px;
-  border-top: 1px dashed var(--rule);
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--mist);
-}
-
 .verdict-key b { margin-right: 8px; }
 
 /* ---- history ---------------------------------------------------- */
@@ -525,26 +317,16 @@ main h2 {
 
 /* ---- detail ----------------------------------------------------- */
 
-.detail {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 40;
-  width: min(430px, 100%);
-  height: 100dvh;
-  overflow-y: auto;
-  padding: 26px 28px 40px;
-  background: var(--deck);
-  border-left: 1px solid var(--ice);
-  box-shadow: -24px 0 56px rgba(0, 0, 0, 0.7);
-}
+/* Where it sits, how wide it is and how it arrives are the sheet's — see
+   ui/Dialog.jsx. What is left here is what goes on inside it. */
+.detail { padding: 26px 28px 40px; }
 
 .d-head {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--ice);
+  border-bottom: 1px solid var(--line2);
 }
 
 .d-head .rule-label { margin-top: 0; }
@@ -668,7 +450,7 @@ main h2 {
   gap: 12px 18px;
   margin-top: 24px;
   padding-top: 18px;
-  border-top: 1px solid var(--ice);
+  border-top: 1px solid var(--line2);
 }
 
 .d-unknown {
@@ -738,33 +520,18 @@ main h2 {
   to { translate: 300% 0; }
 }
 
-/* ---- footer ----------------------------------------------------- */
-
-.demo-foot {
-  margin-top: clamp(20px, 4vh, 40px);
-  border-top: 1px solid var(--ice);
-  font-family: var(--display);
-  font-size: 11px;
-  line-height: 1.7;
-  color: var(--mist);
-}
-
-.demo-foot a { color: var(--ice); }
-
 /* ---- narrow ----------------------------------------------------- */
 
 @media (max-width: 900px) {
   .summary dl { grid-template-columns: repeat(2, 1fr); gap: 22px 0; }
   .summary dl > div:nth-child(odd) { border-left: 0; padding-left: 0; }
-  .verdict-key { grid-template-columns: 1fr; }
-  .history li { grid-template-columns: 92px 1fr; gap: 5px 14px; }
+    .history li { grid-template-columns: 92px 1fr; gap: 5px 14px; }
   .history .h-app { grid-column: 2; }
   .history .h-body { grid-column: 2; }
 }
 
 @media (max-width: 720px) {
-  .bar-nav { display: none; }
-
+  
   .l-head { display: none; }
 
   .l-row {
@@ -779,68 +546,9 @@ main h2 {
   .c-exp { grid-column: 2; text-align: right; }
   .c-ends { grid-column: 1 / -1; color: var(--slate); }
 
-  .coverage-note dl > div { grid-template-columns: 1fr; gap: 6px; }
-
-  .detail { width: 100%; border-left: 0; }
+  
+  .detail { padding-inline: 20px; }
 }
-
-/* ---- read any address ------------------------------------------- */
-
-.lookup {
-  margin-top: 30px;
-  padding-top: 22px;
-  border-top: 1px dashed var(--rule);
-  max-width: 460px;
-}
-
-.lookup label {
-  display: block;
-  margin-bottom: 9px;
-  font-family: var(--display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-
-.lookup-row { display: flex; gap: 10px; }
-
-/* Ruled, not boxed. The input is a line to write on, per the design rules. */
-.lookup input {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 9px 2px;
-  border: 0;
-  border-bottom: 1px solid var(--ice);
-  background: none;
-  color: var(--ice);
-  font-family: var(--display);
-  font-size: 13px;
-  letter-spacing: 0.02em;
-}
-
-.lookup input::placeholder { color: var(--slate); }
-.lookup input:focus { outline: none; border-bottom-width: 2px; }
-
-.lookup .txt { margin-top: 14px; display: inline-block; }
-
-.gate-error {
-  margin: 16px 0 0;
-  padding-left: 13px;
-  border-left: 3px solid var(--bad);
-  font-size: 13.5px;
-  color: var(--ice);
-}
-
-.gate-none {
-  margin: 0 0 20px;
-  font-size: 14px;
-  color: var(--mist);
-}
-
-.wallet-picks { display: flex; flex-wrap: wrap; gap: 12px; }
-.wallet-picks .btn { gap: 8px; }
 
 /* ---- notices ---------------------------------------------------- */
 
@@ -849,11 +557,6 @@ main h2 {
 .notice.bad { box-shadow: inset 3px 0 0 var(--bad); }
 .n-why { color: var(--mist); font-size: 13px !important; }
 .notice .btn { margin-top: 14px; }
-
-/* ---- reading note ------------------------------------------------ */
-
-.reading-note { border-top: 1px dashed var(--rule); }
-.reading-note p { max-width: 68ch; font-size: 14px; line-height: 1.6; color: var(--mist); }
 
 /* ---- calldata ---------------------------------------------------- */
 
@@ -918,78 +621,12 @@ main h2 {
   cursor: pointer;
 }
 
-.gate-chains {
-  margin: 20px 0 0;
-  font-family: var(--display);
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  color: var(--slate);
-}
-
-/* ---- how it reads ------------------------------------------------ */
-
-.reads-steps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  background: var(--line);
-  border: 1px solid var(--line);
-}
-
-.reads-steps li {
-  padding: 22px 24px 26px;
-  background: var(--deck);
-}
-
 .rs-n {
   font-family: var(--display);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.2em;
   color: var(--ok);
-}
-
-.reads-steps h3 {
-  margin: 12px 0 9px;
-  font: 700 17px/1.25 var(--display);
-  letter-spacing: -0.02em;
-}
-
-.reads-steps p {
-  margin: 0;
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--mist);
-}
-
-.not-covered {
-  margin: 0 0 16px;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 28px;
-}
-
-.not-covered li {
-  padding: 8px 0 8px 15px;
-  position: relative;
-  border-bottom: 1px dashed var(--rule);
-  font-size: 13px;
-  color: var(--mist);
-}
-
-.not-covered li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 15px;
-  width: 6px;
-  height: 1px;
-  background: var(--slate);
 }
 
 /* ---- row actions -------------------------------------------------- */
@@ -1033,9 +670,11 @@ main h2 {
   color: var(--slate);
 }
 
+/* No measure of its own. The headline sits in the verdict's left column now,
+   which already gives it one — a 19ch cap on top of that broke the sentence
+   earlier than the space it was in required. */
 .v-line {
   margin: 0;
-  max-width: 19ch;
   font: 700 clamp(34px, 6vw, 72px)/1.015 var(--display);
   letter-spacing: -0.045em;
   text-wrap: pretty;
@@ -1044,43 +683,6 @@ main h2 {
 /* The count is the fact. It carries the accent, and only when there is
    something to be concerned about. */
 .verdict.bad .v-line b { color: var(--bad); font-weight: 800; }
-.verdict.ok .v-line { max-width: 26ch; }
-
-.v-amounts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  margin: clamp(26px, 4vh, 38px) 0 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--line);
-}
-
-.v-amounts li {
-  flex: 1 1 210px;
-  padding: 18px 26px 18px 0;
-  border-right: 1px solid var(--line);
-}
-
-.v-amounts li:last-child { border-right: 0; }
-.v-amounts li + li { padding-left: 26px; }
-
-.va-n {
-  display: block;
-  font: 600 clamp(22px, 2.8vw, 34px)/1.05 var(--mono);
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-  color: var(--bad);
-}
-
-.va-l {
-  display: block;
-  margin-top: 10px;
-  font-family: var(--display);
-  font-size: 13px;
-  letter-spacing: 0;
-  color: var(--mist);
-}
 
 .v-sub {
   margin: 34px 0 0;
@@ -1091,5 +693,4 @@ main h2 {
 }
 
 @media (max-width: 720px) {
-  .v-amounts li { flex: 1 1 100%; border-right: 0; border-bottom: 1px solid var(--line); padding-left: 0 !important; }
-}
+  }

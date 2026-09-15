@@ -8,7 +8,13 @@
  * The marks are real logos, fetched once from each project and served from our
  * own origin, so the page makes no third party request and cannot break when
  * someone reorganises a CDN. Six are shown because six is what reads as a
- * cluster rather than a queue; the count carries the rest.
+ * cluster rather than a queue.
+ *
+ * NO NUMBER. It used to read "15 chains", which put a precise count on a badge
+ * that nobody verifies and that goes stale the moment coverage changes — and a
+ * figure stated that casually invites being read as a promise. "+ more" claims
+ * only what the marks already show. The exact number is still stated where a
+ * reader has actually asked for it, in the questions further down the page.
  *
  * ON BASE. Its mark is the one that is genuinely just a colour: base.org
  * publishes a solid blue favicon and five other sources gave the same or
@@ -25,7 +31,7 @@ const SHOWN = [
   { name: 'BNB Chain', file: 'bnb.png' },
 ];
 
-export default function ChainStack({ total = 15, label = 'chains read the same way', compact = false }) {
+export default function ChainStack({ label = '+ more', compact = false }) {
   return (
     <span className={`cstack ${compact ? 'compact' : ''}`}>
       <span className="cs-marks">
@@ -42,9 +48,7 @@ export default function ChainStack({ total = 15, label = 'chains read the same w
           />
         ))}
       </span>
-      <span className="cs-label">
-        <b>{total}</b> {label}
-      </span>
+      <span className="cs-label">{label}</span>
     </span>
   );
 }

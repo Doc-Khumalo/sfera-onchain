@@ -194,9 +194,24 @@ button, [role="combobox"], input, select, textarea {
    job a light source does in a photograph.
    ------------------------------------------------------------------ */
 
+/* Used by the homepage's own sections, and by nothing on the demo any more.
+ *
+ * ::before is inset -20% at the top, so on a section near the top of a page it
+ * does not sit behind that section at all — it paints a soft rectangle up and
+ * over whatever is above it. On the demo that was the header, the standing
+ * disclosure and the breadcrumb, all wearing a lighter panel nobody had put
+ * there, with a visible edge where the gradient stopped. Ambient light that
+ * draws its own box is just a box. */
 .field {
   position: relative;
   isolation: isolate;
+  /* The light below is inset -10% on each side so it spills past the content
+     it sits behind, which is the whole point of it — but unclipped that spill
+     is layout, and it gave the page a horizontal scrollbar 138px wide. `clip`
+     rather than `hidden`: hidden would make this a scroll container and break
+     `position: sticky` for anything inside it. Horizontal only, so the glow
+     still bleeds above the section as intended. */
+  overflow-x: clip;
 }
 
 /* One quiet light, up and behind. */
@@ -245,6 +260,12 @@ button, [role="combobox"], input, select, textarea {
    ------------------------------------------------------------------ */
 
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* A sheet arrives from the edge it is attached to. */
+@keyframes sheetIn {
+  from { transform: translateX(100%); }
+  to   { transform: none; }
+}
 
 @keyframes panelIn {
   from { opacity: 0; transform: translateY(8px) scale(0.985); }

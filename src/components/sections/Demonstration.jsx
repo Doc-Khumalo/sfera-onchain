@@ -38,7 +38,7 @@ export default function Demonstration() {
           second one here, which meant the site showed the same object twice
           and the receipt, the more distinctive of the two, appeared nowhere.
           The receipt is now the hero and this is its only table. */}
-      <LedgerPanel chainStack={<ChainStack total={15} label="chains" compact />} />
+      <LedgerPanel chainStack={<ChainStack compact />} />
 
       <p className="demo-foot">
         Each correction is an unsigned transaction handed to your own wallet.

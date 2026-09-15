@@ -30,27 +30,27 @@ export const LOOP = [
   {
     step: 'Understand',
     title: 'What am I actually authorizing?',
-    body: 'The raw call decoded into the authority it creates. Not the label on the button, the object underneath it.',
+    body: 'The call decoded into the authority it creates. Not the label on the button - the object underneath it.',
   },
   {
     step: 'Compare',
-    title: 'Is that more than my action requires?',
-    body: 'The action you started, before anyone asked you to approve anything, held against what the application asked for.',
+    title: 'Is that more than my action needs?',
+    body: 'What you set out to do, held against what the application asked for. The gap between the two is the whole product.',
   },
   {
     step: 'Limit',
-    title: 'What should I do instead?',
-    body: 'The smallest permission that still completes what you wanted, with an expiry attached where none existed.',
+    title: 'What should it have asked for?',
+    body: 'The smallest permission that still completes what you wanted, with an expiry attached where there was none.',
   },
   {
     step: 'Sign',
-    title: 'Your wallet. Never ours.',
-    body: 'We hand over an unsigned payload and stop. Accept the correction, keep the original, or walk away.',
+    title: 'Who signs it? You do.',
+    body: 'We hand over an unsigned payload and stop. Take the correction, keep the original, or walk away — nothing moves without you.',
   },
   {
     step: 'Verify',
-    title: 'What permission exists now?',
-    body: 'Read the chain back. The stated intent and the resulting onchain state have to agree, or it is not done.',
+    title: 'What exists on the chain now?',
+    body: 'Ask it again afterwards. What we claimed and what the chain says have to agree, or the job is not done.',
   },
 ];
 

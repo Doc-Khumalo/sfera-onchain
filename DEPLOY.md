@@ -186,13 +186,17 @@ Neither matters while Pages is the origin, because the origin is Cloudflare. Bot
 matter the moment you ever point this domain somewhere else, and setting them now
 costs nothing.
 
-Optional while you are in the DNS panel. The domain sends no mail, so these two
-records stop anyone spoofing it.
+~~Optional while you are in the DNS panel. The domain sends no mail, so these two
+records stop anyone spoofing it.~~
 
 ```
 TXT   @   v=spf1 -all
 MX    @   .        priority 0
 ```
+
+**Superseded, and never applied. Do not add these.** A null MX declares that the
+domain accepts no mail, which is incompatible with receiving any. See `EMAIL.md`,
+which sets up Cloudflare Email Routing and covers spoofing through DMARC instead.
 
 ## 8. Check it worked
 
@@ -250,11 +254,22 @@ one, Rollback. It is instant and does not need a git revert.
 - **Blocker before either entry page goes live.** The three market figures —
   $17B stolen through scams and fraud in 2025 (Chainalysis), 741M own crypto
   (Crypto.com), 40–70M use it onchain (a16z) — were flagged in review as not
-  matching their published sources. They now appear on both `/` and `/alt`,
+  matching their published sources. They now appear on `/`,
   beside real company marks, which turns a sourcing error into a
   misattribution. Verify each against the Business Plan and the cited report,
   then correct the figure or drop the claim. Do not ship either page with
   these unverified.
+- **Product gap, not a page gap: the API returns no expiry.** Both entry pages
+  sell expiry as a differentiator — "keep the authority visible for as long as
+  it exists", the Limit step attaches an expiry where there was none, and the
+  `/` ledger distinguishes EXPIRED from REMOVED on the strength of it. The
+  proof-of-concept permission payload
+  (`engine/internal/httpapi/api.go`) has no expiry field at all, which is why
+  `src/components/demo/Ledger.jsx` writes "never expires" as a literal string.
+  The marketing pages describe the product rather than the POC, so this is not
+  a false claim today, but it needs a card before the demo goes in front of
+  anyone technical who reads both. The code sample in the Developers section
+  deliberately omits an expiry field rather than inventing one.
 
 
 ## Live configuration, as built
