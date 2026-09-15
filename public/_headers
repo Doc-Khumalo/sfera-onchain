@@ -1,6 +1,20 @@
 /*
   X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
+  # SAMEORIGIN, not DENY. The how-it-works deck is a self-contained page that
+  # the homepage embeds in an iframe, and DENY refuses that even when the
+  # framing page is this one — which is why the deck rendered as a blank grey
+  # box in production and nowhere else: `_headers` is not applied by the dev
+  # server, so the only place this could show up was the live site.
+  X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
-  Content-Security-Policy: default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  # frame-src 'self' lets this origin frame its own pages, and frame-ancestors
+  # 'self' lets its own pages be framed by it. Both are needed: the first is
+  # the parent's permission to load the frame, the second is the child's
+  # permission to be loaded. Neither opens the site to framing from anywhere
+  # else, which is the threat these directives exist for.
+  #
+  # connect-src names the engine. It was 'none', which blocks every fetch the
+  # page makes — so /demo could never have read a permission in production. It
+  # reads correctly on localhost because the dev server sends no CSP at all.
+  Content-Security-Policy: default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; connect-src 'self' https://txguard-api.fly.dev; frame-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'
