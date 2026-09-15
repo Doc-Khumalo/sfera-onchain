@@ -84,6 +84,13 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
 
   const link = p.chain?.explorer || explorer;
   const unreadable = !p.remediable;
+  /* Why a correction cannot be offered. DECISION §75 for the unreadable case:
+     narrowing an authority we could not read is how false confidence starts. */
+  const why = unreadable
+    ? 'No correction is offered for a permission we could not read. Narrowing an authority we cannot see is how false confidence starts.'
+    : !canAct
+      ? 'Reading a public address. Connect this wallet to change what it has granted.'
+      : null;
 
   /* The figure that can be taken today is the natural cap: it is what this
      permission is actually reaching, so a limit set there changes nothing a
@@ -120,7 +127,14 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
       <Popover.Portal>
         {/* Portalled to <body>, so it carries the ledger's root class or every
             rule scoped to `.dash` stops at its edge. */}
-        <Popover.Content className="rowmenu dash" align="end" sideOffset={8} collisionPadding={16}>
+        <Popover.Content
+          className="rowmenu dash"
+          align="end"
+          sideOffset={8}
+          collisionPadding={16}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           {/* The asset and the chain it is on, and the address underneath as
               something that can be followed — a spender is an address before
               it is a name, and the name is ours rather than the chain's. */}
@@ -180,17 +194,30 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
             </div>
           ) : (
             <ul className="rowmenu-list">
+              {/* A disabled item says why on hover, where the pointer already
+                  is. The reason was a note at the foot of the menu, which
+                  makes a reader find the greyed row, find the note, and decide
+                  the two are about each other. A disabled button fires no
+                  pointer events, so the trigger wraps it. */}
               <li>
-                <button type="button" disabled={!canAct || unreadable} onClick={() => setLimiting(true)}>
-                  <span>Limit to an amount</span>
-                  <em>Keep it working, cap what it can take</em>
-                </button>
+                <Tooltip label={why || 'Builds an unsigned transaction. Your wallet signs it.'}>
+                  <span className="rowmenu-wrap">
+                    <button type="button" disabled={!canAct || unreadable} onClick={() => setLimiting(true)}>
+                      <span>Limit to an amount</span>
+                      <em>Keep it working, cap what it can take</em>
+                    </button>
+                  </span>
+                </Tooltip>
               </li>
               <li>
-                <button type="button" disabled={!canAct || unreadable} onClick={() => { shut(); onRevoke(p); }}>
-                  <span>Revoke entirely</span>
-                  <em>Set the allowance to zero</em>
-                </button>
+                <Tooltip label={why || 'Builds an unsigned transaction. Your wallet signs it.'}>
+                  <span className="rowmenu-wrap">
+                    <button type="button" disabled={!canAct || unreadable} onClick={() => { shut(); onRevoke(p); }}>
+                      <span>Revoke entirely</span>
+                      <em>Set the allowance to zero</em>
+                    </button>
+                  </span>
+                </Tooltip>
               </li>
               <li>
                 <button type="button" onClick={() => { shut(); onOpen(p.id); }}>
@@ -209,18 +236,7 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
             </ul>
           )}
 
-          {!limiting && unreadable && (
-            <p className="rowmenu-note">
-              No correction is offered for a permission we could not read.
-              Narrowing an authority we cannot see is how false confidence starts.
-            </p>
-          )}
-          {!limiting && !unreadable && !canAct && (
-            <p className="rowmenu-note">
-              Reading a public address. Connect this wallet to change what it
-              has granted.
-            </p>
-          )}
+
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

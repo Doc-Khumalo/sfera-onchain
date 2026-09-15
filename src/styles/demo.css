@@ -1191,3 +1191,13 @@ a.rowmenu-addr:hover, a.d-addr:hover { color: var(--ok); text-decoration: underl
 .rowmenu-head > span { min-width: 0; }
 .d-head { align-items: flex-start; gap: 12px; }
 .d-head > div { flex: 1 1 auto; min-width: 0; }
+
+/* The tooltip's trigger around a disabled item: a disabled button fires no
+   pointer events, so the reason would be unreachable exactly when it is
+   wanted. */
+.rowmenu-wrap { display: block; width: 100%; }
+.rowmenu-wrap > button { width: 100%; }
+
+/* An address in the evidence rows is the evidence, so it is followable. */
+.ev-link { color: var(--mist); text-decoration: none; border-bottom: 1px solid var(--line2); }
+.ev-link:hover { color: var(--ok); border-bottom-color: var(--ok); }

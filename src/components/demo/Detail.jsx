@@ -83,19 +83,34 @@ export default function Detail({ perm, explorer, canAct = true, onClose, onAct }
 
       <details className="evidence">
         <summary>Evidence</summary>
+        {/* The addresses are the evidence, so they are the things that can be
+            followed. They were printed as text with the links to them in a
+            line underneath, which asked a reader to match "Spender" to a
+            truncated string above it. */}
         <dl className="d-rows">
-          <div className="row"><dt>Beneficiary</dt><dd>{perm.beneficiary.slice(0, 10)}…</dd></div>
-          <div className="row"><dt>Asset</dt><dd>{perm.symbol || 'Unreadable'}</dd></div>
+          <div className="row">
+            <dt>Beneficiary</dt>
+            <dd>
+              {explorer ? (
+                <a className="ev-link" href={`${explorer}/address/${perm.beneficiary}`} target="_blank" rel="noopener">
+                  {perm.beneficiary.slice(0, 10)}…{perm.beneficiary.slice(-6)}
+                </a>
+              ) : `${perm.beneficiary.slice(0, 10)}…${perm.beneficiary.slice(-6)}`}
+            </dd>
+          </div>
+          <div className="row">
+            <dt>Asset</dt>
+            <dd>
+              {explorer && perm.asset ? (
+                <a className="ev-link" href={`${explorer}/address/${perm.asset}`} target="_blank" rel="noopener">
+                  {perm.symbol || 'Unreadable'}
+                </a>
+              ) : (perm.symbol || 'Unreadable')}
+            </dd>
+          </div>
           <div className="row"><dt>Standard</dt><dd>{perm.standard}</dd></div>
           <div className="row"><dt>Raw allowance</dt><dd>{String(perm.granted).slice(0, 20)}{String(perm.granted).length > 20 ? '…' : ''}</dd></div>
         </dl>
-        {explorer && (
-          <p className="ev-note">
-            <a href={`${explorer}/address/${perm.beneficiary}`} target="_blank" rel="noopener">Spender</a>
-            {' · '}
-            <a href={`${explorer}/address/${perm.asset}`} target="_blank" rel="noopener">Asset</a>
-          </p>
-        )}
         <p className="ev-note">
           Read from the chain by the TX Guard engine. No index, no third party.
         </p>

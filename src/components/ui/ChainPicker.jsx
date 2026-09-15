@@ -30,6 +30,8 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const list = useRef(null);
+  const field = useRef(null);
+  const trigger = useRef(null);
 
   const picked = chains.filter((c) => value.has(c.id));
   const total = Object.values(counts).reduce((n, c) => n + c, 0);
@@ -42,7 +44,12 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
     return needle ? chains.filter((c) => c.name.toLowerCase().includes(needle)) : chains;
   }, [chains, q]);
 
-  function toggle(id) {
+  function toggle(id, e) {
+    /* Picking changes how many rows the table has, which changes the height of
+       the page under this menu. Nothing about that belongs to whatever is
+       behind it. */
+    e?.preventDefault();
+    e?.stopPropagation();
     const next = new Set(value);
     if (next.has(id)) next.delete(id); else next.add(id);
     /* Every chain ticked is the same view as none ticked, and the second is
@@ -50,7 +57,26 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
     onChange(next.size === chains.length ? new Set() : next);
   }
 
-  function all() {
+  /* THE PAGE MUST NOT MOVE WHILE CHAINS ARE BEING PICKED.
+   *
+   * Narrowing to one chain takes rows out of the table, which makes the
+   * document shorter, which makes the browser clamp the scroll position — so
+   * the whole page slid up under the pointer between one tick and the next.
+   * Nothing was propagating; the page was simply shrinking.
+   *
+   * So the console holds the height it had when the menu opened, for as long
+   * as it is open, and lets go when it closes. The rows come and go inside a
+   * box that stays put. */
+  function hold(on) {
+    const console_ = trigger.current?.closest('.a-console');
+    if (!console_) return;
+    if (on) console_.style.minHeight = `${console_.getBoundingClientRect().height}px`;
+    else console_.style.minHeight = '';
+  }
+
+  function all(e) {
+    e?.preventDefault();
+    e?.stopPropagation();
     onChange(new Set());
     setQ('');
   }
@@ -62,9 +88,9 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
       : `${picked.length} chains · ${shownCount}`;
 
   return (
-    <Popover.Root open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQ(''); }}>
+    <Popover.Root open={open} onOpenChange={(o) => { setOpen(o); hold(o); if (!o) setQ(''); }}>
       <Popover.Trigger asChild>
-        <button type="button" className="cpick" aria-label="Choose which chains to show">
+        <button ref={trigger} type="button" className="cpick" aria-label="Choose which chains to show">
           <span className="cstack compact">
             {/* The marks of what is picked, or the cluster when everything is. */}
             <span className="cs-marks">
@@ -84,8 +110,20 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
       <Popover.Portal>
         {/* Portalled to <body>, so it carries the ledger's root class or every
             rule scoped to `.dash` stops at its edge. */}
-        <Popover.Content className="cmenu dash" sideOffset={8} align="end" collisionPadding={16}>
+        {/* Radix focuses the first thing in the content when it opens, and the
+            browser scrolls that into view — which on a console halfway down
+            the page moves the page under the pointer. The field is focused
+            here instead, without the scroll. */}
+        <Popover.Content
+          className="cmenu dash"
+          sideOffset={8}
+          align="end"
+          collisionPadding={16}
+          onOpenAutoFocus={(e) => { e.preventDefault(); field.current?.focus({ preventScroll: true }); }}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           <input
+            ref={field}
             className="cmenu-find"
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -96,7 +134,7 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
             onKeyDown={(e) => {
               /* Enter takes the first match, because typing three letters and
                  then reaching for the mouse is not a search. */
-              if (e.key === 'Enter' && found.length) { e.preventDefault(); toggle(found[0].id); }
+              if (e.key === 'Enter' && found.length) { e.preventDefault(); toggle(found[0].id, e); }
               if (e.key === 'ArrowDown') { e.preventDefault(); list.current?.querySelector('button')?.focus(); }
             }}
           />
@@ -111,7 +149,7 @@ export function ChainPicker({ chains, value, counts = {}, onChange }) {
             </li>
             {found.map((c) => (
               <li key={c.id}>
-                <button type="button" onClick={() => toggle(c.id)} aria-pressed={value.has(c.id)}>
+                <button type="button" onClick={(e) => toggle(c.id, e)} aria-pressed={value.has(c.id)}>
                   <ChainMark chain={c} size={18} />
                   <span className="cm-name">{c.name}</span>
                   <em>{counts[c.id] ?? 0}</em>
