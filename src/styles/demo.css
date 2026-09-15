@@ -255,7 +255,31 @@
   .gate-do { margin-top: clamp(30px, 5vh, 46px); }
 }
 
-.gate-say, .gate-do { min-width: 0; }
+.gate-say { min-width: 0; }
+
+/* The action half, as one object in the frame the console and the sheet use.
+   Loose parts beside a 56px headline read as debris; a panel reads as the
+   thing you came to use. */
+.gate-do {
+  min-width: 0;
+  padding: clamp(20px, 2.2vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+}
+
+/* Below the field: how else to get in, and what it reads. */
+.gate-or {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.gate-or-label {
+  margin: 0 0 12px;
+  font: 400 11.5px/1 var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--slate);
+}
 
 .gate h1,
 .gate h2 {
@@ -278,7 +302,7 @@
 /* Not a warning, and not styled as one: a browser with no wallet in it is the
    ordinary case for someone being shown this for the first time. */
 .gate-none {
-  margin: 0 0 20px;
+  margin: 0;
   font: 400 13px/1.6 var(--display);
   color: var(--slate);
 }
@@ -288,7 +312,7 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 10px;
-  margin: 0 0 22px;
+  margin: 0;
 }
 
 /* One field. Its contents read left to right, so its label and the line under
@@ -302,8 +326,7 @@
 }
 .lookup label {
   display: block;
-  margin-bottom: 11px;
-  padding-left: var(--field-inset);
+  margin-bottom: 13px;
   font: 700 10px/1 var(--mono);
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -339,7 +362,7 @@
 .lookup .btn { flex: 0 0 auto; border-radius: 999px; }
 .lookup .txt {
   display: block;
-  margin: 14px 0 0;
+  margin: 13px 0 0;
   padding-left: var(--field-inset);
   font: 400 12.5px/1.5 var(--display);
   color: var(--slate);
@@ -353,8 +376,7 @@
 .gate-chains {
   display: flex;
   justify-content: flex-start;
-  margin: 20px 0 0;
-  padding-left: var(--field-inset);
+  margin: 16px 0 0;
 }
 .gate-error {
   display: flex;

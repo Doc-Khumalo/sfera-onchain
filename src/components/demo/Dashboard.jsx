@@ -439,65 +439,75 @@ export default function Dashboard({ embedded = false }) {
           </p>
         </div>
 
+        {/* The right half is an object, not a pile.
+         *
+         * It was a status line, a label, a field, a link and a row of chain
+         * marks floating in space beside a very large headline — five loose
+         * fragments where the composition needed one thing with weight. So it
+         * is a panel, in the same frame the console and the detail sheet use,
+         * and the parts inside it run in the order they are used: read an
+         * address, or connect the wallet that holds one.
+         *
+         * "No wallet was found" moved to the bottom of it. It is a fact about
+         * this browser, not the first thing anyone came to read. */}
         <div className="gate-do">
-        {wallets.length === 0 && (
-          <p className="gate-none">
-            No wallet was found in this browser. You can still read any public
-            address below.
-          </p>
-        )}
+          <form className="lookup" onSubmit={(e) => { e.preventDefault(); lookUp(typed); }}>
+            <label htmlFor="addr">Read any public address</label>
+            <div className={`lookup-row${error ? ' bad' : ''}`}>
+              <input
+                id="addr"
+                value={typed}
+                onChange={(e) => { setTyped(e.target.value); if (error) setError(null); }}
+                placeholder="0x…"
+                spellCheck="false"
+                autoComplete="off"
+                aria-invalid={error ? 'true' : undefined}
+                aria-describedby={error ? 'addr-error' : undefined}
+              />
+              <button type="submit" className="btn ghost">Read</button>
+            </div>
 
-        <div className="wallet-picks stagger">
-          {wallets.map((w) => (
-            <button key={w.info.uuid} type="button" className="btn"
-              disabled={status === 'connecting'} onClick={() => onConnect(w)}>
-              {w.info.icon && <img src={w.info.icon} alt="" width="16" height="16" />}
-              {status === 'connecting' ? 'Check your wallet' : w.info.name}
+            {/* The error belongs to the field, not to the page: under the
+                input it failed on, with the input marked invalid so assistive
+                technology says so too. */}
+            {error && (
+              <p className="gate-error" id="addr-error" role="alert">
+                {explain(error)}
+              </p>
+            )}
+
+            <button type="button" className="txt" onClick={() => lookUp(EXAMPLE.address, EXAMPLE.chainId)}>
+              Use an example address with unbounded permissions
             </button>
-          ))}
-        </div>
+          </form>
 
-        {/* The error belongs to the field, not to the page. Floating it above
-            the form left the reader to work out which control it was about,
-            and a message that is not attached to its input is not attached to
-            anything. It sits under the field it failed on, the field is marked
-            invalid so assistive technology says so too, and aria-describedby
-            ties the two together. */}
-        <form className="lookup" onSubmit={(e) => { e.preventDefault(); lookUp(typed); }}>
-          <label htmlFor="addr">Or read any public address</label>
-          <div className={`lookup-row${error ? ' bad' : ''}`}>
-            <input
-              id="addr"
-              value={typed}
-              onChange={(e) => { setTyped(e.target.value); if (error) setError(null); }}
-              placeholder="0x…"
-              spellCheck="false"
-              autoComplete="off"
-              aria-invalid={error ? 'true' : undefined}
-              aria-describedby={error ? 'addr-error' : undefined}
-            />
-            <button type="submit" className="btn ghost">Read</button>
+          <div className="gate-or">
+            {wallets.length > 0 ? (
+              <>
+                <p className="gate-or-label">or connect a wallet</p>
+                <div className="wallet-picks">
+                  {wallets.map((w) => (
+                    <button key={w.info.uuid} type="button" className="btn"
+                      disabled={status === 'connecting'} onClick={() => onConnect(w)}>
+                      {w.info.icon && <img src={w.info.icon} alt="" width="16" height="16" />}
+                      {status === 'connecting' ? 'Check your wallet' : w.info.name}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="gate-none">
+                No wallet was found in this browser. Any public address reads
+                the same way.
+              </p>
+            )}
+
+            {supported.length > 0 && (
+              <p className="gate-chains" title={supported.map((c) => c.name).join(', ')}>
+                <ChainStack label={`${supported.length} chains, all read the same way`} compact />
+              </p>
+            )}
           </div>
-
-          {error && (
-            <p className="gate-error" id="addr-error" role="alert">
-              {explain(error)}
-            </p>
-          )}
-
-          <button type="button" className="txt" onClick={() => lookUp(EXAMPLE.address, EXAMPLE.chainId)}>
-            Use an example address with unbounded permissions
-          </button>
-
-          {/* Inside the field block, on the same vertical as the label and the
-              placeholder. Centred under a left-aligned form was the one thing
-              on this screen that lined up with nothing. */}
-          {supported.length > 0 && (
-            <p className="gate-chains" title={supported.map((c) => c.name).join(', ')}>
-              <ChainStack label={`+ more - ${supported.length} read the same way`} />
-            </p>
-          )}
-        </form>
         </div>
 
         {/* The commitments belong to the screen, not to either half of it.
