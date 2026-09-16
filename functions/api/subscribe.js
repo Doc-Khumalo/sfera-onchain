@@ -49,30 +49,54 @@ function page({ title, body, tone = 'ok', status = 200 }) {
   );
 }
 
+/* The ledger's modal posts JSON and stays on the page; the marketing form
+   posts a form and navigates. One endpoint, one list, two ways in — a second
+   endpoint would be a second place for the rules about an address to drift. */
+function wantsJson(request) {
+  return (request.headers.get('accept') || '').includes('application/json')
+    || (request.headers.get('content-type') || '').includes('application/json');
+}
+
+const said = (ok, message, status) =>
+  new Response(JSON.stringify({ ok, message }), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+  });
+
 export async function onRequestPost({ request, env }) {
+  const json = wantsJson(request);
+  const answer = (opts) => (json
+    ? said(opts.tone !== 'bad', opts.body, opts.status ?? 200)
+    : page(opts));
+
   if (Number(request.headers.get('content-length') || 0) > MAX_BODY) {
-    return page({ title: 'That was too large', body: 'Nothing was saved.', tone: 'bad', status: 413 });
+    return answer({ title: 'That was too large', body: 'Nothing was saved.', tone: 'bad', status: 413 });
   }
 
   let email = '';
   try {
-    const form = await request.formData();
-    email = String(form.get('email') || '').trim().toLowerCase();
+    if (json) {
+      const b = await request.json();
+      email = String(b?.email || '').trim().toLowerCase();
+    } else {
+      const form = await request.formData();
+      email = String(form.get('email') || '').trim().toLowerCase();
+    }
   } catch {
-    return page({ title: 'That did not arrive cleanly', body: 'Nothing was saved. Try again?', tone: 'bad', status: 400 });
+    return answer({ title: 'That did not arrive cleanly', body: 'Nothing was saved. Try again?', tone: 'bad', status: 400 });
   }
 
   /* Deliberately permissive. Validation stricter than this rejects real
      addresses more often than it catches invented ones, and only a
      confirmation email proves an address exists at all. */
   if (!email || email.length > 254 || !/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) {
-    return page({ title: 'That address did not look right', body: 'Nothing was saved. Have another go.', tone: 'bad', status: 400 });
+    return answer({ title: 'That address did not look right', body: 'Nothing was saved. Have another go.', tone: 'bad', status: 400 });
   }
 
   if (!env.SUBSCRIBERS) {
     /* Fail visibly. Accepting an address into nowhere and thanking someone for
        it is worse than admitting the list is not wired up yet. */
-    return page({
+    return answer({
       title: 'The list is not connected yet',
       body: 'Your address was not saved, and we would rather say so than pretend. Use the contact link instead.',
       tone: 'bad', status: 503,
@@ -85,10 +109,10 @@ export async function onRequestPost({ request, env }) {
        address is all we keep. */
     await env.SUBSCRIBERS.put(`sub:${email}`, JSON.stringify({ email, at: new Date().toISOString() }));
   } catch {
-    return page({ title: 'Something went wrong at our end', body: 'Your address was not saved.', tone: 'bad', status: 502 });
+    return answer({ title: 'Something went wrong at our end', body: 'Your address was not saved.', tone: 'bad', status: 502 });
   }
 
-  return page({
+  return answer({
     title: 'Noted.',
     body: 'We will write when there is something real to show, which will not be often.',
   });

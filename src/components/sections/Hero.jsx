@@ -44,8 +44,8 @@ You already said yes.
             <button type="submit" className="btn">Read it</button>
           </div>
           <p id="probe-note" className="probe-note">
-            Read-only, and no wallet needed. Nothing is signed, stored, or sent
-            anywhere.
+            Read-only, and no wallet needed. Nothing is signed and no key is ever
+            asked for.
           </p>
 
           <ChainStack label="+ more, all read the same way" />

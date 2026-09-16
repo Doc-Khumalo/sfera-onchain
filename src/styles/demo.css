@@ -1228,3 +1228,17 @@ a.rowmenu-addr:hover, a.d-addr:hover { color: var(--ok); text-decoration: underl
 }
 .xsub { margin: 0; padding: 0; list-style: none; }
 .xmenu .cmenu-list > li:first-child .xgroup { margin-top: 4px; }
+
+/* ---- keep in touch -------------------------------------------------------
+   Asked once, after a reading. It wears the handoff's panel, because it is the
+   same kind of object: a thing that interrupts, briefly, and can be closed
+   without cost. */
+.kit-h { margin: 0 0 12px; font: 700 21px/1.2 var(--display); letter-spacing: -0.02em; color: var(--ice); }
+.kit-form { margin: 20px 0 0; }
+.kit-form label { margin-bottom: 9px; }
+.kit-note {
+  margin: 16px 0 0;
+  font: 400 11.5px/1.5 var(--display);
+  color: var(--slate);
+}
+.kit .d-actions { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line2); }

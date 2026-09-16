@@ -11,6 +11,7 @@ import Verdict from './Verdict.jsx';
 import { ChainPicker } from '../ui/ChainPicker.jsx';
 import WalletMenu from './WalletMenu.jsx';
 import { ExamplePicker } from '../ui/ExamplePicker.jsx';
+import KeepInTouch from './KeepInTouch.jsx';
 import { EXAMPLES } from '../../data/site.js';
 import { Counter } from '../ui/Counter.jsx';
 import { Toaster } from '../ui/Toast.jsx';
@@ -315,6 +316,19 @@ export default function Dashboard({ embedded = false }) {
     } else {
       setNotes((ns) => ns.filter((n) => n.key !== 'partial' && n.key !== 'read'));
     }
+
+    /* A record that this address was read — see functions/api/probe.js for
+       what is kept and what is deliberately not. Fire and forget: the reading
+       is already on screen and nothing about it waits on our bookkeeping. */
+    fetch('/api/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        address,
+        chains: ok.map((r) => r.chain.id),
+        found: merged.permissions.length,
+      }),
+    }).catch(() => {});
 
     setResult((was) => {
       if (was) {
@@ -833,6 +847,10 @@ export default function Dashboard({ embedded = false }) {
       </>
 
       {/* Beside every screen, not inside one of them. */}
+      {/* Asked once, a few seconds after a reading is on screen — see
+          demo/KeepInTouch.jsx for why not sooner and why not twice. */}
+      <KeepInTouch when={status === 'ready' && !!result} />
+
       <Toaster notes={notes} onDismiss={dismiss} />
 
       {/* On the permission's own chain, not on whichever one is current. The
