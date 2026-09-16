@@ -941,3 +941,40 @@
   .au-red .g { opacity: 1; }
 }
 
+
+/* ---- the cycling console, on a phone --------------------------------------
+   THE BLANK SPACE BUG. The three wallet sets take turns by animating
+   `visibility: collapse`, which removes a row group's height — but only while
+   it is a row group. Below 760px the table stacks into blocks (global.css), so
+   `collapse` degrades to `hidden`: the two sets that are not showing keep
+   every pixel of their height and the console became 6,662px tall on a 390px
+   screen, two thirds of it empty.
+
+   The cycle is a flourish, and a flourish that costs four thousand pixels of
+   nothing is not one. On a phone the console shows one wallet and holds still:
+   there is no reading a 2,100px set twice anyway. */
+@media (max-width: 760px) {
+  /* Qualified by the table, because the stacking rule that caused this is
+     `.a-table tbody { display: block }` and a bare class loses to it. */
+  .a-table tbody.a-set-2,
+  .a-table tbody.a-set-3 { display: none; }
+  .a-table tbody.a-set-1 { display: block; animation: none; visibility: visible; }
+  .a-wids > span:not(.a-wid-1) { display: none; }
+  .a-wid-1 { animation: none; opacity: 1; }
+  .a-scan { display: none; }
+}
+
+/* The hero's call to action is one long line held on one line: at 390px it was
+   387px wide inside a 350px column and ran 37px past the edge of the screen —
+   the button the whole page points at, clipped. It wraps and fills its column
+   instead. */
+@media (max-width: 460px) {
+  .a-btn-lg {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 16px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+  }
+}
