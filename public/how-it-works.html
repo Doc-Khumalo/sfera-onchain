@@ -386,7 +386,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
   <div class="field" aria-hidden="true"><b class="unbound"></b><b class="bound"></b></div>
   <header class="bar">
     <div class="logo">Sfera<i>Onchain</i></div>
-    <a class="btn" href="https://www.linkedin.com/in/khumalo-leslie/">Get in touch</a>
+    <a class="btn" href="https://www.linkedin.com/in/khumalo-leslie/" target="_blank" rel="noopener noreferrer">Get in touch</a>
   </header>
   <main class="deck">
     <div class="scene">
@@ -424,8 +424,17 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
           </div>
           <div class="rbody rteam">
             <dl class="prow lead"><dt>Team</dt><dd>Sfera Onchain</dd></dl>
-            <dl class="prow"><dt>Engineering</dt><dd><a href="https://www.linkedin.com/in/khumalo-leslie/">Leslie Khumalo</a></dd></dl>
-            <dl class="prow"><dt>Product and quality</dt><dd><a href="https://www.linkedin.com/in/blagoja-mojsoski-228b79b1/">Blagoja Mojsoski</a></dd></dl>
+            <!-- Every link out of this deck opens in a new tab, and on the home
+                 page that is the difference between working and not: the deck
+                 is in an iframe there, so a link without a target navigates
+                 THE FRAME, and LinkedIn refuses to be framed — the reader gets
+                 a blocked-content panel where the receipt was, with the page
+                 around it still showing. _blank and not _top, because _top
+                 would take the whole site away to answer a click on a name.
+                 rel is the pair that goes with it: noopener denies the new tab
+                 a handle on this one, noreferrer keeps the referrer off. -->
+            <dl class="prow"><dt>Engineering</dt><dd><a href="https://www.linkedin.com/in/khumalo-leslie/" target="_blank" rel="noopener noreferrer">Leslie Khumalo</a></dd></dl>
+            <dl class="prow"><dt>Product and quality</dt><dd><a href="https://www.linkedin.com/in/blagoja-mojsoski-228b79b1/" target="_blank" rel="noopener noreferrer">Blagoja Mojsoski</a></dd></dl>
             <dl class="prow"><dt>Find us</dt><dd>sferaonchain.xyz</dd></dl>
           </div>
           <div class="rfoot"><span>ERC-20 &middot; approve()</span><span id="pRef">as requested</span></div>
