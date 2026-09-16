@@ -10,13 +10,15 @@ import Handoff from './Handoff.jsx';
 import Verdict from './Verdict.jsx';
 import { ChainPicker } from '../ui/ChainPicker.jsx';
 import WalletMenu from './WalletMenu.jsx';
+import { ExamplePicker } from '../ui/ExamplePicker.jsx';
+import { EXAMPLES } from '../../data/site.js';
 import { Counter } from '../ui/Counter.jsx';
 import { Toaster } from '../ui/Toast.jsx';
 
-/** A public address carrying unbounded approvals against a real balance.
-    Verified before being written down, so the page has something honest to
-    show when there is no wallet to hand. */
-const EXAMPLE = { address: '0x8ea5ad2a58c1dae75394b1e8636e6518eb6dac50', chainId: 8453 };
+/* The examples themselves live in data/site.js, each verified against the live
+   engine before being written down — see the note there. This is only the
+   chain a handed-over address falls back to when the list has not loaded. */
+const EXAMPLE = EXAMPLES[0];
 
 const FILTERS = [
   { k: 'all', label: 'All' },
@@ -480,12 +482,11 @@ export default function Dashboard({ embedded = false }) {
       </form>
 
       {/* Beside the field it fills in, which is the only place it means
-          anything. It sat in the table's waiting row for a while to keep this
-          bar one line tall; the bar is one line tall because the note that
-          used to share it moved to that row instead. */}
-      <button type="button" className="txt" onClick={() => lookUp(EXAMPLE.address, EXAMPLE.chainId)}>
-        Use an example address
-      </button>
+          anything. A list rather than one button: a wallet with three
+          unbounded approvals and a wallet with one read very differently, and
+          a reader shown only the first does not learn that the second is the
+          common case. */}
+      <ExamplePicker onPick={(addr, chainId) => lookUp(addr, chainId)} />
 
       {wallets.length > 0 && (
         <div className="a-console-or">

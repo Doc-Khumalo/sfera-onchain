@@ -1201,3 +1201,20 @@ a.rowmenu-addr:hover, a.d-addr:hover { color: var(--ok); text-decoration: underl
 /* An address in the evidence rows is the evidence, so it is followable. */
 .ev-link { color: var(--mist); text-decoration: none; border-bottom: 1px solid var(--line2); }
 .ev-link:hover { color: var(--ok); border-bottom-color: var(--ok); }
+
+/* ---- the example addresses ----------------------------------------------
+   The chain picker's menu, holding sentences rather than names, so its rows
+   are taller and its measure wider. */
+.xmenu { width: 330px; }
+.xmenu .cmenu-list button { align-items: flex-start; padding: 8px; }
+.xrow .cm-name { display: block; min-width: 0; }
+.xrow b { display: block; font: 600 12.5px/1.3 var(--display); color: var(--ice); }
+.xrow em {
+  display: block;
+  margin-top: 2px;
+  font: 400 11.5px/1.4 var(--display);
+  font-style: normal;
+  color: var(--mist);
+}
+.xaddr { display: block; margin-top: 4px; font: 400 10.5px/1 var(--mono); color: var(--slate); }
+.xmenu .cmenu-list button:hover b { color: var(--ok); }

@@ -115,6 +115,38 @@ export const CHAINS = [
 ];
 
 /**
+ * Addresses the demo can be pointed at, for someone who has none to hand.
+ *
+ * EVERY ONE IS VERIFIED BEFORE IT IS WRITTEN DOWN. The engine reads a registry
+ * of a few tokens against ten spenders per chain, so an address with a long
+ * trading history shows nothing unless what it approved is in that registry —
+ * the limit is the registry, not the wallet. Each entry here was queried
+ * against the live engine and the counts below are what came back.
+ *
+ * To add one: find a wallet that has swapped on Uniswap, which routes through
+ * Permit2 and leaves an unlimited approval behind, then
+ *
+ *   curl https://txguard-api.fly.dev/v1/permissions/<chainId>/<address>
+ *
+ * and keep it only if `permissions` is not empty. Do not write down an address
+ * that has not answered.
+ */
+export const EXAMPLES = [
+  {
+    address: '0x8ea5ad2a58c1dae75394b1e8636e6518eb6dac50',
+    chainId: 8453,
+    title: 'Three unbounded approvals',
+    note: 'USDC, WETH and USDT on Base, all to Uniswap Permit2',
+  },
+  {
+    address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+    chainId: 10,
+    title: 'One unbounded approval',
+    note: 'OP on Optimism, to Uniswap Permit2, against a live balance',
+  },
+];
+
+/**
  * Where a conversation can start.
  *
  * BOOKING is a plain link and never an embedded widget. DEPLOYMENT.md forbids
