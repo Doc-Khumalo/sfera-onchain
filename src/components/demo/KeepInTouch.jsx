@@ -74,7 +74,7 @@ export default function KeepInTouch({ when }) {
       <DialogContent
         className="kit"
         title="Keep in touch"
-        description="Leave an address and we will write when there is something real to show."
+        description="Leave an address and we will write when there is something to show."
       >
         {state === 'done' ? (
           <>
@@ -90,11 +90,15 @@ export default function KeepInTouch({ when }) {
           <>
             <p className="rule-label">Keep in touch</p>
             <h3 className="kit-h">This is a proof of concept.</h3>
+            {/* Four lines to two. This is an interruption, and an interruption
+                that takes longer to read than the thing it interrupted is one
+                nobody finishes. What was cut was the list of what is still
+                being built: true, and not what anyone needs in order to decide
+                whether to leave an address. */}
             <p className="h-body">
-              It reads standing permissions and builds one correction. The rest -
-              limiting instead of revoking, several at once, signed permissions -
+              It reads standing permissions and builds one correction. The rest
               is being built. Leave an address and we will write when there is
-              something real to show, which will not be often.
+              something to show.
             </p>
 
             <form className="lookup kit-form" onSubmit={send}>
@@ -117,10 +121,12 @@ export default function KeepInTouch({ when }) {
               {state === 'failed' && <p className="gate-error">{said}</p>}
             </form>
 
-            {/* What we keep, said where the address is asked for. */}
+            {/* What we keep, said where the address is asked for. Shorter, but
+                every clause here is a commitment rather than a description, so
+                none of them went. */}
             <p className="kit-note">
-              The address goes on a list and nothing else. It is never joined to
-              a wallet, never sold, and one line back to us takes it off again.
+              It goes on a list and nothing else. Never joined to a wallet,
+              never sold, and one line back takes it off.
             </p>
 
             <div className="d-actions">

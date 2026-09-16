@@ -14,8 +14,14 @@
  * Answering directly means the form works with JavaScript disabled, which is a
  * state a security-minded visitor is quite likely to be in.
  *
- * Storage is KV. Create and bind it as SUBSCRIBERS:
- *   wrangler kv namespace create SUBSCRIBERS
+ * Storage is KV, bound as SUBSCRIBERS. Until that binding exists this endpoint
+ * answers 503 and says so rather than accepting an address into nowhere. See
+ * DEPLOY.md, "The email list", for the two minutes of dashboard it takes.
+ *
+ * A confirmation is sent when RESEND_API_KEY and MAIL_FROM are set, and not
+ * otherwise. It is sent after the address is stored and its failure is never
+ * the subscriber's problem: a mail provider having a bad afternoon must not
+ * turn a saved address into an error message.
  *
  * This is a marketing list. It is not wallet linked, holds no permission state
  * and never touches the analysis path, so ADR 001 is untroubled by it.
@@ -112,10 +118,57 @@ export async function onRequestPost({ request, env }) {
     return answer({ title: 'Something went wrong at our end', body: 'Your address was not saved.', tone: 'bad', status: 502 });
   }
 
+  /* After the write, never before, and never in a way that can fail the
+     request: the address is on the list either way, and the subscriber cannot
+     do anything about our mail provider. */
+  await confirm(email, env).catch(() => {});
+
   return answer({
     title: 'Noted.',
     body: 'We will write when there is something real to show, which will not be often.',
   });
+}
+
+/**
+ * One email, saying what was recorded and how to undo it.
+ *
+ * Plain text. An HTML mail from a project whose argument is that you should be
+ * able to see what you agreed to would be a small joke at its own expense, and
+ * plain text is also what survives every client without a tracking pixel in it.
+ */
+async function confirm(email, env) {
+  const key = env.RESEND_API_KEY;
+  const from = env.MAIL_FROM;
+  if (!key || !from) return;
+
+  const reply = env.MAIL_REPLY_TO || from;
+  const body = [
+    'Your address is on the Sfera Onchain list.',
+    '',
+    'That is all it is on. It is not joined to a wallet and it is not sold.',
+    'We will write when there is something real to show, which will not be often.',
+    '',
+    `To come off the list, reply to this message and say so: ${reply}`,
+    '',
+    'Sfera Onchain',
+    'https://sferaonchain.xyz',
+  ].join('\n');
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from,
+      to: [email],
+      reply_to: reply,
+      subject: 'You are on the list',
+      text: body,
+    }),
+  });
+
+  /* Logged, not surfaced. Someone should be able to find out that mail stopped
+     working without a subscriber being the one to report it. */
+  if (!res.ok) console.error('confirmation not sent', res.status, await res.text());
 }
 
 /** A GET here is someone poking at the URL, not a subscriber. */

@@ -235,6 +235,63 @@ merge. Merging to `main` publishes.
 Cloudflare Pages keeps every deployment. In the project, Deployments, find a good
 one, Rollback. It is instant and does not need a git revert.
 
+## The email list
+
+**As of 16 September 2026 this is not connected, and the live site turns every
+signup away.** `POST /api/subscribe` answers 503 with "The list is not connected
+yet" because `env.SUBSCRIBERS` is undefined. That is the endpoint refusing to
+accept an address into nowhere and thank someone for it, which is the right
+behaviour for an unbound namespace and the wrong thing to leave running.
+
+Two bindings, both in the dashboard, no CLI:
+
+1. **The namespace.** Workers & Pages, KV, Create a namespace. Call it
+   `sferaonchain-subscribers`.
+2. **The binding.** The `sferaonchain` Pages project, Settings, Functions, KV
+   namespace bindings. Add one for Production and one for Preview, both with
+   the variable name `SUBSCRIBERS`, pointing at that namespace.
+3. Redeploy. A binding added after a deployment does not reach the running one.
+
+Check it from a terminal:
+
+```
+curl -s -X POST https://sferaonchain.xyz/api/subscribe \
+  -H 'content-type: application/json' -H 'accept: application/json' \
+  -d '{"email":"you@example.com"}'
+```
+
+`{"ok":true}` means the list is live. 503 means the binding did not take.
+
+The same page has a second namespace, `PROBES`, for `functions/api/probe.js`,
+which records which addresses were read and nothing about who read them. It is
+bound the same way and is equally unbound today.
+
+### Reading the list
+
+There is no admin page, deliberately. Keys are `sub:<email>`:
+
+```
+npx wrangler kv key list --binding SUBSCRIBERS --remote
+```
+
+### The confirmation email
+
+Optional, and off unless configured. With no key set, addresses are still saved
+and no mail is sent. To turn it on, add these as Pages environment variables
+(Settings, Environment variables, and mark the key **encrypted**):
+
+| Variable | What it is |
+| --- | --- |
+| `RESEND_API_KEY` | A Resend API key. The domain has to be verified with them first, which is three DNS records in the zone you already control. |
+| `MAIL_FROM` | The sender, e.g. `Sfera Onchain <hello@sferaonchain.xyz>`. Must be on the verified domain. |
+| `MAIL_REPLY_TO` | Optional. Where "take me off the list" replies land. Defaults to `MAIL_FROM`. |
+
+The mail is plain text and carries no tracking pixel. It is sent after the
+address is stored and its failure is swallowed: a provider having a bad
+afternoon must not turn a saved address into an error message. Failures are
+logged, so `wrangler pages deployment tail` is where to look if mail stops.
+
+
 ## Still outstanding
 
 - No favicon. The tab shows a default globe.
@@ -251,6 +308,9 @@ one, Rollback. It is instant and does not need a git revert.
 - `how-it-works.html` renders blank with JavaScript disabled. The homepage does not.
 - No analytics. Cloudflare Web Analytics is free, needs no cookie banner, and is
   one script tag.
+- **The email list and the probe log are both unbound.** Every signup on the
+  live site is refused. See "The email list" above; it is two dashboard
+  bindings and a redeploy.
 - **Blocker before either entry page goes live.** The three market figures —
   $17B stolen through scams and fraud in 2025 (Chainalysis), 741M own crypto
   (Crypto.com), 40–70M use it onchain (a16z) — were flagged in review as not
