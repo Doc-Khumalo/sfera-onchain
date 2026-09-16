@@ -91,8 +91,8 @@ export default function KeepInTouch({ when }) {
             <p className="rule-label">Keep in touch</p>
             <h3 className="kit-h">This is a proof of concept.</h3>
             <p className="h-body">
-              It reads standing permissions and builds one correction. The rest —
-              limiting instead of revoking, several at once, signed permissions —
+              It reads standing permissions and builds one correction. The rest -
+              limiting instead of revoking, several at once, signed permissions -
               is being built. Leave an address and we will write when there is
               something real to show, which will not be often.
             </p>

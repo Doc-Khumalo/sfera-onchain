@@ -49,7 +49,7 @@ export default function Lifecycle() {
         </dl>
         <p className="graph-note">
           One view of every application, actor and session with authority over
-          the account — what it can reach, and how to end it.
+          the account: what it can reach, and how to end it.
         </p>
       </div>
     </section>

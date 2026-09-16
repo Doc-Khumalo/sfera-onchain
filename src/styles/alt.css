@@ -964,17 +964,83 @@
   .a-scan { display: none; }
 }
 
-/* The hero's call to action is one long line held on one line: at 390px it was
-   387px wide inside a 350px column and ran 37px past the edge of the screen —
-   the button the whole page points at, clipped. It wraps and fills its column
-   instead. */
+/* The hero's call to action is one long line, and at 390px it was 387px wide
+   inside a 350px column — the button the whole page points at, running off the
+   screen. Wrapping it was worse: two ragged lines of tracked-out uppercase with
+   the arrow stranded at the end of the second. It stays one line and the line
+   is set smaller, which is what a phone does to everything else on this page. */
 @media (max-width: 460px) {
   .a-btn-lg {
     width: 100%;
     max-width: 100%;
-    padding-inline: 16px;
-    white-space: normal;
-    text-align: center;
-    line-height: 1.35;
+    gap: 8px;
+    padding: 15px 16px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
   }
+  .a-cta-arrow { width: 13px; height: 13px; }
+  .a-cta { gap: 14px; margin-top: 28px; }
+  .a-cta-note { font-size: 12px; }
+}
+
+
+
+/* ---- the three figures, rebuilt ------------------------------------------
+   This band is the first thing read on the console and it was the quietest:
+   a 10px label and a 12.5px caption around a 27px number, so the figure was
+   loud and the two pieces of text that say what it MEANS were not. A number
+   nobody can read the label of teaches nothing.
+
+   So: the label carries a mark in the reading's own colour, the way the deck
+   marks its steps, and both label and caption are set to be read rather than
+   glanced past. The mark is drawn from the value's own class with :has(), so
+   it cannot disagree with the figure it sits above.
+
+   On a phone the label and the figure share a line and the caption takes the
+   next, which fits three findings in the height the old stack gave to one and
+   keeps every word at a size worth setting. This band is shared with the ledger, which writes the same three
+   figures in a description list; the rules there are the same rules. */
+.a-figs > span {
+  position: relative;
+  padding: 18px 24px 20px;
+}
+.a-figs em {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 10.5px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.a-figs em::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: var(--slate);
+}
+.a-figs > span:has(b.bad) em::before { background: var(--bad); }
+.a-figs > span:has(b.ok) em::before { background: var(--ok); }
+.a-figs > span > i {
+  font: 400 13.5px/1.5 var(--display);
+  font-style: normal;
+  color: var(--mist);
+  max-width: 32ch;
+}
+
+@media (max-width: 760px) {
+  .a-figs > span {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 4px 14px;
+    padding: 13px 18px 14px;
+  }
+  .a-figs em { grid-column: 1; font-size: 10px; letter-spacing: 0.12em; }
+  .a-figs b { grid-column: 2; grid-row: 1; font-size: 22px; }
+  .a-figs > span > i { grid-column: 1 / -1; max-width: none; font-size: 12.5px; }
 }

@@ -273,52 +273,6 @@
    Where the wallet's identity sits once there is one. Same padding, same
    rule beneath it, so the console does not change shape when a read begins —
    only what the bar is saying changes. */
-/* ONE HEIGHT, BOTH STATES. The bar that asks for an address and the bar that
-   names the one being read are the same object saying different things, so
-   they are the same size: one rule, one min-height, and the console does not
-   jump the moment a read begins. */
-.a-console-head,
-.a-console-read {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  min-height: 70px;
-  padding: 12px 24px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(255,255,255,0.012);
-}
-/* One line, always: what is in here swaps with the line that names the
-   wallet, and a second line here would make the console jump. Below the
-   breakpoint it wraps like everything else and both states wrap alike. */
-@media (min-width: 900px) {
-  .a-console-head,
-  .a-console-read { flex-wrap: nowrap; }
-}
-.a-console-read .lookup { flex: 1 1 340px; min-width: 0; max-width: 480px; }
-/* Named for assistive technology, and taking no room. `.sr-only` loses here:
-   `.lookup label` is the more specific selector and puts the display back. */
-.a-console-read .lookup label {
-  position: absolute;
-  width: 1px; height: 1px;
-  margin: -1px; padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-/* A fixed row, so the bar is 70px whatever is in the field — the same 70px
-   the wallet's own line occupies. Padding alone left it at 75 and the two
-   states disagreed by five pixels every time a read began. */
-.a-console-read .lookup-row { height: 44px; padding-block: 0; }
-.a-console-read .lookup input { padding-block: 0; }
-.a-console-read .lookup .btn { padding-block: 8px; }
-.a-console-or { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-/* Inline beside the field, not under it: under it would be a second line and
-   the bar would no longer match the one it swaps with. */
-.a-console-read .txt { flex: 0 0 auto; margin: 0; padding: 0; white-space: nowrap; }
-.a-console-read .gate-or-label { margin: 0; }
-
 /* Change the wallet. A mark rather than a word: it sits beside an address in
    mono and a label there reads as part of it. */
 .a-wallet-edit {
@@ -354,13 +308,6 @@
   padding-top: 18px;
   border-top: 1px solid var(--line);
 }
-.gate-or-label {
-  margin: 0 0 12px;
-  font: 400 11.5px/1 var(--mono);
-  letter-spacing: 0.06em;
-  color: var(--slate);
-}
-
 .gate h1,
 .gate h2 {
   max-width: 15ch;
@@ -508,10 +455,6 @@
   margin: 0 auto;
   padding: 20px var(--gutter) 0;
 }
-/* One rule for the trail, because there is one trail. It used to need a
-   second set of overrides for the copy that lived inside the gate's grid. */
-.crumbs { margin-bottom: clamp(26px, 4vh, 44px); }
-
 .crumb-back {
   display: inline-flex;
   align-items: center;
@@ -993,8 +936,17 @@ tr:hover .rowmenu-trigger,
   .filters button { padding: 7px 13px; font-size: 12px; }
 
   /* The console head stacks, so the picker gets the width its label needs
-     rather than a chevron hanging off the end of a squeezed row. */
+     rather than a chevron hanging off the end of a squeezed row.
+
+     `align-items` is repeated here on purpose, and qualified. The column comes
+     from alt.css, inside its own phone block; this file's base rule for the
+     head is further down the file, and a media query adds no weight, so its
+     `align-items: center` won on source order alone and the stacked head
+     centred the address over a table whose every label starts at the left
+     edge. `.dash` outweighs it wherever it sits. */
   .a-console-head { gap: 12px; }
+  .dash .a-console-head { align-items: flex-start; }
+
   .a-console-acts { width: 100%; }
   .cpick { padding-left: 0; }
 
@@ -1054,121 +1006,6 @@ tr:hover .rowmenu-trigger,
    while a read is running. */
 .v-scan { position: relative; display: block; height: 1px; overflow: hidden; background: var(--line); }
 
-/* ---- the wallet, and what can be done with it ----------------------------
-   The address is a control, not a caption: it opens everything this page
-   knows about the wallet and everything the product is being built to do
-   with it. See demo/WalletMenu.jsx for why the unavailable items are listed
-   rather than hidden. */
-.a-wallet-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 5px 11px 5px 5px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: none;
-  cursor: pointer;
-  transition: border-color 0.16s ease, background 0.16s ease;
-}
-.a-wallet-trigger b { font: 400 13px/1 var(--mono); color: var(--ice); }
-.a-wallet-trigger:hover,
-.a-wallet-trigger[data-state="open"] {
-  border-color: var(--line2);
-  background: rgba(255, 255, 255, 0.03);
-}
-.a-wallet-trigger:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
-.a-wallet-chev { width: 10px; height: 6px; flex: 0 0 auto; color: var(--slate); }
-.a-wallet-trigger[data-state="open"] .a-wallet-chev { transform: rotate(180deg); }
-
-.wmenu {
-  width: 340px;
-  max-height: min(78vh, 620px);
-  overflow-y: auto;
-  padding: 8px;
-  border: 1px solid var(--line2);
-  border-radius: 14px;
-  background: linear-gradient(180deg, #0B1117, #080D12);
-  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.9);
-  z-index: 50;
-}
-.wmenu:focus-visible { outline: none; }
-
-.wm-head {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 8px 9px 12px;
-  border-bottom: 1px solid var(--line);
-}
-.wm-head b { display: block; font: 600 13px/1.2 var(--display); color: var(--ice); }
-.wm-head em {
-  display: block;
-  margin-top: 3px;
-  font: 400 10.5px/1.3 var(--mono);
-  font-style: normal;
-  color: var(--slate);
-  overflow-wrap: anywhere;
-}
-
-.wm-rule {
-  margin: 12px 9px 5px;
-  font: 400 9.5px/1 var(--mono);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-.wm-list { margin: 0; padding: 0; list-style: none; }
-.wm-row > button,
-.wm-row > a,
-.wm-row.wm-off,
-.wm-row.wm-said {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 7px 9px;
-  border: 0;
-  border-radius: 9px;
-  background: none;
-  color: var(--ice);
-  font: 400 13px/1.25 var(--display);
-  text-align: left;
-  text-decoration: none;
-  cursor: pointer;
-}
-.wm-row > button:hover, .wm-row > a:hover { background: rgba(255, 255, 255, 0.04); }
-.wm-row > button:focus-visible, .wm-row > a:focus-visible { outline: 2px solid var(--ok); outline-offset: -2px; }
-.wm-mark { flex: 0 0 auto; display: inline-flex; }
-.wm-text { flex: 1 1 auto; min-width: 0; }
-.wm-text em {
-  display: block;
-  margin-top: 2px;
-  font: 400 11px/1.35 var(--display);
-  font-style: normal;
-  color: var(--mist);
-}
-/* Listed, not hidden: the product's shape, and how far this page gets. */
-.wm-off { cursor: default; }
-.wm-off .wm-text b { color: var(--mist); }
-.wm-soon {
-  flex: 0 0 auto;
-  padding: 3px 8px;
-  border: 1px dashed var(--line2);
-  border-radius: 999px;
-  font: 400 9.5px/1.3 var(--mono);
-  color: var(--slate);
-  white-space: nowrap;
-}
-.wm-note {
-  margin: 12px 9px 4px;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
-  font: 400 11.5px/1.5 var(--display);
-  color: var(--slate);
-}
-/* A row that states something rather than doing something. */
-.wm-said { cursor: default; }
-
 /* The figures in the headline, when nothing is reachable and that was read
    rather than assumed. See demo/Verdict.jsx for when this is allowed. */
 .verdict.clear .v-line b { color: var(--ok); }
@@ -1197,6 +1034,15 @@ a.rowmenu-addr:hover, a.d-addr:hover { color: var(--ok); text-decoration: underl
    wanted. */
 .rowmenu-wrap { display: block; width: 100%; }
 .rowmenu-wrap > button { width: 100%; }
+
+/* What a contract is, under its name in the row's menu. */
+.rowmenu-what {
+  margin: 9px 9px 2px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font: 400 12px/1.5 var(--display);
+  color: var(--mist);
+}
 
 /* An address in the evidence rows is the evidence, so it is followable. */
 .ev-link { color: var(--mist); text-decoration: none; border-bottom: 1px solid var(--line2); }
@@ -1242,3 +1088,369 @@ a.rowmenu-addr:hover, a.d-addr:hover { color: var(--ok); text-decoration: underl
   color: var(--slate);
 }
 .kit .d-actions { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line2); }
+
+/* ---- the head: a field, some marks, the chains ---------------------------
+   One bar in every state. It holds the address as a control you can type in,
+   the four things that can be done to that wallet, and the chain picker. */
+.a-console-head,
+.a-console-read {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  min-height: 70px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,0.012);
+}
+@media (min-width: 900px) {
+  .a-console-head { flex-wrap: nowrap; }
+}
+
+/* The address, the other way to give one, and the marks: one group. */
+.a-console-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+/* The field is the address. It was a button that opened a popover holding an
+   input, which put two clicks and a layer between a reader and the one thing
+   this bar is for — and the bar has 1250px of room to simply hold the input.
+   So the box is here, always, with the address in it, ready to be typed over.
+   The list below it is a suggestion, not the way in. */
+.wfield {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 5px 6px 5px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: text;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.wfield:hover { border-color: var(--line2); }
+.wfield:focus-within {
+  border-color: var(--ok);
+  background: rgba(47, 224, 188, 0.04);
+}
+/* Only while an address is being typed and is not one yet — see
+   demo/WalletField.jsx, where a word typed to search never gets this. */
+.wfield.bad { border-color: var(--bad); background: rgba(255, 107, 90, 0.05); }
+.wfield-input {
+  flex: 1 1 auto;
+  /* Closed, it holds 0x8ea5…ac50 and takes a name's worth of the bar. Opened —
+     which is to say, focused — it holds all 42 characters, because that is the
+     only moment anyone reads an address character by character. The bar was
+     carrying the wide box at all times for the sake of a string that is not
+     being edited 99% of the time. */
+  width: 13ch;
+  max-width: 100%;
+  min-width: 0;
+  transition: width 0.2s cubic-bezier(0.2, 0.7, 0.3, 1);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 400 13px/1.45 var(--mono);
+  color: var(--ice);
+  text-overflow: ellipsis;
+}
+.wfield.open .wfield-input { width: 43ch; }
+.wfield-input:focus { outline: none; }
+.wfield-input::placeholder { color: var(--mist); }
+/* Height set rather than inherited from .btn's padding: this and the connect
+   button sit on the same line and were 36 and 31, which showed. */
+/* Inline in the box, on the value it clears. */
+.wfield-clear {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--slate);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.wfield-clear svg { width: 11px; height: 11px; }
+.wfield-clear:hover { color: var(--ice); background: rgba(255, 255, 255, 0.07); }
+.wfield-clear:focus-visible { outline: 2px solid var(--ok); outline-offset: 1px; }
+
+.wfield-go { flex: 0 0 auto; height: 32px; padding: 0 14px; font-size: 12px; line-height: 1; }
+.wfield-via {
+  flex: 0 0 auto;
+  padding-right: 8px;
+  font: 400 11px/1 var(--display);
+  color: var(--slate);
+  white-space: nowrap;
+}
+
+.wdrop {
+  width: min(400px, calc(100vw - 32px));
+  max-height: min(70vh, 540px);
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.9);
+  z-index: 50;
+}
+.wdrop:focus-visible { outline: none; }
+.wdrop-form { flex: 0 0 auto; margin: 0; }
+.wdrop-form .lookup-row { height: 42px; padding-block: 0; padding-left: 14px; }
+.wdrop-form input { padding-block: 0; }
+.wdrop-form .btn { padding-block: 7px; }
+.wdrop-list { flex: 1 1 auto; margin-top: 6px; overflow-y: auto; overscroll-behavior: contain; }
+.wdrop-none { margin: 10px 9px; font: 400 12px/1.5 var(--display); color: var(--slate); }
+.wdrop-foot {
+  flex: 0 0 auto;
+  margin: 6px 9px 2px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font: 400 11.5px/1.4 var(--display);
+  color: var(--slate);
+}
+.wrow b { font-family: var(--mono); font-weight: 400; font-size: 12.5px; }
+
+/* The rows are buttons, and a button centres its text unless told otherwise.
+   The example rows carried their own left edge from `.xmenu .cmenu-list
+   button`, a selector this list does not match, so every title, note and
+   address came up centred and the column had no edge to read down. */
+.wdrop .xrow {
+  display: block;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.wdrop .xrow:hover { background: rgba(255, 255, 255, 0.04); }
+.wdrop .xrow:hover b { color: var(--ok); }
+.wdrop .xrow:focus-visible { outline: 2px solid var(--ok); outline-offset: -2px; }
+
+/* ---- connecting, and reading this elsewhere -----------------------------
+   A wallet in this browser, or a code that carries the reading to the device
+   the wallet is actually on. See demo/ConnectButton.jsx. */
+.cbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px 0 11px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: none;
+  font: 600 12.5px/1 var(--display);
+  color: var(--mist);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.cbtn svg { width: 15px; height: 15px; flex: 0 0 auto; }
+.cbtn:hover:not(:disabled) { color: var(--ice); border-color: var(--ok); background: rgba(47, 224, 188, 0.05); }
+.cbtn:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
+.cbtn:disabled { opacity: 0.55; cursor: default; }
+
+.cdrop {
+  width: min(320px, calc(100vw - 32px));
+  padding: 8px;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0B1117, #080D12);
+  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.9);
+  z-index: 50;
+}
+.cdrop:focus-visible { outline: none; }
+.crow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.crow b { display: block; font: 600 13px/1.2 var(--display); color: var(--ice); }
+.crow em {
+  display: block;
+  margin-top: 2px;
+  font: 400 11.5px/1.35 var(--display);
+  font-style: normal;
+  color: var(--slate);
+}
+.crow-text { flex: 1 1 auto; min-width: 0; }
+.crow > svg, .crow > img, .crow-blank { align-self: flex-start; margin-top: 1px; }
+.crow { align-items: flex-start; }
+.crow img { border-radius: 6px; flex: 0 0 auto; }
+.crow svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--slate); }
+.crow-blank { width: 20px; height: 20px; border-radius: 6px; background: var(--line2); flex: 0 0 auto; }
+.crow:hover { background: rgba(255, 255, 255, 0.04); }
+.crow:hover b { color: var(--ok); }
+.crow:hover svg { color: var(--ok); }
+.crow:focus-visible { outline: 2px solid var(--ok); outline-offset: -2px; }
+/* The camera, looking at somebody's receive screen. */
+.scanbox { padding: 4px 3px 0; }
+.scanview {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 11px;
+  overflow: hidden;
+  background: #06090D;
+}
+.scanview video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.scanframe {
+  position: absolute;
+  inset: 16%;
+  border: 1.5px solid var(--ok);
+  border-radius: 8px;
+  box-shadow: 0 0 0 200px rgba(5, 7, 10, 0.5);
+}
+.scannote { margin: 10px 6px 2px; font: 400 11.5px/1.5 var(--display); color: var(--slate); }
+.cdrop-foot {
+  margin: 6px 9px 2px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font: 400 11.5px/1.45 var(--display);
+  color: var(--slate);
+}
+
+/* The four marks. Quiet until wanted, and never the only statement of what a
+   control does — each carries its name in a tooltip and in aria-label. */
+.hacts { display: inline-flex; align-items: center; gap: 2px; }
+.hact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  /* --slate is the caption colour, and a 1.5px stroke at 15px carries far less
+     of it than a letterform does: at rest these read as smudges. They are the
+     only way to re-read, copy or leave, so they sit a step brighter and only
+     the ring waits for the pointer. */
+  color: #9CB2C0;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.hact svg { width: 15px; height: 15px; }
+.hact:hover:not(:disabled) { color: var(--ice); border-color: var(--line2); background: rgba(255,255,255,0.03); }
+.hact:focus-visible { outline: 2px solid var(--ok); outline-offset: 1px; }
+.hact:disabled { opacity: 0.4; cursor: default; }
+
+/* ---- the console head on a phone ----------------------------------------
+   At the end of the file on purpose. The head, the field and the marks are all
+   defined further up, and a media query carries no extra weight — every
+   earlier attempt at these three rules lost to the base rules on source order
+   alone and the marks stayed pushed off the right of the screen.
+
+   The address takes a row of its own and everything that acts on it takes the
+   next. `display: contents` so the marks are laid out by the head rather than
+   by the group they share with the field: nested, they could only wrap onto a
+   third row of their own. */
+@media (max-width: 760px) {
+  /* A column, from alt.css, which gave every control a row of its own: four
+     rows of bar before the first figure. Two rows — the address, then
+     everything that acts on it. */
+  .dash .a-console-head { flex-direction: row; flex-wrap: wrap; }
+  .dash .a-console-who { display: contents; }
+  .dash .wfield { flex: 1 0 100%; }
+  .dash .wfield-input { width: auto; }
+  .dash .wfield.open .wfield-input { width: auto; }
+  .dash .a-console-acts { width: auto; margin-left: auto; }
+  /* The stacked marks already say which chains, and the count is on the menu
+     they open. "All chains · 2" is the one thing on this row that can be said
+     shorter, and saying it costs the row its second line. */
+  .dash .cpick .cs-label { display: none; }
+  .dash .cbtn { padding: 0 12px 0 9px; }
+}
+
+
+
+/* ---- a permission as a card ---------------------------------------------
+   The card itself is in global.css, with the example console's, because both
+   tables fold the same way and only the mechanism differs: this one on
+   aria-expanded, that one on a checkbox. What is left here is the one thing
+   that is true of the ledger alone.
+
+   See demo/Ledger.jsx, where the tap is bound to folding the card and not to
+   the evidence sheet, which is what the same tap opens on a wide screen. */
+@media (max-width: 760px) {
+  .dash .a-table tbody tr.is-live[aria-expanded="true"]::after {
+    transform: rotate(225deg);
+  }
+  .dash .a-table tbody tr.is-live[aria-expanded="false"] td[data-col="Allowance"],
+  .dash .a-table tbody tr.is-live[aria-expanded="false"] td[data-col="Expires"],
+  .dash .a-table tbody tr.is-live[aria-expanded="false"] td[data-col="Action"] {
+    display: none;
+  }
+  /* The heading keeps clear of the caret. */
+  .dash .a-table tbody tr.is-live td[data-col="Application"] { padding-right: 34px; }
+}
+
+/* ---- the three figures, rebuilt ------------------------------------------
+   This band is the first thing read on the console and it was the quietest:
+   a 10px label and a 12.5px caption around a 27px number, so the figure was
+   loud and the two pieces of text that say what it MEANS were not. A number
+   nobody can read the label of teaches nothing.
+
+   So: the label carries a mark in the reading's own colour, the way the deck
+   marks its steps, and both label and caption are set to be read rather than
+   glanced past. The mark is drawn from the value's own class with :has(), so
+   it cannot disagree with the figure it sits above.
+
+   On a phone the label and the figure share a line and the caption takes the
+   next, which fits three findings in the height the old stack gave to one and
+   keeps every word at a size worth setting. Written here as well as in alt.css because the two consoles carry the
+   same figures in different elements, and this file loads last on /demo. */
+.a-figs > div {
+  position: relative;
+  padding: 18px 24px 20px;
+}
+.a-figs dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 10.5px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.a-figs dt::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: var(--slate);
+}
+.a-figs > div:has(dd.bad) dt::before { background: var(--bad); }
+.a-figs > div:has(dd.ok) dt::before { background: var(--ok); }
+.a-figs .cap {
+  font: 400 13.5px/1.5 var(--display);
+  font-style: normal;
+  color: var(--mist);
+  max-width: 32ch;
+}
+
+@media (max-width: 760px) {
+  .a-figs > div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 4px 14px;
+    padding: 13px 18px 14px;
+  }
+  .a-figs dt { grid-column: 1; font-size: 10px; letter-spacing: 0.12em; }
+  .a-figs dd { grid-column: 2; grid-row: 1; font-size: 22px; }
+  .a-figs .cap { grid-column: 1 / -1; max-width: none; font-size: 12.5px; }
+}

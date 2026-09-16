@@ -7,7 +7,13 @@
   # server, so the only place this could show up was the live site.
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  # camera=(self), not camera=(). The connect menu can read a wallet's address
+  # off a QR code, which needs getUserMedia, and a blanket denial here refuses
+  # it before the permission prompt is ever shown — in production only, since
+  # `_headers` is not applied by the dev server. The page asks for the camera
+  # when somebody presses the button for it and never otherwise, and the frame
+  # is decoded locally: nothing from it leaves the browser.
+  Permissions-Policy: geolocation=(), microphone=(), camera=(self), payment=()
   # frame-src 'self' lets this origin frame its own pages, and frame-ancestors
   # 'self' lets its own pages be framed by it. Both are needed: the first is
   # the parent's permission to load the frame, the second is the child's

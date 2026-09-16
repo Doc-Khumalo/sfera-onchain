@@ -2,19 +2,21 @@ import { useCallback, useEffect, useState } from 'react';
 import ChainStack from '../ChainStack.jsx';
 import { isAddress } from 'viem';
 import { discover, connect, watch, switchChain } from '../../lib/wallet.js';
-import { chains as fetchChains, permissions as fetchPermissions, format, ApiError } from '../../lib/api.js';
+import { chains as fetchChains, permissions as fetchPermissions, format, isDollar, ApiError } from '../../lib/api.js';
 import { reading, explain } from '../../lib/readings.js';
 import Ledger from './Ledger.jsx';
 import Detail from './Detail.jsx';
 import Handoff from './Handoff.jsx';
 import Verdict from './Verdict.jsx';
 import { ChainPicker } from '../ui/ChainPicker.jsx';
-import WalletMenu from './WalletMenu.jsx';
-import { ExamplePicker } from '../ui/ExamplePicker.jsx';
+import WalletField, { rememberRecent } from './WalletField.jsx';
+import HeadActions from './HeadActions.jsx';
+import ConnectButton from './ConnectButton.jsx';
 import KeepInTouch from './KeepInTouch.jsx';
 import { EXAMPLES } from '../../data/site.js';
 import { Counter } from '../ui/Counter.jsx';
 import { Toaster } from '../ui/Toast.jsx';
+import { TooltipProvider } from '../ui/Tooltip.jsx';
 
 /* The examples themselves live in data/site.js, each verified against the live
    engine before being written down — see the note there. This is only the
@@ -74,21 +76,22 @@ function Crumbs({ address, chain, onBack }) {
         Back
       </button>
 
+      {/* Two steps, not three. "Read a wallet" was a rung between the site
+          and the wallet on screen, and it named the page you are already on:
+          the Back button leaves, the address says where you are, and the
+          middle step was a link to here from here. */}
       <ol>
         <li><a href="/">Sfera Onchain</a></li>
         <li>
-          {atResult
-            ? <button type="button" onClick={onBack}>Read a wallet</button>
-            : <span aria-current="page">Read a wallet</span>}
-        </li>
-        {atResult && (
-          <li>
+          {atResult ? (
             <span aria-current="page">
               {address.slice(0, 6)}…{address.slice(-4)}
               {chain && <em> · {chain.name}</em>}
             </span>
-          </li>
-        )}
+          ) : (
+            <span aria-current="page">Read a wallet</span>
+          )}
+        </li>
       </ol>
     </nav>
   );
@@ -330,6 +333,8 @@ export default function Dashboard({ embedded = false }) {
       }),
     }).catch(() => {});
 
+    rememberRecent(address, merged.permissions.length);
+
     setResult((was) => {
       if (was) {
         setPrevious(Object.fromEntries((was.permissions ?? []).map((p) => [p.id, p])));
@@ -468,57 +473,6 @@ export default function Dashboard({ embedded = false }) {
    * vocabulary underneath is there to be read while a reader decides. Nothing
    * is hidden behind an act of faith.
    */
-  const readBar = (
-    <div className="a-console-read">
-      <form className="lookup" onSubmit={(e) => { e.preventDefault(); lookUp(typed); }}>
-        {/* Named for assistive technology only. On screen the placeholder and
-            the button say it, and a label above the field would make this bar
-            taller than the one it swaps with — the console would change height
-            the moment a read began. */}
-        <label htmlFor="addr" className="sr-only">Read any public address</label>
-        <div className={`lookup-row${error ? ' bad' : ''}`}>
-          <input
-            id="addr"
-            value={typed}
-            onChange={(e) => { setTyped(e.target.value); if (error) setError(null); }}
-            placeholder="0x…"
-            spellCheck="false"
-            autoComplete="off"
-            aria-invalid={error ? 'true' : undefined}
-          />
-          <button type="submit" className="btn ghost">Read</button>
-        </div>
-        {/* The field carries the failure — the row goes red and the input is
-            marked invalid — and the reason goes to a toast. It used to print
-            underneath, which made this bar taller than the line it swaps with
-            and showed the engine's own errors twice, since those are toasted
-            already. */}
-      </form>
-
-      {/* Beside the field it fills in, which is the only place it means
-          anything. A list rather than one button: a wallet with three
-          unbounded approvals and a wallet with one read very differently, and
-          a reader shown only the first does not learn that the second is the
-          common case. */}
-      <ExamplePicker onPick={(addr, chainId) => lookUp(addr, chainId)} />
-
-      {wallets.length > 0 && (
-        <div className="a-console-or">
-          <p className="gate-or-label">or connect</p>
-          <div className="wallet-picks">
-            {wallets.map((w) => (
-              <button key={w.info.uuid} type="button" className="btn"
-                disabled={status === 'connecting'} onClick={() => onConnect(w)}>
-                {w.info.icon && <img src={w.info.icon} alt="" width="16" height="16" />}
-                {status === 'connecting' ? 'Check your wallet' : w.info.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
   const chain = supported.find((c) => c.id === Number(chainId));
   const perms = result?.permissions ?? [];
   const shown = perms.filter((p) => match(p, filter, chainFilter));
@@ -593,7 +547,7 @@ export default function Dashboard({ embedded = false }) {
        is not there. */
     where: wallets.length > 0
       ? 'give an address above, or connect a wallet'
-      : 'give an address above — no wallet was found in this browser',
+      : 'give an address above, since no wallet was found in this browser',
     note: null,
     onReset: null,
   } : status === 'scanning' ? {
@@ -613,11 +567,24 @@ export default function Dashboard({ embedded = false }) {
       : `${perms.length} read · ${filter === 'all' ? 'none on this chain' : `none ${filterName.toLowerCase()}`}`,
     note: perms.length === 0
       ? 'Nothing found is not the same as nothing existing. This asks a known list of tokens and spenders, and what it did not ask about is listed below.'
-      : 'Everything read is still there — this view is narrowed. Widen it to see the rest.',
+      : 'Everything read is still there. This view is narrowed, so widen it to see the rest.',
     onReset: narrowed
       ? () => { setFilter('all'); setChainFilter(new Set()); }
       : null,
   };
+
+  /* What we can see of what this wallet holds: the balances the engine returned
+     for the tokens it asked about, summed where they are dollars. Not a
+     portfolio — every token we looked at and no others. */
+  const heldCents = perms
+    .filter((p) => isDollar(p.symbol) && p.held != null)
+    .reduce((n, p) => {
+      const d = p.decimals || 0;
+      let v = 0n;
+      try { v = BigInt(p.held); } catch { v = 0n; }
+      return n + (d > 2 ? v / (10n ** BigInt(d - 2)) : v * (10n ** BigInt(2 - d)));
+    }, 0n);
+  const held = perms.length ? `$${format(heldCents.toString(), 2, null, true)}` : null;
 
   const takers = new Set(
     perms.filter((p) => p.attention).map((p) => (p.label || p.beneficiary).toLowerCase())
@@ -626,6 +593,11 @@ export default function Dashboard({ embedded = false }) {
   const apps = new Set(perms.map((p) => p.beneficiary.toLowerCase())).size;
 
   return (
+    /* One provider for the page. It lived inside the ledger, around the table,
+       which was fine while every tooltip was on a row — the head's controls
+       then threw "`Tooltip` must be used within `TooltipProvider`" and took
+       the whole island down with them. */
+    <TooltipProvider>
     <div className="dash">
       {/* The chain in the trail is the one the picker is showing — and none
           when it is showing all of them. It used to name `chain`, which is
@@ -683,48 +655,69 @@ export default function Dashboard({ embedded = false }) {
                   dot, a note — for a header doing the identical job beside an
                   identical table, which is most of why the two pages read as
                   two products. */}
-              {/* Until there is an address, the head IS the field. After
-                  there is one, it is the wallet and the chains being read —
-                  the same bar, saying the thing that matters at the time. */}
-              {address ? (
-                <div className="a-console-head">
-                  <span className="a-wallet">
-                    {/* The address is the way in to everything this page knows
-                        about the wallet — see demo/WalletMenu.jsx. It used to
-                        be a string with a pencil beside it. */}
-                    <WalletMenu
+              {/* ONE BAR, WHATEVER IS IN IT. The address is a field you can
+                  type in — see demo/WalletField.jsx — and the four things you
+                  can do to the wallet it names sit beside it rather than
+                  behind a menu. It was a string, a pencil, and a popover
+                  holding re-read, copy, explorer and disconnect: four single
+                  actions on the thing the bar was already naming. */}
+              <div className="a-console-head">
+                {/* The address, the other way to give one, and the things that
+                    can be done to whatever is on screen: one group. They were
+                    at opposite ends of a 1250px bar, which made both the marks
+                    and the connect button read as belonging to the chain
+                    control they were sitting next to. */}
+                <span className="a-console-who">
+                  <WalletField
+                    address={address}
+                    walletName={walletName}
+                    connected={!!provider}
+                    busy={status === 'scanning'}
+                    held={held}
+                    recentsKey={result?.readAt}
+                    onRead={(addr, forceChain) => lookUp(addr, forceChain)}
+                  />
+
+                  {/* Discovery runs on mount, so this is whatever is actually
+                      installed.
+
+                      `mode` starts at 'wallet' — it names which gate used to be
+                      showing, not whether anything is connected, and a
+                      condition on it hid this button exactly when nobody had a
+                      wallet. A provider is the only thing that means connected. */}
+                  {!provider && (
+                    <ConnectButton
+                      wallets={wallets}
+                      busy={status === 'connecting'}
+                      onConnect={onConnect}
+                      onAddress={(a) => lookUp(a)}
+                    />
+                  )}
+
+                  {address && (
+                    <HeadActions
                       address={address}
-                      walletName={walletName}
-                      mode={mode}
-                      chain={onlyChain}
-                      chains={supported}
-                      perms={perms}
-                      /* `result` carries no explorer — each chain has its own
-                         and the merge keeps them on the rows. At wallet level,
-                         use the chain being shown, or the first one read. */
                       explorer={(onlyChain || result?.chainsRead?.[0])?.explorer}
-                      scanning={status === 'scanning'}
-                      onReRead={refresh}
-                      onSwitch={(id) => provider && switchChain(provider, id)}
-                      onChange={editAddress}
+                      connected={!!provider}
                       onForget={forget}
                     />
-                  </span>
+                  )}
+                </span>
 
-                  <span className="a-console-acts">
-                    {/* The stacked marks ARE the chain control — see
-                        ui/ChainPicker.jsx. */}
-                    {supported.length > 1 && (
-                      <ChainPicker
-                        chains={supported}
-                        value={chainFilter}
-                        counts={perChain}
-                        onChange={setChainFilter}
-                      />
-                    )}
-                  </span>
-                </div>
-              ) : readBar}
+                <span className="a-console-acts">
+
+                  {/* The stacked marks ARE the chain control — see
+                      ui/ChainPicker.jsx. */}
+                  {supported.length > 1 && (
+                    <ChainPicker
+                      chains={supported}
+                      value={chainFilter}
+                      counts={perChain}
+                      onChange={setChainFilter}
+                    />
+                  )}
+                </span>
+              </div>
 
               {/* Always. Not "once a read has finished", not "if anything was
                   found" — always. Every gate on this console was a way for the
@@ -793,7 +786,7 @@ export default function Dashboard({ embedded = false }) {
                           ? 'nothing is waiting on you'
                           : toSeeTo === perms.length
                             ? 'every permission found'
-                            : `of ${perms.length} — the rest need nothing`}
+                            : `of ${perms.length}, and the rest need nothing`}
                     </span>
                   </div>
                 </dl>
@@ -868,6 +861,7 @@ export default function Dashboard({ embedded = false }) {
           onSettle={() => { setHandoff(null); setOpenId(null); refresh(); }} />
       )}
     </div>
+    </TooltipProvider>
   );
 }
 

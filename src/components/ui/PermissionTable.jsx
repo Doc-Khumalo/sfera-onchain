@@ -113,13 +113,17 @@ export function PermissionRow({
 /* The application, the chain it holds authority on, and what that authority
    reaches. Two lines, because an application name without its chain is not an
    address of anything. */
-export function AppCell({ mark, name, meta }) {
+export function AppCell({ mark, name, meta, note }) {
   return (
     <span className="a-app">
       {mark}
       <span>
         <b>{name}</b>
         <em>{meta}</em>
+        {/* One line saying what this contract is, for the ones whose name is
+            the name of a standard rather than of anything a reader chose. See
+            data/spenders.js. */}
+        {note && <i className="a-app-note">{note}</i>}
       </span>
     </span>
   );

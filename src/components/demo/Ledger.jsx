@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Popover } from 'radix-ui';
 import { parseUnits } from 'viem';
+import { spender } from '../../data/spenders.js';
 import { reading } from '../../lib/readings.js';
 import { format } from '../../lib/api.js';
 import { AssetMark } from '../ui/AssetMark.jsx';
 import { ChainMark } from '../ui/ChainMark.jsx';
-import { Tooltip, TooltipProvider } from '../ui/Tooltip.jsx';
+import { Tooltip } from '../ui/Tooltip.jsx';
 import { Amount } from '../ui/Counter.jsx';
 import {
   PermissionTable, PermissionRows, PermissionRow, AppCell, StateChip,
@@ -77,6 +78,7 @@ const isTask = (p) => p.attention && p.remediable;
  * table of ten permissions is not a table of forty controls.
  */
 function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
+  const known = spender(p.beneficiary);
   const [open, setOpen] = useState(false);
   const [limiting, setLimiting] = useState(false);
   const [typed, setTyped] = useState('');
@@ -141,7 +143,7 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
           <p className="rowmenu-head">
             <AssetMark symbol={p.symbol} chain={p.chain} size={26} />
             <span>
-              <b>{p.label || 'This permission'}</b>
+              <b>{known?.name || p.label || 'This permission'}</b>
               <span>{p.chain?.name} · {p.symbol || 'Unreadable contract'}</span>
               {link ? (
                 <a className="rowmenu-addr" href={`${link}/address/${p.beneficiary}`}
@@ -153,6 +155,11 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
               )}
             </span>
           </p>
+
+          {/* What the contract is, for a name that is the name of a standard.
+              Here rather than only on the row, because the row's line is a
+              hover on a wide screen and a phone has no hover. */}
+          {known?.what && <p className="rowmenu-what">{known.what}</p>}
 
           {limiting ? (
             <div className="rowmenu-limit">
@@ -281,8 +288,36 @@ function Actions({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
   );
 }
 
-function Row({ p, was, open, canAct, explorer, onOpen, onRevoke, onLimit }) {
+/**
+ * Whether the rows are stacked cards rather than a table. The breakpoint is the
+ * one in global.css that does the stacking, and it is read rather than assumed
+ * because the two layouts want different things from a tap: on a table the row
+ * opens the evidence, on a card it opens the card.
+ */
+function useStacked() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const q = window.matchMedia('(max-width: 760px)');
+    const sync = () => setOn(q.matches);
+    sync();
+    q.addEventListener('change', sync);
+    return () => q.removeEventListener('change', sync);
+  }, []);
+  return on;
+}
+
+function Row({ p, was, open, canAct, explorer, sayWhat, onOpen, onRevoke, onLimit }) {
   const changed = was && was.granted !== p.granted;
+
+  /* A card carries a name, a figure and a reading, and everything else waits
+     for a tap. Four permissions at full height is a screen and a half of
+     scrolling before the reader has seen what they are scrolling through.
+     On a wide screen there is room for the whole row, so this is never used. */
+  const stacked = useStacked();
+  const [shown, setShown] = useState(false);
+
+  /* "Permit2" is the contract's real name and it tells a reader nothing. */
+  const known = spender(p.beneficiary);
 
   /* Settling is a fact about this render, not about the data: the row glows
      once, when the figure it is showing is not the figure it was showing a
@@ -302,15 +337,16 @@ function Row({ p, was, open, canAct, explorer, onOpen, onRevoke, onLimit }) {
     <PermissionRow
       tone={tone(p)}
       className={isTask(p) ? 'is-task' : undefined}
-      open={open}
+      open={stacked ? shown : open}
       settling={settling}
-      onOpen={() => onOpen(p.id)}
+      onOpen={() => (stacked ? setShown((v) => !v) : onOpen(p.id))}
 
       app={
         <AppCell
           mark={<AssetMark symbol={p.symbol} chain={p.chain} size={28} />}
-          name={p.label || `${p.beneficiary.slice(0, 6)}…${p.beneficiary.slice(-4)}`}
+          name={known?.name || p.label || `${p.beneficiary.slice(0, 6)}…${p.beneficiary.slice(-4)}`}
           meta={`${p.symbol || 'Unreadable contract'} · ${p.chain?.name ?? '—'}`}
+          note={sayWhat ? known?.short : undefined}
         />
       }
 
@@ -385,9 +421,23 @@ export default function Ledger({
 }) {
   const anyUnreadable = rows.some((p) => !p.remediable);
 
+  /* One spender usually holds several permissions — a wallet that has swapped
+     a few times has five Permit2 rows — so the line saying what that contract
+     is goes on the first of them and not on all five. Said once it is an
+     explanation; said on every row it is wallpaper, and it costs each row a
+     line of height to be ignored. */
+  const saysWhat = useMemo(() => {
+    const seen = new Set();
+    const first = new Set();
+    for (const p of rows) {
+      const who = String(p.beneficiary || '').toLowerCase();
+      if (!seen.has(who)) { seen.add(who); first.add(p.id); }
+    }
+    return first;
+  }, [rows]);
+
   return (
-    <TooltipProvider>
-      <div className="lpanel">
+    <div className="lpanel">
         <PermissionTable>
           {rows.length === 0 ? (
             <NothingRow empty={empty} />
@@ -405,6 +455,7 @@ export default function Ledger({
                   open={openId === p.id}
                   canAct={canAct}
                   explorer={explorer}
+                  sayWhat={saysWhat.has(p.id)}
                   onOpen={onOpen}
                   onRevoke={onRevoke}
                   onLimit={onLimit}
@@ -428,7 +479,6 @@ export default function Ledger({
             <span> Unknown is not a finding of no issue.</span>
           </p>
         )}
-      </div>
-    </TooltipProvider>
+    </div>
   );
 }

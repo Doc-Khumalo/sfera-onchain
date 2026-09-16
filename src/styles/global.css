@@ -368,6 +368,21 @@ a { color: inherit; }
   font-style: normal;
   color: var(--slate);
 }
+/* What the contract is, for the spenders whose name is the name of a standard
+   rather than of anything a reader chose. One line, quieter than the asset and
+   chain above it, and present only where something true can be said — see
+   data/spenders.js. The row keeps its height: this sits in the Application
+   cell, which is two lines where the rest of the row is one. */
+.a-app-note {
+  display: block;
+  margin-top: 3px;
+  font: 400 11px/1.35 var(--display);
+  font-style: normal;
+  color: var(--slate);
+  max-width: 36ch;
+  white-space: normal;
+}
+
 .a-table td.bad   { color: var(--bad); }
 .a-table td.warn  { color: #E8B75B; }
 .a-table td.ok    { color: var(--mint); }
@@ -378,6 +393,19 @@ a { color: inherit; }
    actually returned, and outranked the reading they were carrying. */
 .a-table tbody.a-set tr:nth-child(-n+2) { background: linear-gradient(90deg, rgba(255,95,78,0.045), transparent 55%); }
 .a-table tbody.a-set tr:nth-child(-n+2) td:first-child { box-shadow: inset 2px 0 0 rgba(255,95,78,0.45); }
+/* The fold's control, on a page that ships no JavaScript. Both halves are out
+   of the layout everywhere, and the phone block below gives the label back its
+   box: a bare checkbox was drawing itself at the top of every row on a wide
+   screen, where rows do not fold at all. */
+.rtoggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.rtoggle-lab { display: none; }
+
 /* The chain a permission lives on, beside the application that holds it. */
 .a-app { display: flex; align-items: center; gap: 11px; min-width: 0; }
 .a-chain { flex: 0 0 auto; border-radius: 50%; }
@@ -546,6 +574,43 @@ button.a-pill[disabled] { cursor: not-allowed; }
 
   /* Stacked cells align to the right edge like the figures they hold. */
   .a-table td .a-sw, .a-table td .a-sw-live, .a-table td .a-reach { justify-items: end; }
+
+  /* ---- a row folded down to a card ----------------------------------------
+     Closed, a card carries the application, the money reachable and the
+     reading: the three things you scan for. Opened, the rest of the row comes
+     back exactly as the wide table has it.
+
+     Two mechanisms, one behaviour. The ledger's rows are React and fold on
+     aria-expanded, because a tap there has to fold the card rather than open
+     the evidence sheet it opens on a wide screen. The example console ships no
+     JavaScript at all, so its rows fold on a checkbox its label covers. */
+  .a-table tbody tr { position: relative; }
+  .rtoggle-lab {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    cursor: pointer;
+  }
+  .a-table tbody tr:has(.rtoggle) td[data-col="Application"] { padding-right: 34px; }
+  .a-table tbody tr:has(.rtoggle)::after,
+  .a-table tbody tr.is-live::after {
+    content: "";
+    position: absolute;
+    top: 22px; right: 20px;
+    width: 7px; height: 7px;
+    border-right: 1.5px solid var(--mist);
+    border-bottom: 1.5px solid var(--mist);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+  .a-table tbody tr:has(.rtoggle:checked)::after { transform: rotate(225deg); }
+  .a-table tbody tr:has(.rtoggle:not(:checked)) td[data-col="Allowance"],
+  .a-table tbody tr:has(.rtoggle:not(:checked)) td[data-col="Expires"],
+  .a-table tbody tr:has(.rtoggle:not(:checked)) td[data-col="Action"] {
+    display: none;
+  }
+  .rtoggle:focus-visible + .rtoggle-lab { outline: 2px solid var(--ok); outline-offset: -3px; }
 }
 
 /* ---- the Access Receipt -------------------------------------------------

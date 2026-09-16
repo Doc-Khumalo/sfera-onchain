@@ -8,7 +8,7 @@ export default function Coverage() {
     <section className="coverage reveal" id="coverage">
       <h2>We decode. We don't guess.</h2>
       <p className="lede">
-        We can be right rather than probabilistic — and say unknown rather than
+        We can be right rather than probabilistic, and say unknown rather than
         safe when we cannot tell.
       </p>
 

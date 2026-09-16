@@ -45,7 +45,7 @@ export const LOOP = [
   {
     step: 'Sign',
     title: 'Who signs it? You do.',
-    body: 'We hand over an unsigned payload and stop. Take the correction, keep the original, or walk away — nothing moves without you.',
+    body: 'We hand over an unsigned payload and stop. Take the correction, keep the original, or walk away. Nothing moves without you.',
   },
   {
     step: 'Verify',
@@ -119,16 +119,31 @@ export const CHAINS = [
  *
  * EVERY ONE IS VERIFIED BEFORE IT IS WRITTEN DOWN. The engine reads a registry
  * of a few tokens against ten spenders per chain, so an address with a long
- * trading history shows nothing unless what it approved is in that registry —
- * the limit is the registry, not the wallet. Each entry here was queried
- * against the live engine and the counts below are what came back.
+ * trading history shows nothing unless what it approved is in that registry.
+ * The limit is the registry, not the wallet. Each entry here was queried
+ * against the live engine and the readings below are what came back.
  *
  * These were harvested rather than guessed: Approval logs for Uniswap's
- * Permit2 on USDC and WETH over a recent span of Base and Ethereum blocks gave
- * 133 owners, each was queried against the engine, and the eleven that
- * answered are grouped below by what they demonstrate. Exchange wallets, DAO
- * treasuries and protocol multisigs all came back empty — they hold balances
- * and approve nothing.
+ * Permit2 over a span of Base and Ethereum blocks, each owner queried against
+ * the engine, and only the ones that answered written down. Exchange wallets,
+ * DAO treasuries and protocol multisigs all came back empty. They hold
+ * balances and approve nothing.
+ *
+ * The list was nine and is two. Every entry was re-audited across all fifteen
+ * chains on 16 September 2026 and only one wallet had money an approval could
+ * actually reach; the rest held live unbounded authority over balances that
+ * had since gone to zero, which makes the same point twice and the first point
+ * not at all. The two kept are the two readings worth showing: money reachable
+ * today, and authority live over nothing.
+ *
+ * Harvesting more is harder than it was. The engine reads six tokens against
+ * ten spenders per chain, so a wallet is invisible to it unless what it
+ * approved is in that registry, and the one registry spender known from the
+ * outside is Permit2. Permit2 approvals are historical: none appear in recent
+ * Base or Ethereum blocks, where routers now take exact amounts. Public RPCs
+ * cap eth_getLogs at 2,000 blocks, so walking back to where those approvals
+ * live is not something a handful of requests can do. An indexer key, or the
+ * registry itself, is what would open this up.
  *
  * THEY ARE REAL PEOPLE'S WALLETS. Public, and public is not the same as
  * offered. Nothing here names anyone, the figures are the chain's own, and the
@@ -143,75 +158,26 @@ export const CHAINS = [
  * that has not answered.
  */
 export const EXAMPLES = [
-  /* Several at once — the case that makes the argument. */
+  /* The case the product exists for: standing authority with a balance behind
+     it. Verified 16 September 2026 against the live engine, three unbounded
+     approvals on Base with USDC and WETH balances the approvals reach. The
+     figure moves with the wallet, so it is not written down here. */
   {
-    group: 'Several at once',
-    address: '0x09ad820aac5779683b481c4674208a4e1b024afa',
-    chainId: 8453,
-    title: 'Eleven unbounded approvals, two chains',
-    note: 'USDC, WETH, cbBTC, AERO, USDT and EURC on Base; USDC, USDT, WETH, WBTC and EURC on Ethereum',
-  },
-  {
-    group: 'Several at once',
-    address: '0x7bc57c9566919a40521f850f99a2d121493b86cf',
-    chainId: 1,
-    title: 'Three unbounded approvals',
-    note: 'USDC, WETH and WBTC on Ethereum',
-  },
-  {
-    group: 'Several at once',
+    group: 'Money reachable today',
     address: '0x8ea5ad2a58c1dae75394b1e8636e6518eb6dac50',
     chainId: 8453,
-    title: 'Three unbounded approvals',
-    note: 'USDC, WETH and USDT on Base',
+    title: 'Three unbounded approvals, against a live balance',
+    note: 'USDC, WETH and USDT on Base, with balances the approvals reach',
   },
 
-  /* Money reachable today — what the headline figure is for. */
-  {
-    group: 'Money reachable today',
-    address: '0x5d49d3c9484899a5dbbfaa21c3bd0e00d023e582',
-    chainId: 1,
-    title: 'Unbounded, against a live balance',
-    note: 'WETH on Ethereum, with a balance the approval reaches',
-  },
-  {
-    group: 'Money reachable today',
-    address: '0x6a996e74d044d346b452055d04b2c2f4aebfec89',
-    chainId: 8453,
-    title: 'Unbounded, against a live balance',
-    note: 'USDC on Base, with a balance the approval reaches',
-  },
-  {
-    group: 'Money reachable today',
-    address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-    chainId: 10,
-    title: 'Unbounded, against a live balance',
-    note: 'OP on Optimism, to Uniswap Permit2',
-  },
-
-  /* The reading people misjudge: live authority over an empty balance. */
+  /* The reading people misjudge. Live authority, nothing behind it today, and
+     nothing stopping a deposit tomorrow from being covered by it. */
   {
     group: 'Nothing to take today',
     address: '0x7eaa922665112fe12c254d9583d224e7edfbd3aa',
     chainId: 1,
     title: 'Unbounded, empty balance',
-    note: 'WETH on Ethereum — the authority is live, the balance is not',
-  },
-  {
-    group: 'Nothing to take today',
-    address: '0x539c8617cbbd803202c1b9fcd8aa07fa75301e4a',
-    chainId: 8453,
-    title: 'Unbounded, empty balance',
-    note: 'USDC on Base — nothing reachable, and nothing expires',
-  },
-
-  /* A wallet in good order, so the page is not only red. */
-  {
-    group: 'Everything bounded',
-    address: '0xfbe231b15abd6cc692384e260cca430a16e70d2d',
-    chainId: 1,
-    title: 'One bounded approval',
-    note: 'WETH on Ethereum, capped — what a corrected wallet looks like',
+    note: 'WETH on Ethereum. The authority is live and the balance is not',
   },
 ];
 

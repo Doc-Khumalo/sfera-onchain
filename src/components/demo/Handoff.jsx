@@ -223,8 +223,8 @@ export default function Handoff({ perm, intent, chain, chainId, owner, provider,
           <>
             <p className="rule-label">This cannot be built yet</p>
             <p className="h-body">
-              A limit was asked for. The engine returned a removal instead —
-              <code> {tx?.decodesTo}</code> — so nothing is offered for signature
+              A limit was asked for. The engine returned a removal instead,
+              <code> {tx?.decodesTo}</code>, so nothing is offered for signature
               here. It would have set the allowance to zero under a button that
               said otherwise.
             </p>

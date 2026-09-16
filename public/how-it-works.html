@@ -72,7 +72,10 @@ h2{margin:0;font-weight:800;letter-spacing:-.035em;text-wrap:balance}
 .chips li{font-family:var(--m);font-size:9px;letter-spacing:.06em;line-height:1.35;color:var(--mist);
  border:1px solid var(--line2);border-radius:99px;padding:4px 9px;background:rgba(255,255,255,.02)}
 /* ── centre slot: the wallet prompt, then the receipt ── */
-.slot{position:relative;display:grid;place-items:center;min-height:clamp(196px,26vh,232px);width:100%}
+/* Bottom-aligned, so the paper's lower edge meets the path under it at the
+   same point on every panel whatever the receipt says. */
+.slot{position:relative;display:grid;place-items:end center;
+ min-height:clamp(196px,26vh,232px);width:100%}
 .slot>*{grid-area:1/1;transition:opacity .45s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
 .slot>.off{opacity:0;visibility:hidden;transform:translateY(8px);pointer-events:none}
 
@@ -97,10 +100,34 @@ h2{margin:0;font-weight:800;letter-spacing:-.035em;text-wrap:balance}
 .onenote{font-family:var(--m);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--slate);
  text-align:center;margin-top:11px}
 
-/* the closing card carries neither the sheet nor the receipt,
-   so its empty slot leaves the flow and the centring does the rest */
-.app.bare .slot{min-height:0;height:0;overflow:hidden}
-.app.bare .scene{row-gap:0}
+/* The receipt is on every panel now, opening and closing included, where it
+   carries who built this instead of a permission. It used to leave the flow on
+   those two, which collapsed a 230px band twice a run — the single biggest
+   jump in the deck. */
+/* Qualified down to .rhead: `.rhead .rt{display:block}` is further down this
+   stylesheet and a plainer `.perm .rt-team` lost to it on source order, so the
+   paper printed both of its faces at once. */
+.perm .rhead .rt-team,.perm .rhead .rs-team,.perm .rteam,.perm .rfoot-team{display:none}
+.perm.team .rhead .rt-team{display:block}
+.perm.team .rhead .rs-team{display:inline-flex}
+.perm.team .rfoot-team,.perm.team .rteam{display:block}
+.perm.team .rhead .rt:not(.rt-team),
+.perm.team .rhead .rs:not(.rs-team),
+.perm.team>.rbody:not(.rteam),
+.perm.team>.rfoot:not(.rfoot-team){display:none}
+/* Not a warning and not a result: the one line on this face that is neither. */
+.perm.team .rs-team{color:var(--ink2)}
+.perm.team .rfoot span+span{color:var(--ink2)}
+.rteam .prow dd,.rteam .prow dd a{color:var(--ink);text-decoration:none}
+.rteam .prow dd a{border-bottom:1px solid var(--rule)}
+.rteam .prow dd a:hover{color:var(--stamp);border-color:var(--stamp)}
+/* Both faces print to the same depth, so the receipt is one object that
+   changes what it says rather than two of different sizes — otherwise the deck
+   steps down by the difference twice a run, which is the jump this was meant
+   to remove. They match by having the same shape, one lead line and three
+   rows, rather than by a pinned height: the phone cuts every measurement in
+   here, and a number that squared the two faces at 1440 stretched the paper
+   at 390. */
 
 /* the receipt, printed on paper */
 .perm{--paper:#F2EEE6;--ink:#191C1F;--ink2:#8C8377;--rule:rgba(25,28,31,.34);--stamp:#C2342A;
@@ -163,22 +190,24 @@ h2{margin:0;font-weight:800;letter-spacing:-.035em;text-wrap:balance}
 .arrows button:hover:not(:disabled){color:var(--ok);border-color:var(--ok)}
 .arrows button:disabled{opacity:.45;color:var(--mist);cursor:default}
 button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:3px}
-.who{display:flex;gap:clamp(16px,3vw,40px);flex-wrap:wrap;margin-top:clamp(16px,2.4vh,26px);font-size:14px;color:var(--mist)}
-.who a{color:var(--mist);text-decoration:none;border-bottom:1px solid var(--line2);padding-bottom:2px}
-.who a:hover{color:var(--ok);border-color:var(--ok)}
 @media (prefers-reduced-motion:reduce){.nudge::after{animation:none}}
 
 .deck{position:relative;min-height:0;display:grid;grid-template-rows:auto auto;align-content:center;
  gap:clamp(10px,1.8vh,20px)}
 .scene{position:relative;min-height:0;display:grid;grid-template-rows:auto auto;
  justify-items:center;align-items:end;gap:clamp(12px,2vh,22px);padding-inline:var(--gut)}
-.frame{position:relative;width:100%;min-height:0}
-.belt{position:relative}
-.card{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+/* One height for every panel. The cards stack in here and only the live one
+   is in flow, so the frame used to take the height of whatever copy was on
+   screen: a two-line headline and a three-line standfirst moved everything
+   below them, receipt and rail included, on every step. It is a fixed band
+   now, and the copy starts at the top of it. */
+.frame{position:relative;width:100%;min-height:clamp(228px,30vh,318px)}
+.belt{position:relative;height:100%}
+.card{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-start;
  align-items:center;text-align:center;
  opacity:0;visibility:hidden;transform:translateY(9px);
  transition:opacity .4s ease,transform .52s cubic-bezier(.2,.7,.3,1),visibility .4s}
-.card.on{position:relative;inset:auto;opacity:1;visibility:visible;transform:none}
+.card.on{opacity:1;visibility:visible;transform:none}
 .copy{max-width:min(680px,90vw)}
 /* headline and standfirst hold the same footprint on every step,
    so nothing under them shifts as the copy changes */
@@ -188,7 +217,6 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
 .chips{min-height:33px;align-content:flex-start}
 .snum{justify-content:center}
 .chips{justify-content:center}
-.who{justify-content:center}
 .pathwrap{position:relative;height:clamp(74px,12vh,116px);overflow:hidden}
 .pathwrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .pathwrap .bed{fill:none;stroke:var(--line2);stroke-width:1.6;opacity:.65}
@@ -312,14 +340,20 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
 .framed .bar{display:none}
 .framed .app{padding-top:clamp(10px,1.6vh,18px)}
 
-/* The arrows belong beside the thing they move. In the corner they read as
-   page furniture; flanking the card they read as its controls. */
-.frame{position:relative}
+/* The arrows belong beside the thing they move, and the receipt is the only
+   part of the deck with room on both sides. Over the copy they sat on top of
+   the standfirst and clipped it at every width. */
 .arrows{
-  position:absolute;inset:0;pointer-events:none;
-  display:flex;align-items:center;justify-content:space-between;
-  padding-inline:clamp(6px,2.4vw,34px);gap:0;z-index:4
+  position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);
+  /* The receipt is 318px. This is that plus a mark either side of it, so they
+     flank the paper rather than the window — pinned to the viewport edges on a
+     wide screen they are half a metre from the thing they move. */
+  width:min(486px,calc(100% - 8px));pointer-events:none;
+  display:flex;align-items:center;justify-content:space-between;gap:0;z-index:4
 }
+/* The slot's children animate in and out; the arrows do neither, and the
+   `transform` in that shared rule was cancelling the centring above. */
+.slot>.arrows{transition:none;opacity:1;visibility:visible}
 .arrows button{pointer-events:auto}
 @media (max-width:640px){
   .arrows{padding-inline:2px}
@@ -334,9 +368,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
   </header>
   <main class="deck">
     <div class="scene">
-      <div class="frame"><div class="arrows"><button id="prev" aria-label="Previous">&#8592;</button><button id="next" aria-label="Next">&#8594;</button></div>
+      <div class="frame">
           <div class="belt" id="belt">
-        <div class="card"><div class="copy"><div class="snum">Transaction control</div><h2>Know what you <em>sign.</em></h2><p>Nine steps between one button and the authority it actually grants. Move through them &dash; and if this belongs in what you are building, build it with us.</p><div class="who"><span>Leslie Khumalo &middot; <a href="https://www.linkedin.com/in/khumalo-leslie/">Engineering</a></span><span>Blagoja Mojsoski &middot; <a href="https://www.linkedin.com/in/blagoja-mojsoski-228b79b1/">Product and quality</a></span></div></div></div>
+        <div class="card"><div class="copy"><div class="snum">Transaction control</div><h2>Know what you <em>sign.</em></h2><p>Nine steps between one button and the authority it actually grants. Move through them &dash; and if this belongs in what you are building, build it with us.</p></div></div>
         <div class="card"><div class="copy"><div class="snum">01 &middot; Intent</div><h2>What were you doing?</h2><p>The action you started, before anyone asked you to approve anything.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">Swap <b>100 USDC</b> with app.example.xyz</span></div></div></div>
         <div class="card"><div class="copy"><div class="snum">02 &middot; Inspect</div><h2>What is it <em>asking</em> for?</h2><p>The raw call decoded into the authority it creates. Not the label on the button, the object underneath it.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">approve(spender, <em>2^256&minus;1</em>) &middot; ERC-20 &middot; no expiry field</span></div></div></div>
         <div class="card bad"><div class="copy"><div class="snum">03 &middot; Decide</div><h2>Far <em>wider</em> than needed.</h2><p>You are spending a hundred. The request reaches your whole balance and every deposit you make after it, permanently.</p><div class="conc"><span class="ck">Concludes</span><span class="cv"><em>Over-requested.</em> The action needs 100. The request reaches the entire balance and every future deposit.</span></div></div></div>
@@ -344,9 +378,10 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
         <div class="card"><div class="copy"><div class="snum">05 &middot; Authorize</div><h2>Your wallet. <em>Never ours.</em></h2><p>We hand over an unsigned payload and stop. Accept the correction, keep the original, or walk away.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">Unsigned payload handed to your wallet. <b>You sign, or you refuse.</b></span></div></div></div>
         <div class="card"><div class="copy"><div class="snum">06 &middot; Verify</div><h2>Confirm what <em>landed.</em></h2><p>Read the chain back. The stated intent and the resulting onchain state have to agree, or it is not done.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">allowance = <b>100 USDC</b> &middot; matches intent</span></div></div></div>
         <div class="card"><div class="copy"><div class="snum">07 &middot; Monitor</div><h2>It <em>stays</em> visible.</h2><p>Standing authority stays visible for as long as it exists, and takes one action to revoke.</p><div class="conc"><span class="ck">Concludes</span><span class="cv">1 open permission &middot; expires in 28 minutes</span></div></div></div>
-        <div class="card"><div class="copy"><div class="snum">Design partners</div><h2>Build it <em>with us.</em></h2><p>If your users are granting standing authority and you would rather they understood it, we want to build the first integration with you.</p><div class="who"><span>Leslie Khumalo &middot; <a href="https://www.linkedin.com/in/khumalo-leslie/">Engineering</a></span><span>Blagoja Mojsoski &middot; <a href="https://www.linkedin.com/in/blagoja-mojsoski-228b79b1/">Product and quality</a></span></div></div></div>
+        <div class="card"><div class="copy"><div class="snum">Design partners</div><h2>Build it <em>with us.</em></h2><p>If your users are granting standing authority and you would rather they understood it, we want to build the first integration with you.</p></div></div>
       </div></div>
       <div class="slot">
+        <div class="arrows"><button id="prev" aria-label="Previous">&#8592;</button><button id="next" aria-label="Next">&#8594;</button></div>
         <div class="sheet off" id="sheet">
           <div class="sh"><i></i>app.example.xyz<b><svg viewBox="0 0 1280 1280" role="img" aria-label="Base"><path d="M0,101.12c0-34.64,0-51.95,6.53-65.28,6.25-12.76,16.56-23.07,29.32-29.32C49.17,0,66.48,0,101.12,0h1077.76c34.63,0,51.96,0,65.28,6.53,12.75,6.25,23.06,16.56,29.32,29.32,6.52,13.32,6.52,30.64,6.52,65.28v1077.76c0,34.63,0,51.96-6.52,65.28-6.26,12.75-16.57,23.06-29.32,29.32-13.32,6.52-30.65,6.52-65.28,6.52H101.12c-34.64,0-51.95,0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z"/></svg></b></div>
           <div class="sb">
@@ -357,15 +392,22 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
           </div>
         </div>
 
-        <aside class="perm off" id="perm" aria-live="polite">
-          <div class="rhead"><span class="rt">Access receipt</span><span class="rs" id="pSt">Unbounded</span></div>
+        <aside class="perm off team" id="perm" aria-live="polite">
+          <div class="rhead"><span class="rt">Access receipt</span><span class="rt rt-team">Who built this</span><span class="rs" id="pSt">Unbounded</span><span class="rs rs-team">Design partners</span></div>
           <div class="rbody">
             <dl class="prow lead"><dt>Amount</dt><dd id="pAmt">Unlimited</dd></dl>
             <dl class="prow"><dt>Expires</dt><dd id="pExp">Never</dd></dl>
             <dl class="prow"><dt>Reaches</dt><dd id="pRch">Entire balance</dd></dl>
             <dl class="prow"><dt>Exposure</dt><dd id="pExo">8,420 USDC</dd></dl>
           </div>
+          <div class="rbody rteam">
+            <dl class="prow lead"><dt>Team</dt><dd>Sfera Onchain</dd></dl>
+            <dl class="prow"><dt>Engineering</dt><dd><a href="https://www.linkedin.com/in/khumalo-leslie/">Leslie Khumalo</a></dd></dl>
+            <dl class="prow"><dt>Product and quality</dt><dd><a href="https://www.linkedin.com/in/blagoja-mojsoski-228b79b1/">Blagoja Mojsoski</a></dd></dl>
+            <dl class="prow"><dt>Find us</dt><dd>sferaonchain.xyz</dd></dl>
+          </div>
           <div class="rfoot"><span>ERC-20 &middot; approve()</span><span id="pRef">as requested</span></div>
+          <div class="rfoot rfoot-team"><span>Transaction control</span><span>build it with us</span></div>
         </aside>
       </div>
     </div>
@@ -406,8 +448,12 @@ function chrome(){
   /* step 01 shows the one button, 02 onward shows what it actually meant */
   /* the trap on the opening screen, then what it actually meant */
   sheet.classList.toggle("off",true);
-  perm.classList.toggle("off",i<1||i===N-1);
-  app.classList.toggle("bare",i===0||i===N-1);
+  /* The paper is on every panel. On the opening and closing ones it prints who
+     built this instead of a permission — see .perm.team — rather than leaving
+     and taking its band of the page with it. */
+  const team=i===0||i===N-1;
+  perm.classList.toggle("off",false);
+  perm.classList.toggle("team",team);
   const should=i>=FIX;
   if(should!==fixed){fixed=should;setPerm(fixed)}
 }

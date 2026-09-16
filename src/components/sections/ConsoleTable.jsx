@@ -60,18 +60,37 @@ export default function ConsoleTable({ wallets }) {
                      holds the authority, and which chain — in words, because a
                      14px badge is a reminder, not a label. */
                   app={
-                    <AppCell
-                      mark={
-                        <AssetMark
-                          symbol={r.asset}
-                          chainFile={r.chain}
-                          chainName={r.chainName}
-                          size={28}
-                        />
-                      }
-                      name={r.app}
-                      meta={`${r.via} · ${r.chainName}`}
-                    />
+                    <>
+                      {/* The row folds on a phone, the way the ledger's rows
+                          do. A checkbox and a label rather than a click
+                          handler, because this page ships no JavaScript and
+                          that is worth more than the four lines a listener
+                          would save. Both are display:none above the
+                          breakpoint, so on a wide screen the row is a row. */}
+                      <input
+                        type="checkbox"
+                        className="rtoggle"
+                        id={`rt-${set}-${r.app}-${r.via}`.replace(/\s+/g, '-')}
+                      />
+                      <label
+                        className="rtoggle-lab"
+                        htmlFor={`rt-${set}-${r.app}-${r.via}`.replace(/\s+/g, '-')}
+                      >
+                        <span className="sr-only">Show the rest of this row</span>
+                      </label>
+                      <AppCell
+                        mark={
+                          <AssetMark
+                            symbol={r.asset}
+                            chainFile={r.chain}
+                            chainName={r.chainName}
+                            size={28}
+                          />
+                        }
+                        name={r.app}
+                        meta={`${r.via} · ${r.chainName}`}
+                      />
+                    </>
                   }
 
                   allowance={
