@@ -173,22 +173,39 @@ h2{margin:0;font-weight:800;letter-spacing:-.035em;text-wrap:balance}
 .count s{text-decoration:none;color:var(--slate)}
 .hint{font-family:var(--m);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--slate);
  display:flex;align-items:center;gap:9px;white-space:nowrap}
-.hint kbd{font-family:var(--m);font-size:9px;border:1px solid var(--line2);border-radius:4px;padding:2px 5px;color:var(--mist)}
+/* The one key we name, and it is named with the same mark the buttons use.
+   It was a bordered, rounded keycap holding a → : the last piece of chrome
+   left at the foot of the deck once the discs went, and the roundest thing
+   on the screen. */
+.hint kbd{display:inline-flex;align-items:center;color:var(--mist)}
+.hint kbd svg{display:block;width:8px;height:14px;fill:none;stroke:currentColor;stroke-width:2;
+ stroke-linecap:butt;stroke-linejoin:miter}
 .nudge{width:26px;height:1px;background:var(--line2);position:relative;overflow:hidden}
 .nudge::after{content:"";position:absolute;inset:0;background:var(--ok);animation:trace 2.4s cubic-bezier(.6,0,.3,1) infinite}
 @keyframes trace{0%{transform:translateX(-100%)}62%,100%{transform:translateX(100%)}}
 .arrows{display:flex;gap:8px}
-/* Solid enough to be seen. They were a hairline border and mist glyph on a
-   dark panel, dropping to 30% when disabled — on a phone, over the deck's own
-   background, they read as nothing at all and the hint told people to use
-   controls they could not find. */
-.arrows button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);
- background:rgba(10,15,21,.86);backdrop-filter:blur(6px);color:var(--ice);
- cursor:pointer;display:grid;place-items:center;font-size:16px;line-height:1;
- box-shadow:0 6px 18px -8px rgba(0,0,0,.9);
- transition:color .25s,border-color .25s,opacity .25s,background .25s}
-.arrows button:hover:not(:disabled){color:var(--ok);border-color:var(--ok)}
-.arrows button:disabled{opacity:.45;color:var(--mist);cursor:default}
+/* The mark, and nothing around it. A ringed, filled, shadowed disc either
+   side of the receipt made two more objects on a panel that already has the
+   paper as its subject, and pressed against it at narrow widths.
+
+   A chevron rather than an arrow, and drawn rather than typed. The ← and →
+   characters are a shaft with a head on it — at this size the shaft is the
+   loudest part and the two of them read as a pair of dashes flanking the
+   paper. A chevron is the turn itself: two strokes, nothing horizontal, and
+   nothing round anywhere on it. Mitred corner, butt caps, no radius on the
+   button either, so the focus ring is a square around a square hit area.
+   The 38px box stays — the touch target was never what looked wrong. */
+.arrows button{width:38px;height:38px;border:0;border-radius:0;background:none;padding:0;
+ color:var(--ice);cursor:pointer;display:grid;place-items:center;
+ transition:color .25s,opacity .25s,transform .25s}
+.arrows button svg{display:block;width:12px;height:21px;
+ /* the shadow keeps it legible over the lit part of the backdrop as well as
+    the dark, which is what the chip used to do. */
+ filter:drop-shadow(0 1px 9px rgba(5,7,10,.95))}
+.arrows button svg path{fill:none;stroke:currentColor;stroke-width:1.9;
+ stroke-linecap:butt;stroke-linejoin:miter}
+.arrows button:hover:not(:disabled){color:var(--ok);transform:scale(1.12)}
+.arrows button:disabled{opacity:.3;color:var(--mist);cursor:default}
 button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.nudge::after{animation:none}}
 
@@ -196,14 +213,19 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
  gap:clamp(10px,1.8vh,20px)}
 .scene{position:relative;min-height:0;display:grid;grid-template-rows:auto auto;
  justify-items:center;align-items:end;gap:clamp(12px,2vh,22px);padding-inline:var(--gut)}
-/* One height for every panel. The cards stack in here and only the live one
-   is in flow, so the frame used to take the height of whatever copy was on
-   screen: a two-line headline and a three-line standfirst moved everything
-   below them, receipt and rail included, on every step. It is a fixed band
-   now, and the copy starts at the top of it. */
-.frame{position:relative;width:100%;min-height:clamp(228px,30vh,318px)}
-.belt{position:relative;height:100%}
-.card{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-start;
+/* One height for every panel, taken from the panels themselves. The cards all
+   sit in the same grid cell and the hidden ones are `visibility:hidden`, which
+   keeps them in layout — so the cell is exactly as tall as the tallest panel
+   at the width at hand, and it does not change as you move between them.
+
+   It was a hand-picked band, clamp(228px,30vh,318px), which is two faults at
+   once: on a desktop 30vh is far more than any panel needs and the copy floats
+   above a third of a screen of nothing, and on a phone it is less than the
+   longest panel needs, so that copy ran out of the bottom of the band and
+   under the receipt, which is opaque. Measuring beats guessing at both ends. */
+.frame{position:relative;width:100%}
+.belt{display:grid}
+.card{grid-area:1/1;display:flex;flex-direction:column;justify-content:flex-start;
  align-items:center;text-align:center;
  opacity:0;visibility:hidden;transform:translateY(9px);
  transition:opacity .4s ease,transform .52s cubic-bezier(.2,.7,.3,1),visibility .4s}
@@ -263,8 +285,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
   .rail{gap:12px}
   .count{font-size:10px}
   .hint{font-size:8.5px;gap:7px}
-  .hint kbd{font-size:8px;padding:1px 4px}
-  .arrows button{width:32px;height:32px;font-size:13px}
+  .hint kbd svg{width:7px;height:12px}
+  .arrows button{width:32px;height:32px}
+  .arrows button svg{width:10px;height:18px}
   .arrows{gap:7px}
   /* the receipt is a diagram, not reading text, so it takes the deepest cut */
   .slot{min-height:0}
@@ -326,13 +349,11 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
 .app.bounded .field .unbound{opacity:0}
 .app.bounded .field .bound{opacity:.085}
 @keyframes drift{to{transform:translate3d(-440px,-352px,0)}}
-/* a faint lattice, the boundaries themselves */
-.field .grid{position:absolute;inset:0;opacity:.55;
- background-image:linear-gradient(var(--line) 1px,transparent 1px),
-   linear-gradient(90deg,var(--line) 1px,transparent 1px);
- background-size:88px 88px;animation:none;
- -webkit-mask:radial-gradient(105% 72% at 50% 44%,#0000 20%,#000 82%);
- mask:radial-gradient(105% 72% at 50% 44%,#0000 20%,#000 82%)}
+/* The graph-paper lattice that used to sit behind all of this is gone. On its
+   own page it was a faint texture; embedded in the home page it was a second
+   grid over a page that has none, at its own pitch and its own origin, and it
+   read as a rendering fault rather than as depth. The calldata layer stays,
+   because it carries the unbounded/bounded state rather than decorating. */
 .app>*:not(.field){position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.field b{animation:none}}
 
@@ -358,10 +379,11 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
 @media (max-width:640px){
   .arrows{padding-inline:2px}
   .arrows button{width:34px;height:34px}
+  .arrows button svg{width:11px;height:19px}
 }
 </style>
 <div class="app" id="app">
-  <div class="field" aria-hidden="true"><b class="grid"></b><b class="unbound"></b><b class="bound"></b></div>
+  <div class="field" aria-hidden="true"><b class="unbound"></b><b class="bound"></b></div>
   <header class="bar">
     <div class="logo">Sfera<i>Onchain</i></div>
     <a class="btn" href="https://www.linkedin.com/in/khumalo-leslie/">Get in touch</a>
@@ -381,7 +403,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
         <div class="card"><div class="copy"><div class="snum">Design partners</div><h2>Build it <em>with us.</em></h2><p>If your users are granting standing authority and you would rather they understood it, we want to build the first integration with you.</p></div></div>
       </div></div>
       <div class="slot">
-        <div class="arrows"><button id="prev" aria-label="Previous">&#8592;</button><button id="next" aria-label="Next">&#8594;</button></div>
+        <div class="arrows"><button id="prev" aria-label="Previous"><svg viewBox="0 0 12 21" aria-hidden="true"><path d="M10.6 1.4 1.9 10.5l8.7 9.1"/></svg></button><button id="next" aria-label="Next"><svg viewBox="0 0 12 21" aria-hidden="true"><path d="M1.4 1.4l8.7 9.1-8.7 9.1"/></svg></button></div>
         <div class="sheet off" id="sheet">
           <div class="sh"><i></i>app.example.xyz<b><svg viewBox="0 0 1280 1280" role="img" aria-label="Base"><path d="M0,101.12c0-34.64,0-51.95,6.53-65.28,6.25-12.76,16.56-23.07,29.32-29.32C49.17,0,66.48,0,101.12,0h1077.76c34.63,0,51.96,0,65.28,6.53,12.75,6.25,23.06,16.56,29.32,29.32,6.52,13.32,6.52,30.64,6.52,65.28v1077.76c0,34.63,0,51.96-6.52,65.28-6.26,12.75-16.57,23.06-29.32,29.32-13.32,6.52-30.65,6.52-65.28,6.52H101.12c-34.64,0-51.95,0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z"/></svg></b></div>
           <div class="sb">
@@ -416,7 +438,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
 
   <footer class="rail">
     <div class="count"><b id="cNow">01</b><s> / 09</s></div>
-    <div class="hint"><span class="nudge"></span>Scroll or <kbd>&rarr;</kbd></div>
+    <div class="hint"><span class="nudge"></span>Scroll or <kbd><svg viewBox="0 0 12 21" aria-hidden="true"><path d="M1.4 1.4l8.7 9.1-8.7 9.1"/></svg></kbd></div>
       </footer>
 </div>
 <script>
