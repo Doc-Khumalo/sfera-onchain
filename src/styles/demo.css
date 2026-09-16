@@ -1218,3 +1218,13 @@ a.rowmenu-addr:hover, a.d-addr:hover { color: var(--ok); text-decoration: underl
 }
 .xaddr { display: block; margin-top: 4px; font: 400 10.5px/1 var(--mono); color: var(--slate); }
 .xmenu .cmenu-list button:hover b { color: var(--ok); }
+.xmenu { width: 360px; max-height: min(66vh, 480px); }
+.xgroup {
+  margin: 10px 8px 4px;
+  font: 400 9.5px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.xsub { margin: 0; padding: 0; list-style: none; }
+.xmenu .cmenu-list > li:first-child .xgroup { margin-top: 4px; }

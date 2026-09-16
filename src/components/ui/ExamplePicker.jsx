@@ -23,9 +23,20 @@ export function ExamplePicker({ onPick }) {
   const found = useMemo(() => {
     const needle = q.trim().toLowerCase();
     if (!needle) return EXAMPLES;
+    /* The group name is searchable too: "bounded" should find the wallet in
+       good order as readily as it finds the word in a note. */
     return EXAMPLES.filter((e) =>
-      `${e.title} ${e.note} ${e.address}`.toLowerCase().includes(needle));
+      `${e.group} ${e.title} ${e.note} ${e.address}`.toLowerCase().includes(needle));
   }, [q]);
+
+  const groups = useMemo(() => {
+    const by = new Map();
+    for (const e of found) {
+      if (!by.has(e.group)) by.set(e.group, []);
+      by.get(e.group).push(e);
+    }
+    return [...by.entries()];
+  }, [found]);
 
   function pick(e, ev) {
     ev?.preventDefault();
@@ -64,16 +75,27 @@ export function ExamplePicker({ onPick }) {
             }}
           />
 
+          {/* Grouped by what each one demonstrates, because that is why a
+              reader would pick one over another: a wallet with eleven
+              approvals and a wallet with one bounded approval are two
+              different lessons, not two entries in a list. */}
           <ul className="cmenu-list">
-            {found.map((e) => (
-              <li key={e.address}>
-                <button type="button" className="xrow" onClick={(ev) => pick(e, ev)}>
-                  <span className="cm-name">
-                    <b>{e.title}</b>
-                    <em>{e.note}</em>
-                    <span className="xaddr">{e.address.slice(0, 10)}…{e.address.slice(-8)}</span>
-                  </span>
-                </button>
+            {groups.map(([group, items]) => (
+              <li key={group}>
+                <p className="xgroup">{group}</p>
+                <ul className="xsub">
+                  {items.map((e) => (
+                    <li key={e.address}>
+                      <button type="button" className="xrow" onClick={(ev) => pick(e, ev)}>
+                        <span className="cm-name">
+                          <b>{e.title}</b>
+                          <em>{e.note}</em>
+                          <span className="xaddr">{e.address.slice(0, 10)}…{e.address.slice(-8)}</span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>
