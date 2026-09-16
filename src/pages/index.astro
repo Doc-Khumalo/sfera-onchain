@@ -222,6 +222,23 @@ WALLETS.forEach((w, i) => {
       `of rows or the console changes height when it cycles and the page jumps.`
     );
   }
+  /* The console holds its last rows back behind a control — see SHOWN in
+     ConsoleTable.jsx. That is only honest while those rows are the ones
+     nothing needs doing to. A fault, an over-wide or an unreadable row
+     arriving at position 8 would put evidence behind a click, so it stops the
+     build instead. Keep the shape: fault, fault, over-wide, bounded, unknown,
+     expired, removed, then bounded to the end. */
+  w.rows.slice(7).forEach((r, k) => {
+    if (r.status !== 'ok') {
+      throw new Error(
+        `index.astro: wallet ${i + 1} (${w.id}) row ${k + 8} (${r.app}) reads ` +
+        `"${r.status}", but rows 8 and on are folded away until a reader asks ` +
+        `for them. Move it above row 8 or raise SHOWN in ConsoleTable.jsx — a ` +
+        `reading the page argues with cannot sit behind a control.`
+      );
+    }
+  });
+
   const twoLine = w.rows.filter((r) => r.usd).length;
   if (twoLine !== 1) {
     throw new Error(

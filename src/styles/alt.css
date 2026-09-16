@@ -113,13 +113,14 @@
   border-radius: 14px;
   background: linear-gradient(180deg, #0B1117, #080D12);
   overflow: hidden;
-  /* The last rows dissolve rather than stopping, so the table reads as a
-     window onto more of them. A mask, so the console's own border and corners
-     fade with everything else — an overlay gradient leaves the bottom border
-     drawn at full strength across the fade, which reads as a hard edge and is
-     exactly what this is meant to avoid. */
-  -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent 99%);
-          mask-image: linear-gradient(180deg, #000 72%, transparent 99%);
+  /* The bottom used to dissolve into the page — a mask, to say the table was a
+     window onto more rows than fit. It said it by making real rows unreadable:
+     the last two carried the expired and the removed readings and a reader met
+     them at half opacity, or at none.
+
+     The control under the table says the same thing and can be acted on, so
+     the fade is gone. Two mechanisms for "there is more" is one too many, and
+     the one that hid evidence is the one to drop. */
 }
 
 .a-console-head {
@@ -226,6 +227,61 @@
 
 /* The console is the positioning context for the read sweep. */
 .a-console { position: relative; }
+
+/* ---- the last rows, held back ------------------------------------------
+   Ten rows is the argument — all six readings the engine can emit, across
+   nine chains — and it is also a long scroll on a phone, where every row is a
+   card. So the argument stands and the repetition folds: rows 8 to 10 are
+   bounded, dated and need nothing, and they wait behind a control that says
+   how many they are and what they are.
+
+   A checkbox, not a script. `/` ships no JavaScript and this does not change
+   that; it is the same mechanism the rows themselves fold on. */
+.a-more {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.a-more:not(:checked) ~ .a-table-wrap .a-table tbody.a-set tr:nth-child(n+8) {
+  display: none;
+}
+.a-more-lab {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  font: 600 11.5px/1 var(--display);
+  letter-spacing: 0.02em;
+  color: var(--mist);
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+.a-more-lab:hover { color: var(--ice); background: rgba(255,255,255,0.02); }
+/* The clause sits beside the count with air between them; without this they
+   share one inline box and the separator hugs the word before it. */
+.a-more-show { display: flex; align-items: baseline; gap: 7px; }
+.a-more-lab i {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--slate);
+}
+/* The checkbox is a pixel wide and invisible, so the ring has to be drawn
+   around the thing the reader is actually pointing at. */
+.a-more:focus-visible ~ .a-more-lab { outline: 2px solid var(--ok); outline-offset: -2px; }
+.a-more-hide { display: none; }
+.a-more:checked ~ .a-more-lab .a-more-show { display: none; }
+.a-more:checked ~ .a-more-lab .a-more-hide { display: block; }
+
+@media (max-width: 760px) {
+  /* The second clause goes under the first rather than beside it — on a phone
+     the two of them on one line wrap into a ragged pair. */
+  .a-more-lab, .a-more-show { display: block; text-align: center; }
+  .a-more-lab i { display: block; margin-top: 5px; }
+}
 
 /* ================= The loop, run once =================================
  *

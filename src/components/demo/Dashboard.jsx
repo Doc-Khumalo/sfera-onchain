@@ -795,6 +795,12 @@ export default function Dashboard({ embedded = false }) {
               {(
                 <Ledger
                   rows={shown}
+                  /* What makes this a different list rather than the same one
+                     re-rendered. The ledger holds back rows past the first
+                     screenful, and any of these three means the reader is
+                     looking at something else and should not inherit however
+                     far they had expanded the last one. */
+                  resetKey={`${address}|${filter}|${[...chainFilter].sort().join(',')}`}
                   previous={previous}
                   openId={openId}
                   canAct={mode === 'wallet'}

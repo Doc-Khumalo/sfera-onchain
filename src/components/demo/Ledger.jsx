@@ -416,25 +416,78 @@ function NothingRow({ empty, columns = 6 }) {
   );
 }
 
+/* How many rows stand before the reader is asked whether they want the rest.
+   Twelve fills a laptop screen and leaves the figures above the table in
+   sight; a wallet with fewer than that never sees the control at all. */
+const PAGE = 12;
+
+/**
+ * The order rows are cut in.
+ *
+ * A wallet that has been used for years comes back with more rows than anyone
+ * reads in one sitting, and they arrive in the order the chains were asked —
+ * which is alphabetical accident. Showing the first twelve of THAT and hiding
+ * the rest would put an unbounded approval behind a button, which is the one
+ * thing this page exists not to do.
+ *
+ * So the reading decides who is above the fold. Unbounded and over-wide first,
+ * because they are the reason to be here; unknown next, because a permission
+ * we could not read is not a permission we cleared; then the bounded ones, and
+ * last the expired and removed, which are history rather than exposure.
+ * Within a rank the engine's own order survives, so a chain's rows stay
+ * together.
+ */
+const RANK = {
+  UNBOUNDED: 0, OVER_WIDE: 0,
+  UNKNOWN: 1,
+  BOUNDED: 2,
+  EXPIRED: 3, REMOVED: 3,
+};
+const rank = (p) => RANK[p.reading] ?? 2;
+
 export default function Ledger({
-  rows, previous, openId, canAct, explorer, empty, onOpen, onRevoke, onLimit,
+  rows, resetKey, previous, openId, canAct, explorer, empty, onOpen, onRevoke, onLimit,
 }) {
   const anyUnreadable = rows.some((p) => !p.remediable);
+
+  /* Ranked, then cut. Both halves of that have to happen in this order or the
+     cut means something different. */
+  const ordered = useMemo(
+    () => rows.map((p, i) => [p, i])
+      .sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1])
+      .map(([p]) => p),
+    [rows],
+  );
+
+  const [limit, setLimit] = useState(PAGE);
+  /* A filter, a chain or a different wallet makes this a different list, and a
+     reader who expanded the last one did not ask for this one to be long.
+     Derived during render rather than in an effect: an effect would paint the
+     new list at the old length for one frame first. */
+  const [listKey, setListKey] = useState(resetKey);
+  if (resetKey !== listKey) { setListKey(resetKey); setLimit(PAGE); }
+
+  const visible = ordered.slice(0, limit);
+  const hidden = ordered.length - visible.length;
 
   /* One spender usually holds several permissions — a wallet that has swapped
      a few times has five Permit2 rows — so the line saying what that contract
      is goes on the first of them and not on all five. Said once it is an
      explanation; said on every row it is wallpaper, and it costs each row a
-     line of height to be ignored. */
+     line of height to be ignored.
+
+     Computed over what is ON SCREEN, in the order it is shown. Taken from the
+     full list instead, the sentence would land on a row below the fold and the
+     five visible Permit2 rows would all go unexplained. */
   const saysWhat = useMemo(() => {
     const seen = new Set();
     const first = new Set();
-    for (const p of rows) {
+    for (const p of visible) {
       const who = String(p.beneficiary || '').toLowerCase();
       if (!seen.has(who)) { seen.add(who); first.add(p.id); }
     }
     return first;
-  }, [rows]);
+  }, [visible]);
 
   return (
     <div className="lpanel">
@@ -447,7 +500,7 @@ export default function Ledger({
                event, the figures in it are. It is simply there, and the numbers
                climb inside it until they settle. */
             <PermissionRows>
-              {rows.map((p) => (
+              {visible.map((p) => (
                 <Row
                   key={p.id}
                   p={p}
@@ -464,6 +517,33 @@ export default function Ledger({
             </PermissionRows>
           )}
         </PermissionTable>
+
+        {/* What is not on screen, and what it is.
+            The count is the point: "Show 12 more" alone leaves a reader
+            guessing whether the rest is five rows or five hundred, and the
+            second line says why the ones held back are the ones held back. */}
+        {hidden > 0 && (
+          <div className="lmore">
+            <button type="button" className="lmore-btn" onClick={() => setLimit((l) => l + PAGE)}>
+              Show {Math.min(PAGE, hidden)} more
+            </button>
+            <p className="lmore-note">
+              {hidden} of {ordered.length} not shown.
+              {/* True whatever the filter says. "Nothing unbounded is below
+                  this line" was not: under the Unbounded filter every row is,
+                  and the sentence read as a contradiction of the table. */}
+              <span> Ordered by reading, so what is held back is the quiet end of the list.</span>
+            </p>
+          </div>
+        )}
+        {hidden === 0 && limit > PAGE && (
+          <div className="lmore">
+            <button type="button" className="lmore-btn lmore-less" onClick={() => setLimit(PAGE)}>
+              Show fewer
+            </button>
+            <p className="lmore-note">All {ordered.length} shown.</p>
+          </div>
+        )}
 
         {empty?.note && rows.length === 0 && <p className="lnote">{empty.note}</p>}
 

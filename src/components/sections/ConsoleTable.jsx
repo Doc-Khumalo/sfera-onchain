@@ -37,8 +37,21 @@ const Swap = ({ className, was, wasClass, now, nowClass }) => (
   </span>
 );
 
+/* The rows every wallet set carries past this one are bounded, dated and need
+   nothing done to them — see the invariant in index.astro that holds it true.
+   That is what makes them the ones to hold back: all six readings the engine
+   can emit are still on screen before the reader touches anything, and what
+   is behind the control is repetition rather than evidence. */
+const SHOWN = 7;
+
 export default function ConsoleTable({ wallets }) {
+  const held = Math.max(0, wallets[0].rows.length - SHOWN);
   return (
+    <>
+    {/* A checkbox and a label, like the row fold beside it, because this page
+        ships no JavaScript. The input is before the table so the CSS can reach
+        both the rows and the label from it with a sibling selector. */}
+    <input type="checkbox" id="a-more" className="a-more" />
     <PermissionTable>
       {wallets.map((w, si) => {
         const set = si + 1;
@@ -154,5 +167,15 @@ export default function ConsoleTable({ wallets }) {
         );
       })}
     </PermissionTable>
+    {held > 0 && (
+      <label className="a-more-lab" htmlFor="a-more">
+        <span className="a-more-show">
+          Show {held} more
+          <i>· bounded, nothing to see to</i>
+        </span>
+        <span className="a-more-hide">Show fewer</span>
+      </label>
+    )}
+    </>
   );
 }

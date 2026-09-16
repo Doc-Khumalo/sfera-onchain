@@ -154,6 +154,53 @@
 }
 .lnote span { color: var(--slate); }
 
+/* ---- what is not on screen ----------------------------------------------
+   The foot of the table when the table is longer than a screenful. It reads
+   as part of the table rather than as a control bar under it: the same top
+   rule the notes carry, the count in the same voice, and the button the only
+   thing on the line with any weight.
+
+   A button and not a link: it changes what is on this page, it does not go
+   anywhere, and a wallet with three permissions never renders it at all. */
+.lmore {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+}
+.lmore-btn {
+  flex: 0 0 auto;
+  padding: 8px 15px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.03);
+  font: 600 11.5px/1 var(--display);
+  letter-spacing: 0.02em;
+  color: var(--ice);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.lmore-btn:hover { border-color: var(--ok); color: var(--ok); background: rgba(47,224,188,0.06); }
+.lmore-btn:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
+/* Collapsing back is housekeeping, not an invitation. */
+.lmore-less { color: var(--mist); }
+.lmore-note {
+  margin: 0;
+  font: 400 12.5px/1.5 var(--display);
+  color: var(--mist);
+}
+.lmore-note span { color: var(--slate); }
+
+@media (max-width: 760px) {
+  /* The count goes under the button rather than beside it: two lines of
+     explanation next to a pill leaves the pill three words wide. */
+  .lmore { display: block; }
+  .lmore-btn { width: 100%; padding: 11px 15px; }
+  .lmore-note { margin-top: 10px; }
+}
+
 /* The table is the home page's, from global.css. What is left here is only what sits
    around it — the panel it lives in and the note above the rows. */
 .lpanel .a-table-wrap { border-top: 1px solid var(--line); }
