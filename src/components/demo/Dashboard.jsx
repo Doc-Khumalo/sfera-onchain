@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Popover } from 'radix-ui';
 import ChainStack from '../ChainStack.jsx';
 import { isAddress } from 'viem';
 import { discover, connect, watch, switchChain } from '../../lib/wallet.js';
@@ -7,7 +8,8 @@ import { reading, explain } from '../../lib/readings.js';
 import Ledger from './Ledger.jsx';
 import Detail from './Detail.jsx';
 import Handoff from './Handoff.jsx';
-import Verdict from './Verdict.jsx';
+import Bento from './Bento.jsx';
+import Gate from './Gate.jsx';
 import { ChainPicker } from '../ui/ChainPicker.jsx';
 import WalletField, { rememberRecent } from './WalletField.jsx';
 import HeadActions from './HeadActions.jsx';
@@ -25,9 +27,17 @@ const EXAMPLE = EXAMPLES[0];
 
 const FILTERS = [
   { k: 'all', label: 'All' },
-  { k: 'attention', label: 'Needs attention' },
+  { k: 'attention', label: 'Attention' },
   { k: 'unbounded', label: 'Unbounded' },
 ];
+
+/* How many rows each filter would show. The artboard puts the count in the
+   tab, which is the difference between a filter you try and one you choose. */
+function filterCount(k, perms) {
+  if (k === 'attention') return perms.filter((p) => p.attention).length;
+  if (k === 'unbounded') return perms.filter((p) => p.reading === 'UNBOUNDED').length;
+  return perms.length;
+}
 
 /* Reading -> the shared state vocabulary in global.css, so the demo's chips
    and the marketing pages' chips are the same objects. */
@@ -110,9 +120,8 @@ function Crumbs({ address, chain, onBack }) {
  * The homepage's form already posted here with ?address=, so this is the same
  * contract written down rather than a new one.
  *
- * Pushed when a read begins, so Back returns to the gate; replaced when it
- * ends, so leaving does not leave an entry behind that would walk back into
- * the result that was just cleared.
+ * Pushed only after a read succeeds. An address in the URL is a claim that
+ * this page has a reading for it, not a record of an attempted request.
  */
 function writeAddress(addr, { push = false } = {}) {
   if (typeof window === 'undefined') return;
@@ -166,6 +175,9 @@ export default function Dashboard({ embedded = false }) {
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  /* The input screen exits completely before the result view is revealed.
+     Both stay mounted, so neither loses state during a handoff or refresh. */
+  const [view, setView] = useState('gate'); // gate | leaving | demo
 
   /* The reading before the last refresh, keyed by permission id. A row uses
      it to animate from the old value to the new one, which is the moment the
@@ -180,6 +192,49 @@ export default function Dashboard({ embedded = false }) {
   const [chainFilter, setChainFilter] = useState(() => new Set());
   const [openId, setOpenId] = useState(null);
   const [handoff, setHandoff] = useState(null);
+  /* Which chain is being asked again, so its own row can say so. */
+  const [retryingChain, setRetryingChain] = useState(null);
+  /* Whether the address field is the thing being used right now. */
+  const [searching, setSearching] = useState(false);
+  /* WHICH QUESTION THE BOX IS ASKING.
+     Reading an address and connecting a wallet are two different acts with
+     two different consequences, and one of them needs no wallet at all. They
+     were a field with a button beside it, which said they were the same act
+     with a shortcut. */
+  const [entry, setEntry] = useState('read');
+  /* FIRST PAINT DOES NOT ANIMATE.
+   *
+   * The address is taken from the URL in an effect, so a reader arriving on a
+   * shared link renders the gate for one frame and then flips to the reading.
+   * With transitions live that flip is a visible half second of the headline
+   * collapsing and the field shrinking, on a page they asked to open already
+   * read. Transitions are for a state the reader changed, not for catching up
+   * with the state they arrived in. */
+  /* THE DASHBOARD IS A VIEW OF RESULTS, NOT A VIEW OF AN ADDRESS.
+     Keyed on a finished read rather than on something being typed: a failed
+     read produced a full screen of zeros captioned "the chain did not answer",
+     which is a dashboard pretending to be one. No result means the page is
+     still the searching screen. A read that finished and found nothing IS a
+     result, and keeps the dashboard: see demo/States and the emptyShape rules. */
+  /* A READING YOU ALREADY HAVE IS STILL A READING WHILE IT IS BEING REFRESHED.
+     Keyed on `status === 'ready'` this flipped to false the moment a re-read
+     started, so the whole dashboard unmounted, the gate appeared for the
+     length of the request, and everything flashed back. `refresh` keeps the
+     previous result until a new one replaces it, and keeps it on failure too,
+     so the presence of a result is the right condition. */
+  const hasResult = !!result;
+
+  useEffect(() => {
+    if (view !== 'leaving') return undefined;
+    const timer = window.setTimeout(() => setView('demo'), 520);
+    return () => window.clearTimeout(timer);
+  }, [view]);
+
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const r = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(r);
+  }, []);
 
   /* What went wrong, carried beside the page instead of in place of it — see
      ui/Toast.jsx. Keyed, so a re-read replaces the previous complaint about
@@ -191,8 +246,35 @@ export default function Dashboard({ embedded = false }) {
   const dismiss = useCallback((id) => setNotes((ns) => ns.filter((n) => n.id !== id)), []);
 
   useEffect(() => {
-    discover().then(setWallets);
+    const report = (reason) => {
+      const message = reason?.shortMessage || reason?.message || String(reason || 'Unexpected error.');
+      if (!message || message === '[object Object]') return;
+      const wallet = /wallet|metamask|rabby|ethereum|connect/i.test(message);
+      note({
+        key: `runtime:${message}`,
+        tone: 'bad',
+        title: wallet ? 'Wallet connection failed' : 'Something went wrong',
+        body: message,
+      });
+    };
+    const onError = (event) => {
+      if (event.filename && !event.filename.startsWith(window.location.origin)) return;
+      report(event.error || event.message);
+    };
+    const onRejection = (event) => {
+      const message = event.reason?.message || String(event.reason || '');
+      if (/failed to connect to metamask|metamask extension not found/i.test(message)) return;
+      report(event.reason);
+    };
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onRejection);
+    return () => {
+      window.removeEventListener('error', onError);
+      window.removeEventListener('unhandledrejection', onRejection);
+    };
+  }, [note]);
 
+  useEffect(() => {
     /* Whatever is in the URL is what this page is reading — whether the
        homepage's form put it there, a reload is picking it back up, or someone
        was sent the link. It resumes read-only in every case: a wallet
@@ -240,7 +322,7 @@ export default function Dashboard({ embedded = false }) {
         setMode('lookup'); setProvider(null); setWalletName(null);
         setAddress(handed); setChainId((c) => c ?? supported[0]?.id ?? EXAMPLE.chainId);
       } else {
-        setAddress(null); setResult(null); setStatus('idle');
+        setAddress(null); setResult(null); setStatus('idle'); setView('gate');
       }
       setOpenId(null); setHandoff(null);
     }
@@ -285,6 +367,10 @@ export default function Dashboard({ embedded = false }) {
          current, and the toast says so. Blanking the page would replace
          something dated with nothing at all. */
       setStatus('error');
+      /* A newly-entered address stays in the field on failure, but never
+         becomes a shareable result URL. A URL handed to us is also removed if
+         it cannot be restored and there is no earlier result to preserve. */
+      if (!result) writeAddress(null);
       note({ key: 'read', tone: 'bad', title: 'The chain could not be read',
              body: `${explain(why)} Nothing below has been refreshed.`,
              action: why?.retryable !== false ? { label: 'Try again', run: refresh } : null });
@@ -341,12 +427,58 @@ export default function Dashboard({ embedded = false }) {
       }
       return merged;
     });
+    if (view !== 'demo') setView('leaving');
+    /* Commit the address to history only once there is actual data on screen.
+       Re-reads retain their existing URL; a first successful read creates the
+       one Back entry that returns to the input screen. */
+    if (readAddress()?.toLowerCase() !== address.toLowerCase()) {
+      writeAddress(address, { push: true });
+    }
     setStatus('ready');
-  }, [address, supported]);
+  }, [address, supported, result, note, view]);
 
   useEffect(() => {
     if (address && supported.length) refresh();
   }, [address, supported]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * One chain, asked again.
+   *
+   * `refresh` re-reads all fifteen, which for a single refusal spends fifteen
+   * requests and discards fourteen answers that were fine. This asks the one
+   * that failed and merges what comes back, so the rest of the reading on
+   * screen is not disturbed by a retry of something else.
+   *
+   * A SECOND REFUSAL LEAVES THE CHAIN WHERE IT WAS. It stays in chainsFailed
+   * and stays counted as unread, because the alternative is a chain that
+   * quietly stops being listed as unreadable while still being unread.
+   */
+  const retryChain = useCallback(async (chain) => {
+    if (!address || retryingChain) return;
+    setRetryingChain(chain.id);
+    try {
+      const r = await fetchPermissions(chain.id, address);
+      setResult((was) => {
+        if (!was) return was;
+        const kept = (was.permissions ?? []).filter((p) => p.chain?.id !== chain.id);
+        const fresh = (r.permissions ?? []).map((p) => ({ ...p, chain, id: `${chain.id}:${p.id}` }));
+        return {
+          ...was,
+          permissions: [...kept, ...fresh],
+          checked: (was.checked ?? 0) + (r.checked ?? 0),
+          chainsRead: [...(was.chainsRead ?? []).filter((c) => c.id !== chain.id), chain],
+          chainsFailed: (was.chainsFailed ?? []).filter((c) => c.id !== chain.id),
+        };
+      });
+      setNotes((ns) => ns.filter((n) => n.key !== 'partial'));
+    } catch (e) {
+      note({ key: `retry-${chain.id}`, tone: 'bad',
+             title: `${chain.name} did not answer again`,
+             body: `${explain(e)} It is still counted as unread.` });
+    } finally {
+      setRetryingChain(null);
+    }
+  }, [address, retryingChain, note]);
 
   /* A wallet sitting on a chain this ledger does not read. It used to replace
      the page with a notice; the reading still runs across every supported
@@ -368,7 +500,7 @@ export default function Dashboard({ embedded = false }) {
   useEffect(() => {
     if (!provider) return undefined;
     return watch(provider, {
-      onAccounts: (a) => { setAddress(a); writeAddress(a); setOpenId(null); setHandoff(null); if (!a) setStatus('idle'); },
+      onAccounts: (a) => { setAddress(a); setOpenId(null); setHandoff(null); if (!a) setStatus('idle'); },
       onChain: (c) => { setChainId(c); setOpenId(null); setHandoff(null); },
     });
   }, [provider]);
@@ -390,15 +522,31 @@ export default function Dashboard({ embedded = false }) {
       const { address: a, chainId: c } = await connect(w.provider);
       setProvider(w.provider);
       setWalletName(w.info.name);
+      setEntry('read');
       setMode('wallet');
       setAddress(a);
       setChainId(c);
-      writeAddress(a, { push: true });
     } catch (e) {
-      setError(new ApiError({ code: 'DECLINED', message: 'Connection was declined in the wallet.' }));
+      const rejected = e?.code === 4001 || /reject|denied|declined/i.test(e?.message || '');
+      const message = e?.shortMessage || e?.message || 'The wallet did not return an account.';
+      const failure = new ApiError({
+        code: 'DECLINED',
+        message: rejected ? 'Connection was declined in the wallet.' : message,
+      });
+      setError(failure);
+      note({
+        key: 'connect',
+        tone: 'bad',
+        title: rejected ? 'Wallet connection was declined' : 'Could not connect to the wallet',
+        body: message,
+      });
       setStatus('idle');
     }
   }
+
+  const discoverWallets = useCallback(async () => {
+    setWallets(await discover());
+  }, []);
 
   function lookUp(value, forceChain) {
     const addr = (value ?? '').trim();
@@ -411,12 +559,12 @@ export default function Dashboard({ embedded = false }) {
     }
     setNotes((ns) => ns.filter((n) => n.key !== 'addr'));
     setError(null);
+    setView('gate');
     setMode('lookup');
     setProvider(null);
     setWalletName(null);
     setAddress(addr);
     setChainId(forceChain ?? supported[0]?.id ?? 8453);
-    writeAddress(addr, { push: true });
   }
 
   /* Leaving a result is a step back up the trail, and there is now a history
@@ -443,7 +591,7 @@ export default function Dashboard({ embedded = false }) {
   function forget() {
     writeAddress(null);
     setProvider(null); setAddress(null); setChainId(null); setResult(null);
-    setOpenId(null); setHandoff(null); setStatus('idle'); setMode('wallet'); setTyped('');
+    setOpenId(null); setHandoff(null); setStatus('idle'); setMode('wallet'); setTyped(''); setView('gate');
   }
 
   /* ONE TRAIL, ONE HEADER, IN ONE PLACE.
@@ -591,6 +739,32 @@ export default function Dashboard({ embedded = false }) {
   ).size;
   const unbounded = perms.filter((p) => p.reading === 'UNBOUNDED').length;
   const apps = new Set(perms.map((p) => p.beneficiary.toLowerCase())).size;
+  const emptyAddressActions = (
+    <div className="wfield-tabs" role="group" aria-label="Read or connect a wallet">
+      <button type="button" aria-label="Read an address" title="Read an address">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+        </svg>
+      </button>
+      <ConnectButton
+        wallets={wallets}
+        busy={status === 'connecting'}
+        onConnect={onConnect}
+        onAddress={(addr) => lookUp(addr)}
+        onOpen={discoverWallets}
+        trigger={(
+          <button type="button" aria-label="Connect a wallet" title="Connect a wallet">
+            {wallets[0]?.info?.icon
+              ? <img src={wallets[0].info.icon} alt="" width="20" height="20" />
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 7V4a1.2 1.2 0 0 0-1.2-1.2H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+                  <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+                </svg>}
+          </button>
+        )}
+      />
+    </div>
+  );
 
   return (
     /* One provider for the page. It lived inside the ledger, around the table,
@@ -598,7 +772,7 @@ export default function Dashboard({ embedded = false }) {
        then threw "`Tooltip` must be used within `TooltipProvider`" and took
        the whole island down with them. */
     <TooltipProvider>
-    <div className="dash">
+    <div className={`dash ${view === 'demo' ? 'is-read' : 'is-gate'}${view === 'leaving' ? ' is-leaving' : ''}${(searching || (status === 'scanning' && view !== 'demo')) ? ' is-searching' : ''}${ready ? '' : ' no-anim'}`}>
       {/* The chain in the trail is the one the picker is showing — and none
           when it is showing all of them. It used to name `chain`, which is
           whichever chain happened to be current, so a ledger reading fourteen
@@ -621,93 +795,138 @@ export default function Dashboard({ embedded = false }) {
           in a toast, what is missing reads zero, and the shape of the thing
           stays on screen. */}
       <>
-          <Verdict
-            perms={perms}
-            readAt={result?.readAt}
-            scanning={status === 'scanning'}
-            failed={status === 'error'}
-            waiting={!address}
+          {/* THE FIRST THING, AND FOR A MOMENT THE ONLY THING.
+              Mounted in both states and collapsed by CSS in the second, so the
+              field below it keeps its place in the tree and can animate from
+              the middle of the page to the top of it. Unmounting this would
+              move the field, and a remounted input is a new input. */}
+          <div className="gate-say" aria-hidden={address ? true : undefined}>
+            <h1>Who can take from your wallet <em>right now?</em></h1>
+            <p>
+              Apps you approved months ago can still move your tokens today. Most of
+              those permissions never expire, and nothing tells you they are there.
+            </p>
+          </div>
+
+          {/* TWO ACTS, NAMED, ON BOTH INPUTS.
+              Reading an address and connecting a wallet are different acts
+              with different consequences, and one of them needs no wallet at
+              all. This sits above the field in every state: in the gate, on
+              the bar over a reading, and on the field the search overlay
+              grows back out of the bar. */}
+          {/* THE ADDRESS BAR, ABOVE EVERYTHING IT ACTS ON.
+              It used to sit inside the console header, which made the wallet
+              read as a property of the table rather than as the thing the
+              whole page is about. See demo/WalletField.jsx for why it is a
+              field you can type in rather than a string with a menu. */}
+          <div className={`b-top entry-${entry}`}>
+            <div className="b-top-row">
+            <WalletField
+              tabs={address ? (
+                <span className="wfield-acts">
+                  <HeadActions
+                    address={address}
+                    explorer={(onlyChain || result?.chainsRead?.[0])?.explorer}
+                    connected={!!provider}
+                    onForget={forget}
+                  />
+                </span>
+              ) : emptyAddressActions}
+              emptyTabs={emptyAddressActions}
+              address={address}
+              placeholder={address ? 'Read any public address' : 'Paste your wallet address'}
+              onActive={setSearching}
+              walletName={walletName}
+              connected={!!provider}
+              busy={status === 'scanning'}
+              held={held}
+              recentsKey={result?.readAt}
+              onRead={(addr, forceChain) => lookUp(addr, forceChain)}
+              onClear={forget}
+            />
+            </div>
+            {status === 'scanning' && (
+              <p className="b-search-progress" role="status">
+                Reading this address across {supported.length} chains…
+              </p>
+            )}
+          </div>
+
+          <Gate
+            supported={supported}
+            wallets={wallets}
+            busy={status === 'scanning' || status === 'connecting'}
+            hidden={hasResult}
+            onRead={(addr, forceChain) => lookUp(addr, forceChain)}
+            onConnect={() => wallets[0] && onConnect(wallets[0])}
           />
 
-          <section className="ledger-block">
-            <div className="ledger-head">
-              <h2>Present authority</h2>
-              <div className="filters" role="tablist" aria-label="Filter permissions">
-                {FILTERS.map(({ k, label }) => (
-                  <button key={k} type="button" role="tab" aria-selected={filter === k}
-                    className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>{label}</button>
-                ))}
-              </div>
-            </div>
+          {/* Naked on the ground rather than inside a panel. The page says what
+              it is before it says what it found, and a heading that is not in a
+              box is the cheapest way to stop everything reading as one
+              undifferentiated stack of cards. */}
+          <div className="b-head">
+            <h1>Present authority</h1>
+            <p>
+              {!address
+                ? 'Give an address above, or connect a wallet. Read-only until you ask for a change, and any change is handed to your wallet unsigned.'
+                : status === 'scanning'
+                  ? <>Reading <b>{address.slice(0, 6)}…{address.slice(-4)}</b> across {supported.length} chains.</>
+                  : status === 'error'
+                    ? <>The chain did not answer for <b>{address.slice(0, 6)}…{address.slice(-4)}</b>. Nothing below has been refreshed.</>
+                    : <>
+                        Read from <b>{address.slice(0, 6)}…{address.slice(-4)}</b>
+                        {result?.readAt ? ` at ${new Date(result.readAt).toLocaleTimeString()}` : ''}
+                        {`, across ${result?.chainsRead?.length ?? 0} of ${supported.length} chains.`}
+                      </>}
+            </p>
+          </div>
 
-            {/* One console, the way the marketing page shows it: who the wallet
-                is, then what is true of it, then the rows. These were three
-                separate objects — a pill floating above the page, a heading and
-                a panel — which is why the table looked considered and
-                everything around it did not. */}
-            <div className="a-console">
-              {/* The read, drawn as work. `/`'s console sweeps because its
-                  loop is always reading; this one sweeps only while it is. */}
-              {status === 'scanning' && <span className="scan-line" aria-hidden="true" />}
-
-              {/* Two tiers, the same two `/` uses: who the wallet is, then
-                  what is true of it. This had its own vocabulary — a strip, a
-                  dot, a note — for a header doing the identical job beside an
-                  identical table, which is most of why the two pages read as
-                  two products. */}
-              {/* ONE BAR, WHATEVER IS IN IT. The address is a field you can
-                  type in — see demo/WalletField.jsx — and the four things you
-                  can do to the wallet it names sit beside it rather than
-                  behind a menu. It was a string, a pencil, and a popover
-                  holding re-read, copy, explorer and disconnect: four single
-                  actions on the thing the bar was already naming. */}
-              <div className="a-console-head">
-                {/* The address, the other way to give one, and the things that
-                    can be done to whatever is on screen: one group. They were
-                    at opposite ends of a 1250px bar, which made both the marks
-                    and the connect button read as belonging to the chain
-                    control they were sitting next to. */}
-                <span className="a-console-who">
-                  <WalletField
-                    address={address}
-                    walletName={walletName}
-                    connected={!!provider}
-                    busy={status === 'scanning'}
-                    held={held}
-                    recentsKey={result?.readAt}
-                    onRead={(addr, forceChain) => lookUp(addr, forceChain)}
-                  />
-
-                  {/* Discovery runs on mount, so this is whatever is actually
-                      installed.
-
-                      `mode` starts at 'wallet' — it names which gate used to be
-                      showing, not whether anything is connected, and a
-                      condition on it hid this button exactly when nobody had a
-                      wallet. A provider is the only thing that means connected. */}
-                  {!provider && (
-                    <ConnectButton
-                      wallets={wallets}
-                      busy={status === 'connecting'}
-                      onConnect={onConnect}
-                      onAddress={(a) => lookUp(a)}
-                    />
-                  )}
-
-                  {address && (
-                    <HeadActions
-                      address={address}
-                      explorer={(onlyChain || result?.chainsRead?.[0])?.explorer}
-                      connected={!!provider}
-                      onForget={forget}
-                    />
-                  )}
-                </span>
-
-                <span className="a-console-acts">
-
-                  {/* The stacked marks ARE the chain control — see
-                      ui/ChainPicker.jsx. */}
+          <Bento
+            perms={perms}
+            supported={supported}
+            perChain={perChain}
+            result={result}
+            status={status}
+            takersHere={takersHere}
+            toSeeToHere={toSeeToHere}
+            takers={takers}
+            toSeeTo={toSeeTo}
+            narrowed={narrowed}
+            unread={unread}
+            uncertain={uncertain}
+            unreadCap={unreadCap}
+            onRetryChain={retryChain}
+            retryingChain={retryingChain}
+            onRefresh={address ? refresh : null}
+            ledgerHead={(
+              <div className="b-ledger-head">
+                <div className="b-ledger-title">
+                  <h2>
+                    {!address ? 'Nothing read yet'
+                      : narrowed ? `${shown.length} of ${perms.length} shown`
+                      : `${perms.length} permission${perms.length === 1 ? '' : 's'}`}
+                  </h2>
+                  <Popover.Root>
+                    <Popover.Trigger asChild>
+                      <button type="button" className="b-ledger-info" aria-label="About these permissions">
+                        <svg viewBox="0 0 16 16" aria-hidden="true">
+                          <circle cx="8" cy="8" r="6.25" />
+                          <path d="M8 7.1v4.05M8 4.6v.1" />
+                        </svg>
+                      </button>
+                    </Popover.Trigger>
+                    <Popover.Portal>
+                      <Popover.Content className="b-ledger-pop dash" side="bottom" align="start" sideOffset={8} collisionPadding={16}>
+                        Each of these was granted once and has been live ever since. Removing one is a transaction your own wallet signs.
+                      </Popover.Content>
+                    </Popover.Portal>
+                  </Popover.Root>
+                </div>
+                <span className="b-ledger-controls">
+                  {/* The chain control filters THIS table, so it lives in this
+                      table's header. In the address bar it read as a property
+                      of the wallet, which is the one thing it is not. */}
                   {supported.length > 1 && (
                     <ChainPicker
                       chains={supported}
@@ -716,124 +935,62 @@ export default function Dashboard({ embedded = false }) {
                       onChange={setChainFilter}
                     />
                   )}
+                  <div className="filters" role="tablist" aria-label="Filter permissions">
+                    {FILTERS.map(({ k, label }) => (
+                      <button key={k} type="button" role="tab" aria-selected={filter === k}
+                        className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>
+                        {label} <span className="f-n">{filterCount(k, perms)}</span>
+                      </button>
+                    ))}
+                  </div>
                 </span>
               </div>
-
-              {/* Always. Not "once a read has finished", not "if anything was
-                  found" — always. Every gate on this console was a way for the
-                  page to teach a reader nothing at the exact moment they most
-                  needed to understand it. Zero is a reading; so is a figure
-                  that could not be fetched. */}
-              {(
-                <dl className="a-figs">
-                  {/* No price feed, so no single total: the largest exposure
-                      states the stake honestly and the count says how many
-                      more sit behind it. */}
-                  {/* Counted up rather than printed. The chain was read to
-                      get these, and the climb is the only part of the screen
-                      that says so. */}
-                  <div>
-                    <dt>Applications</dt>
-                    {/* Mint is a finding, not an arithmetic result. Under a
-                        filter a zero means "not here", so it is left neutral —
-                        green would say "clear" about a wallet this view is not
-                        showing. */}
-                    <dd className={takersHere ? 'bad' : uncertain ? undefined : 'ok'}>
-                      <Counter value={takersHere} />
-                    </dd>
-                    <span className="cap">
-                      {unread
-                        ? unreadCap
-                        : narrowed
-                          ? `in this view · ${takers} in the whole wallet`
-                          : 'can take from this wallet'}
-                    </span>
-                  </div>
-                  <div>
-                    <dt>Permissions</dt>
-                    <dd><Counter value={shown.length} /></dd>
-                    <span className="cap">
-                      {unread
-                        ? unreadCap
-                        : narrowed
-                          ? `in this view · ${perms.length} in the whole wallet`
-                          : `found in ${result?.checked ?? 0} token and spender pairs`}
-                    </span>
-                  </div>
-                  {/* A list with an end to it. "Need attention" counted
-                      problems; this counts what is left to do, and says so
-                      when there is nothing — which is the moment a person came
-                      here for and the page never used to give them. */}
-                  <div>
-                    <dt>To see to</dt>
-                    <dd className={toSeeToHere ? 'bad' : uncertain ? undefined : 'ok'}>
-                      <Counter value={toSeeToHere} />
-                    </dd>
-                    <span className="cap">
-                      {unread
-                        /* Never "nothing is waiting on you" when nothing was
-                           read: that sentence is the all-clear, and an
-                           all-clear on a failed read is the one lie this page
-                           cannot tell. */
-                        ? unreadCap
-                        : narrowed
-                        /* Nor under a filter: the work is elsewhere, not
-                           absent. And never in the page's own shorthand —
-                           "here · 5 across the whole read" was written by
-                           someone who already knew what it meant. */
-                        ? `in this view · ${toSeeTo} in the whole wallet`
-                        : toSeeTo === 0
-                          ? 'nothing is waiting on you'
-                          : toSeeTo === perms.length
-                            ? 'every permission found'
-                            : `of ${perms.length}, and the rest need nothing`}
-                    </span>
-                  </div>
-                </dl>
-              )}
-
-              {(
-                <Ledger
-                  rows={shown}
-                  /* What makes this a different list rather than the same one
-                     re-rendered. The ledger holds back rows past the first
-                     screenful, and any of these three means the reader is
-                     looking at something else and should not inherit however
-                     far they had expanded the last one. */
-                  resetKey={`${address}|${filter}|${[...chainFilter].sort().join(',')}`}
-                  previous={previous}
-                  openId={openId}
-                  canAct={mode === 'wallet'}
-                  explorer={result?.explorer}
-                  empty={emptyShape}
-                  onOpen={(id) => setOpenId(id === openId ? null : id)}
-                  onRevoke={(p) => setHandoff({ perm: p, intent: { kind: 'revoke' } })}
-                  onLimit={(p, to) => setHandoff({ perm: p, intent: { kind: 'limit', ...to } })}
-                />
-              )}
-            </div>
-
-
-            {/* The legend uses the same chips the rows do, from global.css. A
-                key drawn in a different style from the thing it explains makes
-                a reader match them up by reading rather than by looking, which
-                is the one job a key has. */}
-            {/* The vocabulary, when there are rows wearing it. On an empty
-                table it is six definitions of nothing. */}
-            {shown.length > 0 && (
-              <ul className="verdict-key">
-                {['UNBOUNDED', 'OVER_WIDE', 'BOUNDED', 'EXPIRED', 'REMOVED', 'UNKNOWN'].map((k) => {
-                  const r = reading(k);
-                  return (
-                    <li key={k}>
-                      <span className={`state st-${KEY_TONE[k]}`}>{r.label}</span>
-                      <p>{r.means}</p>
-                    </li>
-                  );
-                })}
-              </ul>
             )}
-          </section>
+            ledger={(
+              <Ledger
+                rows={shown}
+                /* What makes this a different list rather than the same one
+                   re-rendered. The ledger holds back rows past the first
+                   screenful, and any of these three means the reader is
+                   looking at something else and should not inherit however
+                   far they had expanded the last one. */
+                resetKey={`${address}|${filter}|${[...chainFilter].sort().join(',')}`}
+                previous={previous}
+                openId={openId}
+                canAct={mode === 'wallet'}
+                explorer={result?.explorer}
+                empty={emptyShape}
+                onOpen={(id) => setOpenId(id === openId ? null : id)}
+                onRevoke={(p) => setHandoff({ perm: p, intent: { kind: 'revoke' } })}
+                onLimit={(p, to) => setHandoff({ perm: p, intent: { kind: 'limit', ...to } })}
+              />
+            )}
+          />
+
+          {/* The legend uses the same chips the rows do, from global.css. A
+              key drawn in a different style from the thing it explains makes a
+              reader match them up by reading rather than by looking, which is
+              the one job a key has. The card above counts the readings; this
+              says what each word means, and they are different jobs. */}
+          {shown.length > 0 && (
+            <ul className="verdict-key">
+              {['UNBOUNDED', 'OVER_WIDE', 'BOUNDED', 'EXPIRED', 'REMOVED', 'UNKNOWN'].map((k) => {
+                const r = reading(k);
+                return (
+                  <li key={k}>
+                    <span className={`state st-${KEY_TONE[k]}`}>{r.label}</span>
+                    <p>{r.means}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          <p className="b-foot">
+            Nothing here is signed and nothing is a recommendation. A correction is built
+            by the engine, handed to your wallet unsigned, and read back off the chain
+            afterwards.
+          </p>
 
       </>
 

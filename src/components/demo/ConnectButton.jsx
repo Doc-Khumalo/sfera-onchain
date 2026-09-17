@@ -111,19 +111,21 @@ function Scanner({ onFound, onFail }) {
   );
 }
 
-export default function ConnectButton({ wallets = [], busy, onConnect, onAddress }) {
+export default function ConnectButton({ wallets = [], busy, onConnect, onAddress, onOpen, trigger }) {
   const [open, setOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
 
   useEffect(() => { if (!open) setScanning(false); }, [open]);
 
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root open={open} onOpenChange={(next) => { setOpen(next); if (next) onOpen?.(); }}>
       <Popover.Trigger asChild>
-        <button type="button" className="cbtn" disabled={busy}>
-          <Mark d="M2 5.2A1.2 1.2 0 0 1 3.2 4h9.6A1.2 1.2 0 0 1 14 5.2v5.6a1.2 1.2 0 0 1-1.2 1.2H3.2A1.2 1.2 0 0 1 2 10.8V5.2Zm8.5 2.8h1.5" />
-          {busy ? 'Connecting…' : 'Connect'}
-        </button>
+        {trigger || (
+          <button type="button" className="cbtn" disabled={busy}>
+            <Mark d="M2 5.2A1.2 1.2 0 0 1 3.2 4h9.6A1.2 1.2 0 0 1 14 5.2v5.6a1.2 1.2 0 0 1-1.2 1.2H3.2A1.2 1.2 0 0 1 2 10.8V5.2Zm8.5 2.8h1.5" />
+            {busy ? 'Connecting…' : 'Connect'}
+          </button>
+        )}
       </Popover.Trigger>
 
       <Popover.Portal>

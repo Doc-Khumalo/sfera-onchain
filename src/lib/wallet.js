@@ -31,16 +31,6 @@ export function discover(timeout = 350) {
       window.removeEventListener('eip6963:announceProvider', onAnnounce);
       const list = [...found.values()];
 
-      /* A wallet that predates EIP-6963 only exposes window.ethereum. Include
-         it, but only when nothing announced itself, so a modern wallet is not
-         listed twice under two names. */
-      if (list.length === 0 && window.ethereum) {
-        list.push({
-          info: { uuid: 'injected', name: 'Browser wallet', icon: null },
-          provider: window.ethereum,
-        });
-      }
-
       resolve(list);
     }, timeout);
   });

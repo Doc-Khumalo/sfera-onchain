@@ -343,7 +343,7 @@ function Row({ p, was, open, canAct, explorer, sayWhat, onOpen, onRevoke, onLimi
 
       app={
         <AppCell
-          mark={<AssetMark symbol={p.symbol} chain={p.chain} size={28} />}
+          mark={<AssetMark symbol={p.symbol} chain={p.chain} size={24} />}
           name={known?.name || p.label || `${p.beneficiary.slice(0, 6)}…${p.beneficiary.slice(-4)}`}
           meta={`${p.symbol || 'Unreadable contract'} · ${p.chain?.name ?? '—'}`}
           note={sayWhat ? known?.short : undefined}
@@ -363,6 +363,12 @@ function Row({ p, was, open, canAct, explorer, sayWhat, onOpen, onRevoke, onLimi
 
       reachable={<span className={p.attention ? 'bad' : undefined}><Reach p={p} /></span>}
       expires={expiry(p)}
+      /* The fourth fact on a phone card: whether money that has not arrived
+         yet is already covered. It is the reason an empty balance is not
+         safety, and it was only ever said in the evidence panel. */
+      future={p.futureExposed
+        ? <span className="a-future-on">covered</span>
+        : <span className="a-future-off">not covered</span>}
       state={<StateChip tone={tone(p)}>{reading(p.reading).label}</StateChip>}
       action={
         <Actions p={p} canAct={canAct} explorer={explorer}
@@ -491,7 +497,7 @@ export default function Ledger({
 
   return (
     <div className="lpanel">
-        <PermissionTable>
+        <PermissionTable future>
           {rows.length === 0 ? (
             <NothingRow empty={empty} />
           ) : (

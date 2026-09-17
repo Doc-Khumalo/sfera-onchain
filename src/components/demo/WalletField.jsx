@@ -43,7 +43,7 @@ export function rememberRecent(address, found) {
 
 const short = (a) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
-export default function WalletField({ address, walletName, connected, busy, held, onRead, recentsKey }) {
+export default function WalletField({ address, walletName, connected, busy, held, onRead, onClear, recentsKey, onActive, tabs, emptyTabs, placeholder = 'Read any public address' }) {
   const [open, setOpen] = useState(false);
   /* Blurred, the field shows the short address and takes a name's worth of
      room; focused, it opens to the full 42 characters. The bar was carrying a
@@ -100,6 +100,24 @@ export default function WalletField({ address, walletName, connected, busy, held
 
   const nothing = seen.length === 0 && examples.length === 0;
 
+  /* ONE FLAT LIST BEHIND THE TWO GROUPS. The list is drawn in sections
+     because recents and examples answer different questions, but the keyboard
+     walks a single sequence: a caret that skips from the bottom of one group
+     to the top of the next is a caret the reader has to think about. */
+  const options = useMemo(() => [
+    ...seen.map((r) => ({ key: `r:${r.address}`, address: r.address, chainId: undefined })),
+    ...examples.flatMap(([, items]) => items.map((e) => ({ key: `e:${e.address}`, address: e.address, chainId: e.chainId }))),
+  ], [seen, examples]);
+
+  /* The page behind wants to know when this is the thing being used, so it
+     can get out of the way. See `.is-searching` in bento.css. */
+  useEffect(() => { onActive?.(open || focused); }, [open, focused]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [active, setActive] = useState(-1);
+  /* A new query is a new list, so the caret goes back to nothing rather than
+     staying on whichever row happens to be at the old index. */
+  useEffect(() => { setActive(-1); }, [needle, open]);
+
   function take(addr, chainId, ev) {
     ev?.preventDefault();
     ev?.stopPropagation();
@@ -115,18 +133,28 @@ export default function WalletField({ address, walletName, connected, busy, held
       <Popover.Anchor asChild>
         <form
           ref={box}
-          className={`wfield${focused ? ' open' : ''}${typingAddress && !valid ? ' bad' : ''}`}
+          className={`wfield${focused ? ' open' : ''}${typingAddress && !valid ? ' bad' : ''}${busy ? ' is-reading' : ''}`}
+          aria-busy={busy || undefined}
           onSubmit={(e) => { e.preventDefault(); if (valid) take(q, undefined, e); }}
         >
+          {/* The two acts sit IN this field, on the same row as the address:
+              a segmented control at the head of the input, not a header above
+              it. design/demo-canvas/parts/Main.css `.field-tabs`. */}
+          {q || !emptyTabs ? tabs : emptyTabs}
           <span className="a-avatar" aria-hidden="true" />
           <label htmlFor="wf" className="sr-only">Read any public address</label>
           <input
             ref={field}
             id="wf"
             className="wfield-input"
-            value={focused ? typed : (address ? short(address) : '')}
+            value={typed}
             title={address || undefined}
-            onChange={(e) => { setTyped(e.target.value); setOpen(true); }}
+            onChange={(e) => {
+              const next = e.target.value;
+              setTyped(next);
+              setOpen(true);
+              if (!next.trim() && address) onClear?.();
+            }}
             onFocus={() => { setFocused(true); setOpen(true); }}
             /* Focus fires once. A second click on a field that is already
                focused fires nothing, so a list dismissed with Escape or by a
@@ -135,16 +163,35 @@ export default function WalletField({ address, walletName, connected, busy, held
             onClick={() => setOpen(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={(e) => {
-              if (e.key === 'Escape') { setOpen(false); field.current?.blur(); }
-              if (e.key === 'ArrowDown') setOpen(true);
+              if (e.key === 'Escape') { setOpen(false); setActive(-1); field.current?.blur(); return; }
+              if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                setOpen(true);
+                if (options.length === 0) return;
+                const step = e.key === 'ArrowDown' ? 1 : -1;
+                setActive((i) => {
+                  const next = i + step;
+                  if (next < 0) return options.length - 1;
+                  if (next >= options.length) return 0;
+                  return next;
+                });
+                return;
+              }
+              /* A valid address in the box wins over whatever the caret is on:
+                 someone who pasted forty-two characters meant those. */
+              if (e.key === 'Enter' && !valid && active >= 0 && options[active]) {
+                e.preventDefault();
+                take(options[active].address, options[active].chainId, e);
+              }
             }}
-            placeholder="Read any public address"
+            placeholder={placeholder}
             spellCheck="false"
             autoComplete="off"
             autoCorrect="off"
             role="combobox"
             aria-expanded={open}
             aria-controls="wf-list"
+            aria-activedescendant={active >= 0 && options[active] ? `wf-o-${options[active].address}` : undefined}
           />
           {connected && walletName && !dirty && (
             <span className="wfield-via">{walletName}</span>
@@ -162,7 +209,7 @@ export default function WalletField({ address, walletName, connected, busy, held
               className="wfield-clear"
               aria-label="Clear the address"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => { setTyped(''); setFocused(true); setOpen(true); field.current?.focus(); }}
+              onClick={() => { setTyped(''); setFocused(true); setOpen(true); onClear?.(); field.current?.focus(); }}
             >
               <svg viewBox="0 0 12 12" aria-hidden="true">
                 <path d="M3 3l6 6M9 3l-6 6" fill="none" stroke="currentColor"
@@ -191,6 +238,14 @@ export default function WalletField({ address, walletName, connected, busy, held
              closed it. Presses on the box it belongs to are not outside. */
           onInteractOutside={(e) => { if (box.current?.contains(e.target)) e.preventDefault(); }}
         >
+          {/* A palette says what its keys do. Without this the arrow keys are
+              a feature only the person who wrote them knows about. */}
+          <p className="wdrop-hints" aria-hidden="true">
+            <span><kbd>&#8593;</kbd><kbd>&#8595;</kbd> Move</span>
+            <span><kbd>&#8629;</kbd> Read</span>
+            <span className="wdrop-hints-end"><kbd>esc</kbd> Close</span>
+          </p>
+
           <div className="wdrop-list">
             {typingAddress && !valid && (
               <p className="wdrop-none">
@@ -212,9 +267,15 @@ export default function WalletField({ address, walletName, connected, busy, held
                 <ul className="xsub">
                   {seen.map((r) => (
                     <li key={r.address}>
-                      <button type="button" className="xrow wrow" onClick={(e) => take(r.address, undefined, e)}>
+                      <button
+                        type="button"
+                        id={`wf-o-${r.address}`}
+                        className={`xrow wrow${options[active]?.address === r.address ? ' on' : ''}`}
+                        onMouseEnter={() => setActive(options.findIndex((o) => o.address === r.address))}
+                        onClick={(e) => take(r.address, undefined, e)}
+                      >
                         <span className="cm-name">
-                          <b>{short(r.address)}</b>
+                          <b>{r.address}</b>
                           <em>{r.found == null ? 'read here' : `${r.found} permission${r.found === 1 ? '' : 's'} last time`}</em>
                         </span>
                       </button>
@@ -230,7 +291,13 @@ export default function WalletField({ address, walletName, connected, busy, held
                 <ul className="xsub">
                   {items.map((e) => (
                     <li key={e.address}>
-                      <button type="button" className="xrow" onClick={(ev) => take(e.address, e.chainId, ev)}>
+                      <button
+                        type="button"
+                        id={`wf-o-${e.address}`}
+                        className={`xrow${options[active]?.address === e.address ? ' on' : ''}`}
+                        onMouseEnter={() => setActive(options.findIndex((o) => o.address === e.address))}
+                        onClick={(ev) => take(e.address, e.chainId, ev)}
+                      >
                         <span className="cm-name">
                           <b>{e.title}</b>
                           <em>{e.note}</em>

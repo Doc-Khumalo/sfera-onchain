@@ -1,0 +1,1805 @@
+/**
+ * The ledger as an instrument, not a stack of equal panels.
+ *
+ * Three things distinguish this from the console it replaces, and all three
+ * came out of comparing the page against dashboards that do not look
+ * generated:
+ *
+ *   1. AN IRREGULAR GRID. Four tiles of identical weight told a reader
+ *      nothing about what to look at first. The anchor spans two columns, the
+ *      chain card spans two rows, and the ledger spans everything.
+ *   2. ONE SATURATED SURFACE. Every card used to carry a border, a gradient
+ *      and a tint, so mint, red and amber all competed. Now cards are flat
+ *      fills, the ledger is the only outlined object because it is the only
+ *      one you act on, and exactly one card is filled with a state colour.
+ *   3. LABELS IN WORDS. Every label was uppercase mono with .15em of
+ *      tracking, which reads as machine output rather than as a page someone
+ *      wrote. Mono is now reserved for what is genuinely machine-produced:
+ *      figures, amounts and addresses.
+ *
+ * Loaded after demo.css, so it overrides the console layer rather than
+ * replacing it: the table, the chips, the row states and every behaviour
+ * bearing class in dashboard.css are untouched and still in force.
+ */
+
+.bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 296px;
+  gap: 14px;
+  align-items: start;
+  max-width: var(--content);
+  margin: 0 auto;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bento-rail { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---- cards are fills, not outlines -------------------------------------- */
+.b-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 15px 17px 16px;
+  border-radius: 16px;
+  background: var(--deck2);
+}
+
+.b-k {
+  margin: 0;
+  font: 500 11.5px/1.3 var(--display);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--mist);
+}
+
+.b-fig {
+  margin: 0;
+  font: 700 23px/1 var(--mono);
+  letter-spacing: -0.022em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ice);
+}
+.b-fig.sm { font-size: 19px; }
+.b-fig.bad { color: var(--bad); }
+.b-fig.ok { color: var(--ok); }
+.b-fig.wide { color: #E8B75B; }
+.b-of { font-size: 0.62em; font-weight: 400; color: var(--slate); }
+
+.b-sub { margin: 0; font: 400 11px/1.45 var(--display); color: var(--slate); text-wrap: pretty; }
+
+/* ---- the one saturated card ---------------------------------------------
+   The colour is a reading. `.live` is money someone else can move, `.clear`
+   is a zero that was earned, and `.waiting` is every zero that has not been
+   established — before a read, during one, and after one that failed. */
+.b-card.anchor { grid-column: 1 / 3; padding: 17px 20px 18px; gap: 9px; }
+.b-card.anchor .b-fig {
+  font-size: clamp(30px, 3.4vw, 46px);
+  letter-spacing: -0.034em;
+}
+.b-atleast { font: 400 0.42em/1 var(--display); letter-spacing: 0; opacity: 0.72; }
+
+/* ---- the chain card, two rows tall -------------------------------------- */
+.b-card.tall {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  justify-content: flex-start;
+}
+.b-card-top { display: flex; flex-direction: column; gap: 7px; }
+/* Fifteen rows in a card that is two rows tall, so it scrolls. The refused
+   ones sort to the top, because they are the rows with something to do. */
+.b-chains {
+  margin: 2px -6px 0 0;
+  padding: 0 6px 0 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  max-height: 168px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line2) transparent;
+  overscroll-behavior: contain;
+}
+.b-chains::-webkit-scrollbar { width: 6px; }
+.b-chains::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
+.b-chains::-webkit-scrollbar-track { background: transparent; }
+
+.b-chrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 0;
+  font: 400 11.5px/1.3 var(--display);
+  color: var(--mist);
+}
+.b-chrow b { flex: 1; min-width: 0; font-weight: 400; overflow: hidden; text-overflow: ellipsis; }
+.b-chstat {
+  flex: none;
+  font: 400 10.5px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--slate);
+}
+.b-chrow.zero { opacity: 0.55; }
+.b-chrow.unread .b-chstat { color: var(--slate); }
+.b-chrow.found .b-chstat { color: var(--mist); }
+.b-chrow.fail b { color: #E8B75B; }
+.b-chrow.fail .b-chstat { color: #E8B75B; }
+.b-cm { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+
+.b-retry {
+  flex: none;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid rgba(232, 183, 91, 0.4);
+  border-radius: 999px;
+  background: transparent;
+  font: 400 10px/1 var(--mono);
+  letter-spacing: 0.04em;
+  color: #E8B75B;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.b-retry:hover:not(:disabled) { background: rgba(232, 183, 91, 0.14); border-color: #E8B75B; }
+.b-retry:disabled { opacity: 0.55; cursor: default; }
+
+/* ---- meters -------------------------------------------------------------- */
+.b-meter { display: flex; gap: 2px; height: 4px; }
+.b-meter.tall { height: 7px; margin: 2px 0; }
+.b-meter i { border-radius: 2px; }
+.hatch { background-image: repeating-linear-gradient(45deg, var(--mist) 0 2px, transparent 2px 5px); }
+
+.b-legend { margin: 0; display: flex; flex-direction: column; gap: 7px; }
+.b-legend > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.b-legend dt {
+  display: flex; align-items: center; gap: 8px; margin: 0;
+  font: 400 11.5px/1 var(--display); color: var(--mist);
+}
+.b-legend dt i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.b-legend dd { margin: 0; font: 400 11px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--ice); }
+
+.b-not { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.b-not li {
+  display: flex; gap: 9px;
+  font: 400 11.5px/1.4 var(--display);
+  color: var(--mist);
+}
+.b-not li svg { width: 12px; height: 12px; flex: none; margin-top: 2px; color: var(--slate); }
+
+/* ---- the ledger is the only outlined object ------------------------------ */
+.b-ledger {
+  position: relative;
+  grid-column: 1 / 4;
+  border: 1px solid var(--line2);
+  border-radius: 16px;
+  background: var(--deck);
+  overflow: hidden;
+}
+.b-ledger > .scan-line { z-index: 1; pointer-events: none; }
+
+.b-ledger-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.b-ledger-head h2 {
+  margin: 0;
+  font: 600 13.5px/1.3 var(--display);
+  letter-spacing: -0.012em;
+  color: var(--ice);
+}
+.b-ledger-title { display: flex; align-items: center; gap: 7px; }
+.b-ledger-info {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--slate);
+  cursor: pointer;
+}
+.b-ledger-info:hover,
+.b-ledger-info:focus-visible { color: var(--ice); }
+.b-ledger-info svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.45; stroke-linecap: round; }
+.b-ledger-pop {
+  z-index: 60;
+  width: min(300px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: var(--deck);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .3);
+  font: 400 12px/1.45 var(--display);
+  color: var(--mist);
+}
+
+/* ---- the address bar, above everything ----------------------------------- */
+.b-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: var(--content);
+  margin: 0 auto 14px;
+}
+.b-head { max-width: var(--content); margin: 0 auto 14px; }
+.b-head h1 {
+  margin: 0;
+  font: 700 clamp(21px, 2.6vw, 27px)/1.05 var(--display);
+  letter-spacing: -0.03em;
+  color: var(--ice);
+}
+.b-head p { margin: 6px 0 0; font: 400 13px/1.5 var(--display); color: var(--mist); }
+.b-head p b { font: 400 13px/1 var(--mono); color: var(--ice); }
+
+.b-foot {
+  max-width: var(--content);
+  margin: 16px auto 0;
+  font: 400 11.5px/1.5 var(--display);
+  color: var(--slate);
+}
+
+/* ---- narrow ------------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .bento { grid-template-columns: minmax(0, 1fr); }
+  .bento-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 820px) {
+  .bento-grid { grid-template-columns: minmax(0, 1fr); }
+  .b-card.anchor { grid-column: 1; }
+  .b-card.tall { grid-column: 1; grid-row: auto; }
+  .b-ledger { grid-column: 1; }
+  .bento-rail { grid-template-columns: minmax(0, 1fr); }
+}
+
+.b-top-gap { flex: 1 1 auto; }
+
+/* The legend sat inside the console's container and inherited its width.
+   Nothing wraps it now, so it carries its own. */
+.verdict-key { max-width: var(--content); margin-inline: auto; }
+
+/* Read, reaching nothing today, and still covering whatever arrives next.
+   Its own colour because it is its own finding: neither the red of money
+   that can move now nor the mint of a wallet with nothing left to do. */
+
+/* ---- the ledger, to the design's proportions -----------------------------
+ *
+ * The bento landed but the table inside it did not: `.a-table` is still the
+ * marketing console's table, whose heads are `13px 24px` and whose cells are
+ * `15px 24px`, so rows came out around 62px against the 46px the design draws.
+ * Filters were outline pills where the design has one segmented control.
+ *
+ * SCOPED TO `.b-ledger` AND `.b-top`, NOT GLOBAL. The same table renders on
+ * `/` inside the example console, where the larger proportions are correct
+ * and deliberate. Restyling `.a-table` itself would silently redesign the
+ * home page.
+ */
+.b-ledger .a-table th {
+  height: 32px;
+  padding: 0 8px;
+  font: 500 10px/1 var(--mono);
+  letter-spacing: 0.08em;
+  color: var(--slate);
+}
+.b-ledger .a-table td {
+  padding: 8px;
+  font: 400 12.5px/1.3 var(--mono);
+}
+.b-ledger .a-table th:first-child,
+.b-ledger .a-table td:first-child { padding-left: 18px; }
+.b-ledger .a-table th:last-child,
+.b-ledger .a-table td:last-child { padding-right: 18px; }
+
+/* The application cell: a name in words, a line of detail under it, and the
+   detail in the display face. It was 14px/600 over an 11.5px mono line, which
+   is a heading over a machine string where the design has a name over a note. */
+.b-ledger .a-table td b {
+  font: 500 12.5px/1.25 var(--display);
+  letter-spacing: -0.006em;
+}
+.b-ledger .a-table td em {
+  margin-top: 2px;
+  font: 400 10.5px/1.3 var(--display);
+  color: var(--slate);
+}
+.b-ledger .a-app { gap: 9px; }
+.b-ledger .a-app-note { margin-top: 2px; font-size: 10.5px; }
+
+/* The chips carry the readings and keep their vocabulary; only their size
+   changes, so a 46px row does not have a 24px pill in it. */
+.b-ledger .state {
+  padding: 2px 8px;
+  font: 500 11px/15px var(--mono);
+  letter-spacing: 0.05em;
+}
+
+/* ---- filters as one segmented control ------------------------------------
+   Three separate outline pills, the active one inverted to white on dark,
+   read as three buttons rather than one control with a position in it. */
+.b-ledger-head .filters {
+  margin-left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 30px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--deck2);
+  flex-wrap: nowrap;
+}
+.b-ledger-head .filters button {
+  height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font: 500 12px/1 var(--display);
+  color: var(--mist);
+  white-space: nowrap;
+}
+.b-ledger-head .filters button:hover {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ice);
+}
+.b-ledger-head .filters button.on {
+  background: var(--deck);
+  border-color: transparent;
+  color: var(--ice);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ---- the address bar ------------------------------------------------------
+   The field is already a pill; what it was not is the height of the controls
+   beside it, so the bar had three different vertical rhythms in it. */
+.b-top .wfield {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  padding: 0 5px 0 10px;
+  border-color: var(--line);
+  background: var(--deck2);
+}
+.b-top .wfield .a-avatar { width: 18px; height: 18px; border-radius: 5px; }
+.b-top .wfield-input { font-size: 12px; letter-spacing: -0.02em; }
+.b-top .wfield-go { height: 26px; padding: 0 11px; font-size: 12px; }
+
+/* ---- the trap that broke the first build ---------------------------------
+ *
+ * dashboard.css:25 sets `.dash section { max-width: var(--page);
+ * margin-inline: auto; padding: clamp(34px, 5.5vh, 64px) var(--gutter) }`,
+ * scoped to the ledger's own root so that mounting it inside another page
+ * cannot re-measure that page's sections. Every card below is a <section>
+ * inside `.dash`, so each one inherited a page measure, centred itself in its
+ * own grid cell and took 64px of gutter padding: the grid collapsed into a
+ * row of shrink-to-fit boxes and the anchor stopped spanning two columns.
+ *
+ * These are <section> elements because each is a titled region, which is what
+ * the tag is for, so the fix is to say so here rather than to downgrade them
+ * to <div> and leave the trap set for the next person.
+ */
+.dash .b-card {
+  max-width: none;
+  margin-inline: 0;
+  padding: 15px 17px 16px;
+}
+.dash .b-card.anchor { padding: 17px 20px 18px; }
+.dash .b-ledger {
+  max-width: none;
+  margin-inline: 0;
+  padding: 0;
+}
+
+@media (max-width: 720px) {
+  /* demo.css:1002 restates the padding at this breakpoint. */
+  .dash .b-card { padding-block: 15px 16px; }
+  .dash .b-card.anchor { padding-block: 17px 18px; }
+  .dash .b-ledger { padding-block: 0; }
+}
+
+/* ==========================================================================
+   THE GATE
+   
+   The search field is one element in both states. In `is-gate` it sits in the
+   middle of the page at 66px; in `is-read` it is a 34px bar at the top. The
+   transition IS that element resizing, which is why nothing below unmounts
+   the field or renders a second copy of it: a remounted input is a new input,
+   and the caret would jump.
+   ========================================================================== */
+
+.dash.is-gate .b-top,
+.dash.is-read .b-top { transition: max-width 0.62s var(--ease-loop), margin 0.5s var(--ease-loop); }
+
+/* The field is the whole bar now: one row, full width of the measure. */
+.dash.is-gate .b-top {
+  flex-direction: row;
+  align-items: center;
+  max-width: calc(880px + var(--gutter) * 2);
+  gap: 10px;
+}
+.dash.is-gate .b-top-gap { display: none; }
+/* The third offer card below IS the connect affordance in this state, so the
+   bar's own button would be the same action twice, stretched across the
+   column. The chain picker has nothing to filter before a read. */
+.dash.is-gate .b-top .cbtn,
+.dash.is-gate .b-top .cpick { display: none; }
+/* One trust line, not two: the vow under the offers says it in the gate, and
+   the foot says it under a reading. */
+.dash.is-gate .b-foot { display: none; }
+
+/* ---- the sentence above it ---------------------------------------------- */
+.gate-say {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: var(--content);
+  margin-inline: auto;
+  overflow: hidden;
+  text-align: center;
+  transition: max-height 0.5s var(--ease-loop), opacity 0.3s ease,
+              transform 0.5s var(--ease-loop), margin-bottom 0.5s var(--ease-loop);
+}
+.is-gate .gate-say {
+  max-height: 340px;
+  opacity: 1;
+  transform: none;
+  margin-bottom: 34px;
+  padding-top: clamp(28px, 7vh, 88px);
+}
+/* VISIBILITY, NOT ONLY HEIGHT. max-height and opacity are transitioned, and a
+   transition that stalls or is interrupted leaves a 52px headline sitting on
+   top of the reading. visibility flips discretely at the end of the run and
+   cannot be caught halfway. */
+.is-read .gate-say {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-16px);
+  margin-bottom: 0;
+  padding-top: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: max-height 0.5s var(--ease-loop), opacity 0.3s ease,
+              transform 0.5s var(--ease-loop), margin-bottom 0.5s var(--ease-loop),
+              visibility 0s linear 0.5s;
+}
+.dash.is-gate.is-leaving .gate-say {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-16px);
+  margin-bottom: 0;
+  padding-top: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+.is-gate .gate-say { visibility: visible; }
+
+.gate-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  font: 400 11px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.gate-say h1 {
+  margin: 0;
+  max-width: 18ch;
+  font: 800 clamp(30px, 4.4vw, 52px)/1.02 var(--display);
+  letter-spacing: -0.036em;
+  color: var(--ice);
+}
+.gate-say h1 em { font-style: normal; color: var(--slate); }
+.gate-say p {
+  margin: 0;
+  max-width: 60ch;
+  font: 400 14.5px/1.55 var(--display);
+  color: var(--mist);
+  text-wrap: pretty;
+}
+
+/* ---- the field, grown ---------------------------------------------------- */
+.dash .wfield { transition: height 0.62s var(--ease-loop), padding 0.62s var(--ease-loop),
+                            border-radius 0.62s var(--ease-loop), box-shadow 0.45s ease; }
+.is-gate .b-top .wfield {
+  max-width: none;
+  height: 66px;
+  padding: 0 9px 0 20px;
+  border-radius: 14px;
+  border-color: rgba(47, 224, 188, 0.35);
+  background: var(--deck2);
+  box-shadow: 0 0 0 3px rgba(47, 224, 188, 0.08);
+}
+.is-gate .b-top .wfield .a-avatar { width: 26px; height: 26px; border-radius: 7px; }
+.is-gate .b-top .wfield-input { font-size: 18px; letter-spacing: -0.02em; }
+.is-gate .b-top .wfield-go { height: 48px; padding: 0 21px; font-size: 14px; border-radius: 10px; }
+
+/* ---- what sits under it -------------------------------------------------- */
+.gate-offers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  max-width: 880px;
+  margin-inline: auto;
+  overflow: hidden;
+  transition: max-height 0.45s var(--ease-loop), opacity 0.28s ease,
+              margin-top 0.45s var(--ease-loop);
+}
+.is-gate .gate-offers { max-height: 420px; opacity: 1; margin-top: 26px; }
+.is-read .gate-offers {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: max-height 0.45s var(--ease-loop), opacity 0.28s ease,
+              margin-top 0.45s var(--ease-loop), visibility 0s linear 0.45s;
+}
+.dash.is-gate.is-leaving .gate-offers {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+.is-gate .gate-offers { visibility: visible; }
+
+.gate-chainline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font: 400 10px/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.gate-marks { display: flex; }
+.gate-marks .a-chain {
+  width: 16px; height: 16px;
+  margin-left: -4px;
+  border: 1.5px solid var(--void);
+  border-radius: 50%;
+}
+.gate-marks .a-chain:first-child { margin-left: 0; }
+
+.gate-picks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+.gate-pick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px 15px 15px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--deck);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s var(--ease-loop), box-shadow 0.2s;
+}
+.gate-pick:hover:not(.is-note):not(:disabled) {
+  border-color: var(--line2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -12px rgba(0, 0, 0, 0.9);
+}
+.gate-pick:disabled { opacity: 0.55; cursor: default; }
+.gate-pick.is-note { cursor: default; background: transparent; border-style: dashed; }
+.gate-tag {
+  font: 400 10px/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.gate-ttl { font: 500 13px/1.35 var(--display); letter-spacing: -0.01em; color: var(--ice); }
+.gate-sub { font: 400 11px/1.45 var(--display); color: var(--mist); }
+.gate-mark {
+  position: absolute;
+  right: 13px; top: 14px;
+  color: var(--slate);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.2s, transform 0.2s var(--ease-loop), color 0.2s;
+}
+.gate-mark svg { width: 14px; height: 14px; display: block; }
+.gate-pick:hover .gate-mark { opacity: 1; transform: none; color: var(--ok); }
+
+.gate-vow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  font: 400 11.5px/1.45 var(--display);
+  color: var(--slate);
+}
+.gate-vow svg { width: 14px; height: 14px; flex: none; color: var(--ok); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gate-say, .gate-offers, .dash .wfield, .dash .b-top { transition: none; animation: none; }
+}
+
+@media (max-width: 820px) {
+  .gate-picks { grid-template-columns: minmax(0, 1fr); }
+  .is-gate .gate-offers { max-height: 640px; }
+}
+
+
+/* ---- the ledger header now carries the chain control ---------------------
+   It filters this table, so it belongs to this table. In the address bar it
+   read as a property of the wallet, which is the one thing it is not. */
+.b-ledger-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.b-ledger-controls .cpick {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--deck2);
+}
+.b-ledger-controls .cstack { gap: 8px; }
+.b-ledger-controls .cs-marks i,
+.b-ledger-controls .cs-marks span { width: 15px; height: 15px; }
+
+/* ---- room above the heading ----------------------------------------------
+   The crumb, the field and the heading were stacked on three consecutive
+   lines with nothing between them, so the page opened on a wall. */
+.dash.is-read .b-top { margin-top: 18px; }
+.dash.is-read .b-head { margin-top: 30px; margin-bottom: 16px; }
+
+/* ---- the field's list, as a command palette -------------------------------
+   A dropdown of two ungrouped lists became a palette: the keys it responds to
+   are stated, the caret is visible, and hovering and arrowing put the caret in
+   the same place rather than fighting each other. */
+.wdrop-hints {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  font: 400 11px/1 var(--display);
+  color: var(--slate);
+}
+.wdrop-hints span { display: inline-flex; align-items: center; gap: 6px; }
+.wdrop-hints-end { margin-left: auto; }
+.wdrop-hints kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--line2);
+  border-radius: 5px;
+  background: var(--deck2);
+  font: 400 10px/1 var(--mono);
+  color: var(--mist);
+}
+
+/* The caret. `.xrow:hover` already existed; this makes the keyboard's
+   position look identical to the pointer's, which is the whole point. */
+.wdrop .xrow.on { background: var(--deck2); }
+.wdrop .xrow.on .cm-name b { color: var(--ice); }
+
+/* In the gate the palette is the width of the field it hangs from. */
+.is-gate .wdrop { min-width: 0; }
+
+/* The deposits figure is the design's 34px amber, not a small white one. */
+.b-fig.lg { font-size: 30px; }
+
+/* Real chain marks in the list, not coloured dots: the engine's chain list
+   carries no colour, so every dot was rendering the same grey. */
+.b-chrow .a-chain { flex: none; }
+.b-chrow.busy .b-chstat { color: var(--ok); }
+.b-chrow.busy .a-chain { animation: pulseDot 1.1s var(--ease-loop) infinite; }
+.b-chrow.zero .a-chain { opacity: 0.45; }
+
+/* ---- room under the header ------------------------------------------------ */
+.dash.is-read .b-top { margin-top: 34px; }
+.is-gate .gate-say { padding-top: clamp(44px, 10vh, 112px); }
+
+/* ==========================================================================
+   SEARCHING
+   Clicking the collapsed field puts the page behind glass and grows the field
+   back to the size it had before a wallet was read. The reader is choosing a
+   wallet again, so the reading they are leaving should recede rather than
+   compete with the thing they are typing into.
+   ========================================================================== */
+.dash.is-searching .b-head,
+.dash.is-searching .bento,
+.dash.is-searching .verdict-key,
+.dash.is-searching .b-foot {
+  filter: blur(16px) saturate(0.55);
+  opacity: 0.28;
+  pointer-events: none;
+  transition: filter 0.38s var(--ease-loop), opacity 0.38s var(--ease-loop);
+}
+.dash.is-read:not(.is-searching) .b-head,
+.dash.is-read:not(.is-searching) .bento,
+.dash.is-read:not(.is-searching) .verdict-key,
+.dash.is-read:not(.is-searching) .b-foot {
+  filter: none;
+  opacity: 1;
+  transition: filter 0.38s var(--ease-loop), opacity 0.38s var(--ease-loop);
+}
+/* The result DOM stays alive while the search screen exits, but it is not
+   allowed on screen until that exit has completed. */
+.dash.is-gate .b-head,
+.dash.is-gate .bento,
+.dash.is-gate .verdict-key,
+.dash.is-gate .b-foot {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.dash.is-read .b-head,
+.dash.is-read .bento,
+.dash.is-read .verdict-key,
+.dash.is-read .b-foot { visibility: visible; }
+
+.dash.is-searching .b-top {
+  position: relative;
+  z-index: 40;
+  max-width: 880px;
+  margin-top: clamp(24px, 6vh, 72px);
+}
+.dash.is-searching .b-top .wfield {
+  max-width: none;
+  height: 66px;
+  padding: 0 9px 0 20px;
+  border-radius: 14px;
+  border-color: rgba(47, 224, 188, 0.35);
+  background: var(--deck2);
+  box-shadow: 0 0 0 3px rgba(47, 224, 188, 0.08), 0 30px 70px -30px rgba(0, 0, 0, 0.95);
+}
+.dash.is-searching .b-top .wfield .a-avatar { width: 26px; height: 26px; border-radius: 7px; }
+.dash.is-searching .b-top .wfield-input { font-size: 18px; letter-spacing: -0.02em; }
+.dash.is-searching .b-top .wfield-go { height: 48px; padding: 0 21px; font-size: 14px; border-radius: 10px; }
+.dash.is-searching .b-top .cbtn,
+
+/* The list is the width of the field it hangs from, in both states. */
+.wdrop { width: var(--radix-popover-trigger-width); min-width: 0; max-width: none; }
+
+/* The state a reader arrived in is not a state they changed, so it does not
+   animate. Removed one frame after mount: see `ready` in demo/Dashboard.jsx. */
+.dash.no-anim,
+.dash.no-anim *,
+.dash.no-anim *::before,
+.dash.no-anim *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ==========================================================================
+   NARROW VIEWPORTS
+   
+   Every container here was `max-width: var(--content); margin-inline: auto`
+   with no horizontal padding, which is correct only while the viewport is
+   wider than the content. Below that the page ran edge to edge with nothing
+   either side of it. `--page` is content plus two gutters, so these keep the
+   same measure on a wide screen and gain the site's own gutter on a narrow
+   one.
+   ========================================================================== */
+/* The field keeps ONE measure whether it is active or not: the width it has
+   when you are typing in it is the width it has when you are not. */
+.b-top { max-width: calc(880px + var(--gutter) * 2) !important; }
+
+.b-top,
+.b-head,
+.verdict-key,
+.b-foot,
+.gate-say,
+.gate-offers {
+  box-sizing: border-box;
+  padding-inline: var(--gutter);
+  max-width: var(--page);
+}
+/* `.bento` is itself the grid. Giving it the page gutter here compounded the
+   grid's own card spacing and made the dashboard read as if it had a second
+   outer frame. Keep one viewport gutter without padding the grid box. */
+.bento {
+  width: calc(100% - var(--gutter) * 2);
+  max-width: var(--content);
+  padding-inline: 0;
+}
+.is-gate .b-top { max-width: calc(880px + var(--gutter) * 2); }
+.gate-offers { max-width: calc(880px + var(--gutter) * 2); }
+.dash.is-searching .b-top { max-width: calc(880px + var(--gutter) * 2); }
+
+@media (max-width: 1080px) {
+  .bento { gap: 12px; }
+  .bento-rail { gap: 12px; }
+}
+
+@media (max-width: 860px) {
+  .dash.is-read .b-top { margin-top: 18px; }
+  .dash.is-read .b-head { margin-top: 22px; margin-bottom: 14px; }
+  .b-card.anchor .b-fig { font-size: clamp(28px, 9vw, 40px); }
+  .b-ledger-head { flex-wrap: wrap; row-gap: 10px; }
+  .b-ledger-controls { width: 100%; justify-content: space-between; }
+}
+
+@media (max-width: 640px) {
+  .bento-grid { gap: 10px; }
+  .b-card { padding: 13px 14px 14px; }
+  .b-card.anchor { padding: 15px 16px 16px; }
+  .gate-picks { gap: 8px; }
+  .b-chains { max-height: 210px; }
+}
+
+/* ---- the ledger, as the phone artboard draws it ---------------------------
+ *
+ * Three things had to be undone, and all three were deliberate, so all three
+ * are named. global.css:529 folds the table into one labelled line per cell.
+ * demo.css:1437 then hides Allowance, Expires and Action until the row is
+ * expanded. And the panel that frames the table on a wide screen puts a
+ * border, a heading and a chain control above cards that the artboard draws
+ * bare. Good decisions for a table in a panel; not the card the phone draws,
+ * where the whole decision has to be on screen at once.
+ *
+ * Addressed by `data-col`, never by position, so a new column cannot silently
+ * reshuffle the card.
+ */
+.b-ledger .a-table td[data-col="Future"] { display: none; }
+.a-future-on { color: #E8B75B; }
+.a-future-off { color: var(--slate); }
+
+@media (min-width: 761px) {
+  /* Six columns on a wide screen, as before: the seventh is hidden and the
+     widths are restated so the hidden one does not shift the rest. */
+  .b-ledger .a-table th:nth-child(5) { display: none; }
+  .b-ledger .a-table th:nth-child(1) { width: 25%; }
+  .b-ledger .a-table th:nth-child(2) { width: 15%; }
+  .b-ledger .a-table th:nth-child(3) { width: 14%; }
+  .b-ledger .a-table th:nth-child(4) { width: 14%; }
+  .b-ledger .a-table th:nth-child(6) { width: 12%; }
+  .b-ledger .a-table th:nth-child(7) { width: 20%; }
+}
+
+@media (max-width: 760px) {
+  /* the chrome the artboard does not draw */
+  /* the panel becomes the cards it holds */
+  .b-ledger {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .b-ledger-head {
+    padding: 0;
+    border-bottom: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .b-ledger-head h2 { display: none; }
+  .b-ledger-controls { flex-direction: column; align-items: stretch; gap: 10px; }
+  .b-ledger-head .filters { width: 100%; }
+  .b-ledger-head .filters button { flex: 1; height: 34px; }
+  .b-ledger .a-table-wrap { margin-top: 12px; }
+
+  .dash .b-ledger .a-table tbody tr.is-live[aria-expanded="false"] td[data-col="Allowance"],
+  .dash .b-ledger .a-table tbody tr.is-live[aria-expanded="false"] td[data-col="Expires"],
+  .dash .b-ledger .a-table tbody tr.is-live[aria-expanded="false"] td[data-col="Action"] {
+    display: flex;
+  }
+  .b-ledger .a-table td[data-col="Future"] { display: flex; }
+
+  .b-ledger .a-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "app   app"
+      "allow reach"
+      "exp   future"
+      "act   act";
+    position: relative;
+    align-items: center;
+    padding: 12px 13px 13px;
+  }
+  .b-ledger .a-table tbody tr::after { top: 16px; right: 16px; display: none; }
+
+  .b-ledger .a-table td { padding: 0; border: 0; text-align: left; }
+  .b-ledger .a-table td::before { display: none; }
+  /* The name takes the full width so it does not wrap at four words, and the
+     reading sits in the corner the way the artboard puts it. */
+  .b-ledger .a-table td[data-col="Application"] { grid-area: app; padding-right: 92px; }
+  .b-ledger .a-table td[data-col="State"] { position: absolute; top: 12px; right: 13px; }
+  .b-ledger .a-table td[data-col="Allowance"] { grid-area: allow; }
+  .b-ledger .a-table td[data-col="Reachable"] { grid-area: reach; }
+  .b-ledger .a-table td[data-col="Expires"] { grid-area: exp; }
+  .b-ledger .a-table td[data-col="Future"] { grid-area: future; }
+  .b-ledger .a-table td[data-col="Action"] { grid-area: act; }
+
+  /* four facts in one block, each under its column's name */
+  .b-ledger .a-table td[data-col="Allowance"],
+  .b-ledger .a-table td[data-col="Reachable"],
+  .b-ledger .a-table td[data-col="Expires"],
+  .b-ledger .a-table td[data-col="Future"] {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 9px 11px;
+    background: var(--deck);
+    border: 1px solid var(--line);
+  }
+  .b-ledger .a-table td[data-col="Allowance"] { margin-top: 11px; border-radius: 10px 0 0 0; border-right: 0; }
+  .b-ledger .a-table td[data-col="Reachable"] { margin-top: 11px; border-radius: 0 10px 0 0; }
+  .b-ledger .a-table td[data-col="Expires"] { border-top: 0; border-right: 0; border-radius: 0 0 0 10px; }
+  .b-ledger .a-table td[data-col="Future"] { border-top: 0; border-radius: 0 0 10px 0; }
+  .b-ledger .a-table td[data-col="Allowance"]::after { content: "Allowance"; }
+  .b-ledger .a-table td[data-col="Reachable"]::after { content: "Reachable"; }
+  .b-ledger .a-table td[data-col="Expires"]::after { content: "Expires"; }
+  .b-ledger .a-table td[data-col="Future"]::after { content: "Future deposits"; }
+  .b-ledger .a-table td[data-col="Allowance"]::after,
+  .b-ledger .a-table td[data-col="Reachable"]::after,
+  .b-ledger .a-table td[data-col="Expires"]::after,
+  .b-ledger .a-table td[data-col="Future"]::after {
+    order: -1;
+    font: 500 9.5px/1 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  /* the action closes the card, full width, where a thumb is */
+  .b-ledger .a-table td[data-col="Action"] { margin-top: 11px; }
+  /* global.css:575 right-aligns this cell's contents for the wide table. On a
+     card the action fills the width instead. */
+  .b-ledger .a-table td[data-col="Action"] .a-do {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: stretch;
+  }
+  /* RowActions renders `.row-actions` holding the buttons, so the stretch has
+     to reach the container as well as the control inside it. */
+  .b-ledger .a-table td[data-col="Action"] .row-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    /* A flex item with width:100% still shrinks to its content. flex-grow is
+       what actually makes it take the cell. */
+    flex: 1 1 100%;
+  }
+  .b-ledger .a-table td[data-col="Action"] .row-actions > .btn:not(.ghost),
+  .b-ledger .a-table td[data-col="Action"] .a-do > button:not(.rowmenu-trigger) {
+    flex: 1;
+    height: 46px;
+    border-radius: 11px;
+    background: var(--ok);
+    border-color: var(--ok);
+    color: var(--void);
+    font: 600 13.5px/1 var(--display);
+  }
+  .b-ledger .a-table td[data-col="Action"] .a-none { flex: 1; text-align: center; }
+  .b-ledger .a-table td[data-col="Action"] .rowmenu-trigger {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border: 1px solid var(--line2);
+    border-radius: 11px;
+  }
+  /* The chain control is a wide screen affordance: on a phone the filter tabs
+     below it are the whole control, and the artboard draws nothing here. */
+  .b-ledger-controls .cpick { display: none; }
+
+  .b-ledger .a-table tbody tr.rs-bad > td:first-child,
+  .b-ledger .a-table tbody tr.rs-wide > td:first-child,
+  .b-ledger .a-table tbody tr.rs-ok > td:first-child,
+  .b-ledger .a-table tbody tr.rs-unk > td:first-child { box-shadow: none; }
+  .b-ledger .a-table tbody tr.rs-bad { box-shadow: inset 2px 0 0 rgba(255,95,78,.55); }
+  .b-ledger .a-table tbody tr.rs-wide { box-shadow: inset 2px 0 0 rgba(232,183,91,.7); }
+  .b-ledger .a-table tbody tr.rs-ok { box-shadow: inset 2px 0 0 rgba(47,224,188,.45); }
+  .b-ledger .a-table tbody tr.rs-unk { box-shadow: inset 2px 0 0 rgba(125,147,164,.45); }
+}
+
+/* ---- read or connect, as two named acts ---------------------------------- */
+.entry-tabs {
+  display: flex;
+  gap: 3px;
+  width: fit-content;
+  margin: 0 auto 14px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--deck2);
+}
+.entry-tabs button {
+  height: 32px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  font: 500 12.5px/1 var(--display);
+  color: var(--mist);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.entry-tabs button:hover { color: var(--ice); }
+.entry-tabs button.on {
+  background: var(--deck);
+  color: var(--ice);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.connect-pane { display: none; width: 100%; }
+.b-top.entry-connect .wfield { display: none; }
+.b-top.entry-connect .connect-pane { display: block; }
+.b-top.entry-read .connect-pane { display: none; }
+
+.connect-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.connect-list button {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 16px;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: var(--deck2);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.connect-list button:hover:not(:disabled) { border-color: var(--ok); background: rgba(47, 224, 188, 0.05); }
+.connect-list button:disabled { opacity: 0.6; cursor: default; }
+.connect-list img { border-radius: 6px; flex: none; }
+.connect-blank { width: 22px; height: 22px; border-radius: 6px; background: var(--line2); flex: none; }
+.connect-list b { font: 500 13.5px/1 var(--display); }
+.connect-list span { margin-left: auto; font: 400 11.5px/1 var(--mono); color: var(--slate); }
+.connect-none {
+  margin: 0;
+  padding: 18px 18px;
+  border: 1px dashed var(--line2);
+  border-radius: 14px;
+  font: 400 12.5px/1.5 var(--display);
+  color: var(--mist);
+  text-align: center;
+}
+
+/* ---- what was overflowing the phone --------------------------------------
+   `max-width` in `ch` is a measure, not a constraint: 18ch of a 30px headline
+   is about 540px, so on a 390px screen the h1 set its own width and took the
+   page with it. `min(…, 100%)` keeps the measure on a wide screen and yields
+   on a narrow one. Same for the address box, which opens to 43 characters. */
+.gate-say h1 { max-width: min(18ch, 100%); }
+.gate-say p { max-width: min(60ch, 100%); }
+.dash .wfield { min-width: 0; }
+.dash .wfield-input { min-width: 0; max-width: 100%; }
+.is-gate .wfield.open .wfield-input,
+.dash.is-searching .wfield.open .wfield-input { width: 100%; }
+
+@media (max-width: 560px) {
+  .entry-tabs { width: 100%; }
+  .entry-tabs button { flex: 1; padding: 0 10px; }
+  .is-gate .b-top .wfield { height: 56px; padding: 0 7px 0 14px; }
+  .is-gate .b-top .wfield-input { font-size: 15px; }
+  .is-gate .b-top .wfield-go { height: 40px; padding: 0 15px; font-size: 13px; }
+  .gate-say h1 { font-size: clamp(26px, 8vw, 34px); }
+  .gate-vow { align-items: flex-start; }
+}
+
+/* ---- what replaced the badges -------------------------------------------- */
+.b-names { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.b-names li {
+  font: 400 11.5px/1.35 var(--display);
+  color: var(--mist);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.b-names-more { color: var(--slate) !important; }
+.b-split { margin: 0; font: 400 11.5px/1 var(--mono); color: var(--mist); }
+
+/* ---- the chain rows, name over native currency --------------------------- */
+.b-chrow { gap: 10px; padding: 6px 0; align-items: center; }
+.b-chname { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.b-chname b { font: 400 12px/1.2 var(--display); color: var(--ice); }
+.b-chname em {
+  font: 400 10px/1 var(--mono);
+  font-style: normal;
+  letter-spacing: 0.06em;
+  color: var(--slate);
+}
+.b-chrow.zero .b-chname b { color: var(--mist); }
+.b-chrow.fail .b-chname b { color: #E8B75B; }
+.b-chrow .a-chain { border-radius: 50%; }
+.b-chains { max-height: 196px; }
+
+/* ---- the tabs, wherever the field is --------------------------------------
+   Requested on both inputs: the gate's, and the one the search overlay grows
+   back out of the bar. They are the same control on the same box. */
+.dash.is-searching .entry-tabs {
+  position: relative;
+  z-index: 41;
+  max-width: calc(880px + var(--gutter) * 2);
+  margin-inline: auto;
+  margin-top: clamp(20px, 5vh, 60px);
+  margin-bottom: 0;
+}
+.dash.is-searching .b-top { margin-top: 12px; }
+
+/* ---- the phone's running order -------------------------------------------
+ * The bento's source order is a desktop order: the chain card is second
+ * because it occupies the third column and two rows. Stacked, that puts a
+ * fifteen row list between the headline figure and the two stats beside it,
+ * which is not the order the phone artboard reads in.
+ *
+ * So the phone reorders rather than re-renders: the figure, the two stats
+ * side by side, the permissions, and only then the chain list and the rail.
+ * One tree, two running orders.
+ */
+@media (max-width: 820px) {
+  .bento { display: flex; flex-direction: column; }
+  .bento-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .bento-grid > .b-card.anchor { grid-column: 1 / -1; grid-row: auto; order: 1; }
+  /* Applications and Left to see to become the artboard's pair. */
+  .bento-grid > .b-card:not(.anchor):not(.tall) { order: 2; }
+  .b-ledger { grid-column: 1 / -1; order: 3; }
+  .bento-grid > .b-card.tall { grid-column: 1 / -1; grid-row: auto; order: 4; }
+  .bento-rail { display: flex; flex-direction: column; gap: 10px; }
+
+  /* Two small cards side by side need smaller figures than one wide one. */
+  .bento-grid > .b-card:not(.anchor):not(.tall) .b-fig { font-size: 26px; }
+  .bento-grid > .b-card:not(.anchor):not(.tall) .b-names { display: none; }
+}
+
+@media (max-width: 420px) {
+  .b-chstat { font-size: 10px; }
+}
+
+/* The tabs over a reading: left aligned with the bar they sit on, and smaller,
+   because there the wallet is already on screen and the control is a way to
+   change it rather than the first thing on the page. */
+.dash.is-read:not(.is-searching) .entry-tabs {
+  margin: 26px auto 8px;
+  max-width: var(--page);
+  box-sizing: border-box;
+  padding-inline: var(--gutter);
+  width: 100%;
+  background: transparent;
+  justify-content: flex-start;
+  padding-block: 0;
+}
+.dash.is-read:not(.is-searching) .entry-tabs button {
+  height: 26px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  background: transparent;
+  color: var(--slate);
+}
+.dash.is-read:not(.is-searching) .entry-tabs button.on {
+  background: var(--deck2);
+  color: var(--ice);
+  box-shadow: none;
+}
+.dash.is-read:not(.is-searching) .b-top { margin-top: 0; }
+.dash .crumbs { margin-bottom: 36px; }
+
+/* ==========================================================================
+   THE PHONE, AS parts/Mobile.html DRAWS IT
+   Translated from the artboard rather than approximated: mono uppercase
+   labels, the To see to and Coverage pair, tab counts, and a full width
+   primary action on each card.
+   ========================================================================== */
+.b-card.only-phone { display: none; }
+
+@media (max-width: 760px) {
+  /* `.label` in the artboard: mono, uppercase, 10px, .1em. The sentence case
+     sans label is the wide screen's. */
+  .b-k {
+    font: 500 10px/1.3 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  /* The pair is To see to and Coverage. Applications and the chain list move
+     below the permissions, where the artboard has neither. */
+  .b-card.only-phone { display: flex; order: 2; }
+  /* The :not() chain above is (0,4,0), so this has to match it to win: the
+     takers card belongs below the permissions on a phone, where the artboard
+     pairs To see to with Coverage instead. */
+  .bento-grid > .b-card.is-takers:not(.anchor):not(.tall) { order: 5; grid-column: 1 / -1; }
+  .b-card.only-phone .b-fig { font-size: 26px; }
+  .b-card.only-phone .b-of { font-size: 0.52em; }
+
+  /* The field: a search mark, the address, and one control to read it again.
+     The avatar, the clear mark and the Read button belong to the wide bar. */
+  .b-top .wfield-clear,
+  .b-top .wfield-go { display: none; }
+  .b-top .wfield::before {
+    content: "";
+    flex: none;
+    width: 17px; height: 17px;
+    background: currentColor;
+    color: var(--slate);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .b-top .wfield { height: 52px; padding: 0 10px 0 14px; border-radius: 14px; }
+  .b-top .wfield-input { font-size: 15px; }
+  /* Reading again is the one control the artboard keeps. */
+  .dash.is-read .b-top .hact:first-child { display: inline-flex; }
+
+  /* Tab counts, and a strip that fills the width. */
+  .b-ledger-head .filters .f-n { color: var(--slate); font-family: var(--mono); font-size: 10.5px; }
+  .b-ledger-head .filters button.on .f-n { color: var(--mist); }
+
+  /* The primary action fills the card. `!important` because `.row-actions`
+     and `.btn` are sized by dashboard.css for a table cell, and this is not
+     one. */
+  .b-ledger .a-table td[data-col="Action"],
+  .b-ledger .a-table td[data-col="Action"] .a-do {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  /* THE REAL MARKUP, READ OFF THE PAGE RATHER THAN ASSUMED.
+     The cell is `span.a-do > span.inline-flex > button.a-pill`, with the row
+     menu as a sibling. It is not `.row-actions`; that is RowActions, which
+     this table does not use. Grid so the first column stretches without a
+     flex-basis fight, and the pill fills the item it sits in. */
+  .b-ledger .a-table td[data-col="Action"] .a-do {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    gap: 8px;
+    width: 100% !important;
+  }
+  .b-ledger .a-table td[data-col="Action"] .a-do > * { min-width: 0; }
+  .b-ledger .a-table td[data-col="Action"] .a-do > .inline-flex { display: block; }
+  .b-ledger .a-table td[data-col="Action"] .a-pill {
+    width: 100%;
+    height: 44px;
+    border-radius: 11px;
+    font-size: 13.5px;
+  }
+  .b-ledger .a-table td[data-col="Action"] .rowmenu-trigger {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+  }
+  .b-ledger .a-table td[data-col="Action"] .row-actions > .btn:first-child {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0;
+    height: 44px !important;
+    padding: 0 16px !important;
+    border-radius: 11px !important;
+    font: 600 13.5px/1 var(--display) !important;
+  }
+
+  /* What is held back, as the artboard's dashed control. */
+  .lmore {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .lmore-btn {
+    width: 100%;
+    height: 46px;
+    border: 1px dashed var(--line2);
+    border-radius: 12px;
+    background: transparent;
+    font: 400 12.5px/1 var(--mono);
+    color: var(--mist);
+  }
+  .lmore-note { margin: 0; font: 400 10.5px/1.45 var(--display); color: var(--slate); text-align: center; }
+}
+
+/* ==========================================================================
+   SURFACES, FROM parts/Mobile.css AND _ui.css RATHER THAN FROM MEMORY
+   
+   The design's three grounds, in order:
+     page   --background  #05070A
+     card   --card        #0A0F15  with a 1px --line2 #263543 border
+     inset  --secondary   #0E151D  for the facts inside a card
+   
+   I had card and inset inverted and no border on the card at all, which is
+   why every surface read as the same value. Restated here, last, so nothing
+   above can win.
+   ========================================================================== */
+.b-card,
+.b-card.only-phone {
+  background: var(--deck);
+  border: 1px solid var(--line2);
+}
+.b-card.anchor { border-color: transparent; }
+.b-ledger { background: var(--deck); border: 1px solid var(--line2); }
+
+/* The facts inside a permission card are the inset ground, divided by
+   hairlines rather than by borders: the artboard uses a 1px grid gap over
+   --line, which is why the dividers are exactly one pixel. */
+@media (max-width: 760px) {
+  .b-ledger {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .b-ledger .a-table td[data-col="Allowance"],
+  .b-ledger .a-table td[data-col="Reachable"],
+  .b-ledger .a-table td[data-col="Expires"],
+  .b-ledger .a-table td[data-col="Future"] {
+    background: var(--deck2);
+    border-color: var(--line);
+  }
+  .b-ledger .a-table td[data-col="Action"] {
+    background: transparent;
+    border: 0;
+  }
+  .b-ledger .a-table .mark,
+  .b-ledger .a-table .a-chain-drawn { background: var(--deck2); }
+}
+
+/* ==========================================================================
+   THE INPUT HOUSES THE TAB NAV
+   Asked for three times and misread three times: the tabs are not a control
+   above the field, they are the field's own header. One bordered box whose
+   top row says which act it is doing and whose body is that act.
+   ========================================================================== */
+.b-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: var(--deck2);
+  overflow: hidden;
+}
+.b-top .entry-tabs {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+}
+.b-top .entry-tabs button {
+  flex: 1;
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font: 500 12.5px/1 var(--display);
+  color: var(--slate);
+  box-shadow: none;
+}
+.b-top .entry-tabs button:hover { color: var(--mist); }
+.b-top .entry-tabs button.on {
+  background: var(--deck);
+  color: var(--ice);
+  box-shadow: inset 0 -1px 0 var(--ok);
+}
+.b-top-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+}
+.b-search-progress {
+  width: 100%;
+  margin: 4px 8px 0;
+  font: 400 11px/1.35 var(--mono);
+  letter-spacing: .04em;
+  color: var(--mist);
+}
+.b-search-progress::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 7px 1px 0;
+  border-radius: 50%;
+  background: var(--ok);
+  vertical-align: middle;
+}
+/* The field is the body of that box, so it carries no frame of its own. */
+.b-top .wfield {
+  flex: 1 1 auto;
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.b-top .wfield:focus-within { background: transparent; }
+.dash.is-read:not(.is-searching) .entry-tabs { margin: 0; padding: 0; max-width: none; }
+.dash.is-read:not(.is-searching) .entry-tabs button { height: 34px; font-size: 12px; border-radius: 0; }
+
+/* ==========================================================================
+   THE PAGE BEHIND, WHEN THE INPUT IS IN USE
+   It was gated on a wallet already being read, so in the gate nothing
+   happened. It now fires whenever the field is active, in either state.
+   ========================================================================== */
+.dash.is-searching .gate-offers,
+.dash.is-searching .gate-say {
+  filter: blur(16px) saturate(0.55);
+  opacity: 0.28;
+  pointer-events: none;
+  transition: filter 0.38s var(--ease-loop), opacity 0.38s var(--ease-loop);
+}
+/* The ring belongs to the field, not to the wrapper: on `.b-top` it drew a
+   second rectangle around the gutter padding, wider than the control. */
+.dash.is-searching .b-top .wfield {
+  border-color: rgba(47, 224, 188, 0.4);
+  box-shadow: 0 0 0 3px rgba(47, 224, 188, 0.08), 0 30px 70px -30px rgba(0, 0, 0, 0.95);
+}
+
+/* ==========================================================================
+   THE FIELD, quoted from design/demo-canvas/parts/Main.css and parts/Mobile.css
+   The app names the same colours differently; the translation, stated once:
+     --secondary #0E151D -> --deck2   --input #263543 -> --line2
+     --background #05070A -> --void   --card #0A0F15 -> --deck
+   ========================================================================== */
+
+/* Main.css:  .field{position:relative;flex:1;display:flex;align-items:center;
+   gap:12px;overflow:hidden;border:1px solid var(--input);
+   background:var(--secondary);}
+   The `flex:1` is what makes the field the bar; I dropped it transcribing. */
+.b-top .wfield {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line2);
+  background: var(--deck2);
+  overflow: hidden;
+}
+.b-top .wfield:focus-within { background: var(--deck2); }
+
+@keyframes wfield-reading-pulse {
+  0%, 100% {
+    border-color: rgba(47, 224, 188, 0.32);
+    box-shadow: 0 0 0 2px rgba(47, 224, 188, 0.04);
+  }
+  50% {
+    border-color: rgba(47, 224, 188, 0.95);
+    box-shadow: 0 0 0 4px rgba(47, 224, 188, 0.17);
+  }
+
+}
+.b-top .wfield.is-reading {
+  animation: wfield-reading-pulse 1.1s var(--ease-loop) infinite;
+}
+.b-top .wfield.is-reading::before {
+  color: var(--slate);
+  animation: none;
+}
+
+/* Main.css: .is-gate .field{height:66px;padding:0 9px 0 6px;border-radius:var(--radius-xl);}
+             .is-read .field{height:40px;padding:0 5px;border-radius:var(--radius-md);}
+   --radius-xl is 14px, --radius-md is 8px */
+.is-gate .b-top .wfield { height: 66px; padding: 0 9px 0 6px; border-radius: 14px; }
+.is-read .b-top .wfield { height: 40px; padding: 0 5px; border-radius: 8px; }
+
+/* Main.css: .field-tabs{display:flex;gap:0;flex:none;padding:4px;
+   border-radius:var(--radius-lg);background:var(--background);}
+   ONE TRACK, NOT TWO BUTTONS: the segments are butted together inside a
+   single container and the active one is raised. */
+.wfield-tabs {
+  display: flex;
+  gap: 0;
+  flex: none;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--void);
+  border: 0;
+}
+
+/* Main.css: .field-tabs button{width:48px;height:48px;border-radius:var(--radius-lg);
+   background:var(--card);color:var(--muted-foreground);}
+   .field-tabs button[data-state="active"]{background:var(--primary);
+   color:var(--primary-foreground);}   --radius-lg is 10px */
+/* Main.css: .field-tabs button{width:44px;height:40px;border-radius:7px;
+   background:transparent;color:var(--muted-foreground);} */
+.wfield-tabs button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--mist);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.wfield-tabs button:hover { color: var(--mist); }
+.wfield-tabs svg { width: 18px; height: 18px; }
+.wfield-tabs button:hover { color: var(--ice); }
+
+.wfield-tabs button[data-state="active"] { background: var(--ok); color: var(--void); }
+
+/* Mobile.css: .field{gap:9px;height:52px;padding:0 8px 0 5px;
+   border-radius:var(--radius-lg);}  --radius-lg is 10px
+   .field-tabs button{padding:0 11px;} */
+@media (max-width: 760px) {
+  .is-read .b-top .wfield { gap: 7px; height: 52px; padding: 0 4px 0 11px; border-radius: 10px; }
+  .is-read .b-top .wfield-input { font-size: 12.5px; }
+}
+
+/* The wrapper carries no frame: the field is the object. */
+.b-top { border: 0; border-radius: 0; background: transparent; overflow: visible; }
+/* A flex item shrinks to its content by default, so this wrapper was capping
+   the field at its own intrinsic width. It has to take the bar. */
+.b-top-row { display: flex; align-items: center; gap: 8px; padding: 0; flex: 1 1 auto; width: 100%; min-width: 0; }
+
+/* ==========================================================================
+   SURFACES, quoted from parts/Mobile.css
+     .lead / .mini / .card {border:1px solid var(--line2);border-radius:12px;
+                            background:var(--card);}
+     .fact  {background:var(--secondary);}
+     .facts {gap:1px;background:var(--line);border-radius:var(--radius-lg);}
+     .stage {background:var(--background);}
+     .mark  {border:1px solid var(--line2);background:var(--secondary);
+             border-radius:var(--radius-lg);}
+   ========================================================================== */
+.b-card,
+.b-card.only-phone,
+.b-ledger {
+  background: var(--deck);
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+}
+.b-card.anchor { border-color: transparent; }
+
+@media (max-width: 760px) {
+  .b-ledger .a-table td[data-col="Allowance"],
+  .b-ledger .a-table td[data-col="Reachable"],
+  .b-ledger .a-table td[data-col="Expires"],
+  .b-ledger .a-table td[data-col="Future"] { background: var(--deck2); border-color: var(--line); }
+  .b-ledger .a-table .mark {
+    background: var(--deck2);
+    border: 1px solid var(--line2);
+    border-radius: 10px;
+  }
+}
+
+/* Main.html and Mobile.html both put the search mark AFTER the tabs and use
+   it in place of an avatar. `.a-avatar` is the app's own mark and has no
+   counterpart in either artboard. */
+.b-top .wfield .a-avatar { display: none; }
+.b-top .wfield::before {
+  content: "";
+  flex: none;
+  width: 17px; height: 17px;
+  background: currentColor;
+  color: var(--slate);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+/* The group is at the RIGHT of the field: mark, address, then the two acts,
+   then the action. Source order in the artboards is the same. */
+.b-top .wfield::before { order: 1; }
+.b-top .wfield-input { order: 2; }
+.wfield-tabs { order: 4; }
+.b-top .wfield-via,
+.b-top .wfield-clear { order: 3; }
+.b-top .wfield-go { order: 5; }
+.is-gate .b-top .wfield::before { width: 19px; height: 19px; }
+
+/* Mobile.css: the phone runs the same field at a smaller scale.
+   .field{gap:9px;height:52px;padding:0 5px 0 12px;}
+   .field-tabs button{height:30px;padding:0 9px;font-size:11px;} */
+/* Mobile.css: .field-tabs{padding:3px;border-radius:9px;} button{38x34;radius 6} */
+@media (max-width: 760px) {
+  .wfield-tabs { padding: 3px; border-radius: 9px; }
+  .wfield-tabs button { width: 38px; height: 34px; border-radius: 6px; }
+  .wfield-tabs svg { width: 16px; height: 16px; }
+}
+
+/* Main.css:37  .caret{flex:1;min-width:0;...}
+   Main.css:39  .is-gate .caret{font-size:18px;} .is-read .caret{font-size:13px;}
+   Without the flex the input keeps demo.css's 13ch and the placeholder
+   truncates with room to spare either side of it. */
+.b-top .wfield-input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+}
+.is-gate .b-top .wfield-input { font-size: 18px; }
+.is-read .b-top .wfield-input { font-size: 13px; }
+
+/* Main.css:44  .is-gate .go{height:48px;padding:0 21px;font-size:14px;
+                             border-radius:var(--radius-lg);}   --radius-lg is 10px
+   Main.css:46  .is-read .go{height:28px;padding:0 12px;font-size:12px;
+                             border-radius:var(--radius-md);}   --radius-md is 8px */
+.is-gate .b-top .wfield-go { height: 48px; padding: 0 21px; font-size: 14px; border-radius: 10px; }
+.is-read .b-top .wfield-go { height: 28px; padding: 0 12px; font-size: 12px; border-radius: 8px; }
+
+/* Mobile.css: .field-acts{display:flex;gap:2px;flex:none;padding:3px;
+   border-radius:9px;background:var(--background);}
+   .field-acts button{width:28px;height:28px;border:0;border-radius:6px;
+   background:transparent;color:var(--slate);}
+   Once an address is in the box the two acts are done, so the slot carries
+   what you do WITH the address instead. */
+.wfield-acts { order: 4; flex: none; }
+.wfield-acts .hactions,
+.wfield-acts > span {
+  display: flex;
+  gap: 0;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--void);
+}
+.wfield-acts .hact {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 40px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--mist);
+}
+.wfield-acts .hact:hover { color: var(--ice); }
+.wfield-acts .hact svg { width: 18px; height: 18px; }
+@media (max-width: 760px) {
+  .wfield-acts .hactions,
+  .wfield-acts > span { gap: 0; padding: 3px; border-radius: 9px; }
+  .wfield-acts .hact { width: 38px; height: 34px; border-radius: 6px; }
+  .wfield-acts .hact svg { width: 16px; height: 16px; }
+}
+
+/* ==========================================================================
+   THE MONEY CARD, from parts/Mobile.css:24-27
+     .lead{border:1px solid var(--line2);border-radius:12px;background:var(--card);
+           padding:16px 18px;display:flex;flex-direction:column;gap:9px;}
+     .fig {font-size:38px;font-weight:700;color:var(--bad);}
+   The artboard states a DARK card with a red figure. The filled red block was
+   mine, not the design's: the colour belongs to the number, not the surface.
+   ========================================================================== */
+.b-card.anchor {
+  background: var(--deck);
+  border: 1px solid var(--line2);
+  padding: 16px 18px;
+  gap: 9px;
+}
+.b-card.anchor .b-k { color: var(--slate); font-weight: 500; }
+.b-card.anchor .b-sub { color: var(--slate); }
+.b-card.anchor.live .b-fig { color: var(--bad); }
+.b-card.anchor.pending .b-fig { color: #E8B75B; }
+.b-card.anchor.clear .b-fig { color: var(--ok); }
+.b-card.anchor.waiting .b-fig { color: var(--slate); }
+
+.b-atleast { color: var(--mist); opacity: 1; }
+
+.b-read-stamp {
+  margin: 0;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.b-reach-copy {
+  margin: 0;
+  font: 600 clamp(24px, 2.85vw, 46px)/1.08 var(--display);
+  letter-spacing: -0.045em;
+  color: var(--ice);
+}
+.b-reach-copy > span,
+.b-reach-copy strong { color: var(--bad); font: inherit; }
+.b-reach-copy em { font: 500 0.62em/1.1 var(--display); letter-spacing: -0.02em; color: var(--mist); }
+.b-reach-note {
+  margin: 0;
+  font: 400 clamp(10px, 0.85vw, 12px)/1.45 var(--display);
+  color: var(--mist);
+}
+.b-summary-card { gap: 12px; }
+.b-summary-head { display: flex; align-items: center; gap: 10px; }
+.b-summary-head .b-k { flex: 1; }
+.b-summary-head .b-fig { margin: 0; font-size: 30px; }
+.b-summary-icon { display: grid; place-items: center; width: 28px; height: 28px; color: var(--slate); }
+.b-summary-icon svg { width: 20px; height: 20px; }
+.b-summary-detail { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.b-summary-detail .b-names { flex: 1; min-width: 0; display: flex; flex-direction: row; gap: 7px; }
+.b-summary-detail .b-names li { overflow: hidden; text-overflow: ellipsis; }
+.b-summary-detail .b-sub { margin: 0 0 0 auto; text-align: right; }
+.b-summary-detail .b-meter { flex: 1; min-width: 70px; margin: 0; }
+.b-summary-card.is-to-see .b-summary-detail { display: grid; gap: 7px; }
+.b-summary-card.is-to-see .b-summary-detail .b-meter { width: 100%; }
+.b-summary-card.is-to-see .b-summary-detail .b-sub { margin: 0; text-align: left; }
+
+/* Mobile.css: .lead-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+   .lead-refresh{width:30px;height:30px;border:1px solid var(--line2);border-radius:8px;
+   background:transparent;color:var(--slate);} */
+.b-lead-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.b-refresh {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--slate);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.b-refresh:hover { color: var(--ice); border-color: var(--mist); }
+
+.b-refresh svg { width: 15px; height: 15px; }
+
+/* Main.html no longer has `.go` or the chains chip in the field. */
+.b-top .wfield-go { display: none; }
+
+/* Main.html's field holds a search mark, the address and the group. It has no
+   Read button, no clear mark and no Connect button beside it: the group is
+   the action and the two acts. */
+.b-top .wfield-go,
+.b-top .cbtn { display: none !important; }
+.b-top .wfield-clear {
+  display: inline-flex !important;
+  width: 14px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.b-top .wfield-clear:hover { background: transparent; color: var(--ice); }
+.b-top .wfield-clear svg { width: 12px; height: 12px; }
+
+@media (max-width: 760px) {
+  .b-ledger {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  /* The field itself reaches the viewport edge and then holds there. Keeping
+     this on its row avoids turning the surrounding result layout into the
+     sticky object. */
+  .dash.is-read:not(.is-searching) .b-top-row {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    padding-block: 8px;
+    background: var(--void);
+  }
+}

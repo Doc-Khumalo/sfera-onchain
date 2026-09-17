@@ -386,7 +386,13 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ok);outline-offset:
   <div class="field" aria-hidden="true"><b class="unbound"></b><b class="bound"></b></div>
   <header class="bar">
     <div class="logo">Sfera<i>Onchain</i></div>
-    <a class="btn" href="https://www.linkedin.com/in/khumalo-leslie/" target="_blank" rel="noopener noreferrer">Get in touch</a>
+    <!-- It moves the deck to its own last panel rather than leaving for a
+         profile. That panel IS the answer to "get in touch": it names both of
+         us with a link each, and the domain, on the receipt — so the reader
+         picks who to write to instead of being sent to whoever's link happened
+         to be on the button. A button and not a link, because it changes what
+         is on this page rather than going anywhere. -->
+    <button class="btn" id="toteam" type="button">Get in touch</button>
   </header>
   <main class="deck">
     <div class="scene">
@@ -582,6 +588,7 @@ function go(n){
 addEventListener("resize",build,{passive:true});
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
 build();
+$("#toteam")?.addEventListener("click",()=>go(N-1));
 $("#next").addEventListener("click",()=>go(i+1));
 $("#prev").addEventListener("click",()=>go(i-1));
 /* the wheel moves the belt itself, one to one, then it settles to the nearest step */

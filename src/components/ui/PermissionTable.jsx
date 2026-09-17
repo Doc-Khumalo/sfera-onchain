@@ -22,9 +22,19 @@
 /* The columns, in this order, on every page that shows a permission. Action is
    last and right-aligned because it is the only column a reader acts on, and
    the only one that is sometimes empty. */
+/* `Future` carries futureExposed, and it is the fact the phone artboard puts
+   in the fourth quadrant of a card. It is hidden on a wide screen, where the
+   same thing is said in the evidence panel and a seventh column would crowd
+   the six that matter: see `.a-table [data-col="Future"]` in bento.css. */
 const COLUMNS = ['Application', 'Allowance', 'Reachable', 'Expires', 'State'];
 
-export function PermissionTable({ children }) {
+export function PermissionTable({ future = false, children }) {
+  /* OPT IN, BECAUSE TWO PAGES SHARE THIS TABLE. `/`'s example console renders
+     the same rows and has no futureExposed to give, so the column appears
+     only where something can fill it. */
+  const cols = future
+    ? ['Application', 'Allowance', 'Reachable', 'Expires', 'Future', 'State']
+    : COLUMNS;
   return (
     /* The table is the only thing that may scroll sideways — see global.css.
        The wrapper is part of the component for that reason: a caller who
@@ -33,7 +43,7 @@ export function PermissionTable({ children }) {
       <table className="a-table">
         <thead>
           <tr>
-            {COLUMNS.map((c) => <th key={c}>{c}</th>)}
+            {cols.map((c) => <th key={c}>{c}</th>)}
             <th className="a-right">Action</th>
           </tr>
         </thead>
@@ -62,7 +72,7 @@ export function PermissionRows({ className, children }) {
  */
 export function PermissionRow({
   tone, className, open, settling,
-  app, allowance, reachable, expires, state, action,
+  app, allowance, reachable, expires, future, state, action,
   onOpen,
 }) {
   const interactive = typeof onOpen === 'function';
@@ -100,6 +110,7 @@ export function PermissionRow({
       <td data-col="Allowance">{allowance}</td>
       <td data-col="Reachable">{reachable}</td>
       <td data-col="Expires" className="quiet">{expires}</td>
+      {future !== undefined && <td data-col="Future">{future}</td>}
       <td data-col="State">{state}</td>
       <td data-col="Action">
         <span className="a-do" onClick={interactive ? stop : undefined} onKeyDown={interactive ? stop : undefined}>
