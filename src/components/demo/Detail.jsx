@@ -1,5 +1,5 @@
 import { reading } from '../../lib/readings.js';
-import { format } from '../../lib/api.js';
+import { format, say } from '../../lib/api.js';
 import { Dialog, SheetContent } from '../ui/Dialog.jsx';
 import { AssetMark } from '../ui/AssetMark.jsx';
 
@@ -18,7 +18,15 @@ import { AssetMark } from '../ui/AssetMark.jsx';
  */
 export default function Detail({ perm, explorer, canAct = true, onClose, onAct }) {
   const r = reading(perm.reading);
-  const granted = perm.unbounded ? 'Unlimited' : format(perm.granted, perm.decimals, perm.symbol);
+  /* A reading that did not answer has no figure and must not be given one.
+     `unreadable` is the engine's own marker and says which call failed. */
+  const granted = perm.unreadable ? 'Did not answer'
+    : say(perm.granted, perm.decimals, perm.symbol);
+  const WHY_UNREADABLE = {
+    CALL_REVERTED: 'The allowance call reverted. That is a property of this contract, so asking again will not change it.',
+    NO_ANSWER: 'The allowance call came back without a value we can read. It is worth asking again.',
+    ASSET_UNREADABLE: 'The contract did not answer the calls needed to interpret a quantity of it, so no amount here can be stated.',
+  };
 
   return (
     <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -51,12 +59,28 @@ export default function Detail({ perm, explorer, canAct = true, onClose, onAct }
       <p className="d-means">{r.means}</p>
       <p className="d-not">{r.notMeans}</p>
 
-      <p className="d-consequence">
-        {perm.label || 'This spender'} can move{' '}
-        {perm.unbounded ? `any amount of the ${perm.symbol}` : `up to ${granted}`}
-        {' '}in {canAct ? 'your account' : 'this account'} without asking again,
-        until the allowance is used or removed.
-      </p>
+      {perm.unreadable ? (
+        /* No sentence about what can be moved, because the amount was not
+           established. What IS known is that the permission was asked about
+           and the chain did not answer, and that is what is said. */
+        <p className="d-consequence">
+          This permission was asked about and the reading did not answer, so
+          how much {perm.label || 'this spender'} can move from{' '}
+          {canAct ? 'your account' : 'this account'} is not established here.
+          It stands whatever we could see of it.
+        </p>
+      ) : (
+        <p className="d-consequence">
+          {perm.label || 'This spender'} can move{' '}
+          {perm.granted?.kind === 'UNBOUNDED' ? `any amount of the ${perm.symbol}` : `up to ${granted}`}
+          {' '}in {canAct ? 'your account' : 'this account'} without asking again,
+          until the allowance is used or removed.
+        </p>
+      )}
+
+      {perm.unreadable && (
+        <p className="d-unknown">{WHY_UNREADABLE[perm.unreadable] || r.means}</p>
+      )}
 
       {!perm.label && (
         <p className="d-unknown">
@@ -70,8 +94,8 @@ export default function Detail({ perm, explorer, canAct = true, onClose, onAct }
         <div className="row"><dt>Access granted</dt><dd>{granted}</dd></div>
         <div className="row"><dt>{canAct ? 'You hold' : 'Account holds'}</dt><dd>{format(perm.held, perm.decimals, perm.symbol)}</dd></div>
         <div className="row"><dt>Reachable now</dt><dd>{format(perm.reachableNow, perm.decimals, perm.symbol)}</dd></div>
-        <div className="row"><dt>Future deposits</dt><dd>{perm.futureExposed ? 'Also exposed' : 'Not exposed'}</dd></div>
-        <div className="row"><dt>Access ends</dt><dd>Never</dd></div>
+        <div className="row"><dt>Future deposits</dt><dd>{perm.futureExposed == null ? 'Not established' : perm.futureExposed ? 'Also exposed' : 'Not exposed'}</dd></div>
+        <div className="row"><dt>Access ends</dt><dd>{perm.endsSay || 'Not established'}</dd></div>
       </dl>
 
       {perm.because?.length > 0 && (
@@ -109,7 +133,21 @@ export default function Detail({ perm, explorer, canAct = true, onClose, onAct }
             </dd>
           </div>
           <div className="row"><dt>Standard</dt><dd>{perm.standard}</dd></div>
-          <div className="row"><dt>Raw allowance</dt><dd>{String(perm.granted).slice(0, 20)}{String(perm.granted).length > 20 ? '…' : ''}</dd></div>
+          <div className="row">
+            <dt>Raw allowance</dt>
+            {/* EVIDENCE, SO ONLY WHAT WAS READ. This row exists to be checked
+                against a block explorer, which means it may only carry a
+                figure the engine returned. An unbounded allowance has no
+                figure on the wire — the contract says so deliberately — and
+                2^256-1 is what one usually holds on the chain, which is not
+                the same as what this read produced. Usually is not evidence,
+                so the row says what it has and stops. */}
+            <dd>{perm.granted?.kind === 'FINITE'
+              ? `${String(perm.granted.amount).slice(0, 20)}${String(perm.granted.amount).length > 20 ? '…' : ''}`
+              : perm.granted?.kind === 'UNBOUNDED' ? 'No ceiling. The engine returns no figure for one, and this row will not supply one.'
+                : perm.granted?.kind === 'NONE' ? '0'
+                  : 'No value came back'}</dd>
+          </div>
         </dl>
         <p className="ev-note">
           Read from the chain by the TX Guard engine. No index, no third party.

@@ -3,7 +3,7 @@ import { Popover } from 'radix-ui';
 import { parseUnits } from 'viem';
 import { spender } from '../../data/spenders.js';
 import { reading } from '../../lib/readings.js';
-import { format } from '../../lib/api.js';
+import { format, say } from '../../lib/api.js';
 import { AssetMark } from '../ui/AssetMark.jsx';
 import { ChainMark } from '../ui/ChainMark.jsx';
 import { Tooltip } from '../ui/Tooltip.jsx';
@@ -48,28 +48,64 @@ const TONES = {
 const tone = (p) => TONES[p.reading] || 'unk';
 
 /* Unlimited is a word, not a figure, and there is nothing to count up to.
-   Everything else climbs — see ui/Counter.jsx. */
+   Everything else climbs — see ui/Counter.jsx.
+
+   A READING THAT DID NOT ANSWER IS NEITHER. The engine now returns the pairs
+   whose allowance() failed instead of dropping them, and this cell is where
+   they would otherwise land as a figure. It says what happened, because a
+   blank or a nought in the allowance column is a wallet claiming to have been
+   read when it was not. */
 const Allowance = ({ p }) =>
-  p.unbounded ? <>Unlimited</> : <Amount raw={p.granted} decimals={p.decimals} symbol={p.symbol} />;
+  p.unreadable ? <span className="quiet">Did not answer</span>
+    : p.granted?.kind === 'FINITE'
+      ? <Amount raw={p.granted.amount} decimals={p.decimals} symbol={p.symbol} />
+      : <>{say(p.granted, p.decimals, p.symbol)}</>;
 
 const Reach = ({ p }) =>
   p.reachableNow == null ? <>—</> : <Amount raw={p.reachableNow} decimals={p.decimals} symbol={p.symbol} />;
 
-/* What the engine actually knows about expiry. The payload carries no expiry
-   field, so this comes from its own reasoning: decide.go emits "no expiry"
-   among the reasons for an unbounded permission, and EXPIRED and REMOVED say
-   it outright. Anything else is genuinely unknown and says so. */
+/* What the engine knows about expiry. This used to match the string "no
+   expiry" inside the reasons list — a sentence used as an API, which breaks
+   the first time anyone rewords it. It is a field now, so it is read. */
 function expiry(p) {
-  if ((p.because ?? []).some((b) => /no expiry/i.test(b))) return 'never';
-  if (p.reading === 'EXPIRED') return 'expired';
+  if (p.expired) return 'expired';
   if (p.reading === 'REMOVED') return 'removed';
+  if (p.ends?.kind === 'NEVER') return 'never';
+  if (p.ends?.kind === 'AT' && p.ends.at) return new Date(p.ends.at).toLocaleDateString();
   return '—';
 }
 
-/* Whether this row is asking anything of the reader. UNKNOWN is deliberately
-   not a task: DECISION §75 forbids offering a correction for an authority we
-   could not read, and a task nobody can complete is worse than none. */
-const isTask = (p) => p.attention && p.remediable;
+/* ---- what the row offers ------------------------------------------------
+ *
+ * THE ENGINE DECIDES THIS AND THIS FILE RENDERS IT. Availability used to be
+ * worked out here, from `attention` and `remediable`, while the plan route
+ * worked it out again from the chain. Two places deciding one thing is two
+ * answers, and the one that reaches a person first is the button: an action
+ * offered on the row and refused when it is pressed is the product promising
+ * something it cannot do. So the row carries `actions[]` — the kind, whether
+ * it is available now, its label, and the reason when it is not — and none of
+ * that is recomputed here.
+ *
+ * Only the two this page can carry out are rendered. WATCH wants a rule
+ * editor and READ_AGAIN a per-row re-read, and neither exists on this page;
+ * drawing a control this page cannot honour is the same fault pointed the
+ * other way. */
+const CAN_RUN = new Set(['LIMIT', 'REMOVE']);
+
+/* Our own words for what each verb is FOR. Not a claim about availability —
+   that is the engine's `say` and `unavailable` — just the line under it. */
+const MEANS = {
+  LIMIT: 'Keep it working, cap what it can take',
+  REMOVE: 'Set the allowance to zero',
+};
+
+const offered = (p) => (p.actions ?? []).filter((a) => CAN_RUN.has(a.kind));
+
+/* At most one action on a row is the recommended one. A recommendation the
+   engine cannot act on is not a task, and neither is one this page cannot
+   carry out. */
+const primaryOf = (p) => offered(p).find((a) => a.primary && a.available) ?? null;
+const isTask = (p) => !!primaryOf(p);
 
 /* ---- the menu on the row ------------------------------------------------
  *
@@ -77,22 +113,22 @@ const isTask = (p) => p.attention && p.remediable;
  * the open — the thing to do — and everything else lives one click away, so a
  * table of ten permissions is not a table of forty controls.
  */
-function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
+function RowMenu({ p, canAct, explorer, open, setOpen, limiting, setLimiting, onRevoke, onLimit, onOpen }) {
   const known = spender(p.beneficiary);
-  const [open, setOpen] = useState(false);
-  const [limiting, setLimiting] = useState(false);
   const [typed, setTyped] = useState('');
   const [bad, setBad] = useState(null);
 
   const link = p.chain?.explorer || explorer;
-  const unreadable = !p.remediable;
-  /* Why a correction cannot be offered. DECISION §75 for the unreadable case:
-     narrowing an authority we could not read is how false confidence starts. */
-  const why = unreadable
-    ? 'No correction is offered for a permission we could not read. Narrowing an authority we cannot see is how false confidence starts.'
+
+  /* Why a control is off. The engine's reason first, because it is the one
+     that knows — an unreadable authority, a token outside the registry, an
+     allowance nothing can be built against. Ours only covers the one thing
+     the engine cannot see, which is whose wallet is connected. */
+  const why = (a) => (!a.available
+    ? (a.unavailable || 'The engine does not offer this for this permission.')
     : !canAct
       ? 'Reading a public address. Connect this wallet to change what it has granted.'
-      : null;
+      : 'Builds an unsigned transaction. Your wallet signs it.');
 
   /* The figure that can be taken today is the natural cap: it is what this
      permission is actually reaching, so a limit set there changes nothing a
@@ -206,26 +242,27 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
                   makes a reader find the greyed row, find the note, and decide
                   the two are about each other. A disabled button fires no
                   pointer events, so the trigger wraps it. */}
-              <li>
-                <Tooltip label={why || 'Builds an unsigned transaction. Your wallet signs it.'}>
-                  <span className="rowmenu-wrap">
-                    <button type="button" disabled={!canAct || unreadable} onClick={() => setLimiting(true)}>
-                      <span>Limit to an amount</span>
-                      <em>Keep it working, cap what it can take</em>
-                    </button>
-                  </span>
-                </Tooltip>
-              </li>
-              <li>
-                <Tooltip label={why || 'Builds an unsigned transaction. Your wallet signs it.'}>
-                  <span className="rowmenu-wrap">
-                    <button type="button" disabled={!canAct || unreadable} onClick={() => { shut(); onRevoke(p); }}>
-                      <span>Revoke entirely</span>
-                      <em>Set the allowance to zero</em>
-                    </button>
-                  </span>
-                </Tooltip>
-              </li>
+              {offered(p).map((a) => (
+                <li key={a.kind}>
+                  <Tooltip label={why(a)}>
+                    <span className="rowmenu-wrap">
+                      <button
+                        type="button"
+                        disabled={!canAct || !a.available}
+                        onClick={() => {
+                          /* A limit needs an amount, and the amount is asked
+                             for below rather than guessed at. */
+                          if (a.kind === 'LIMIT') { setLimiting(true); return; }
+                          shut(); onRevoke(p);
+                        }}
+                      >
+                        <span>{a.say}</span>
+                        <em>{MEANS[a.kind]}</em>
+                      </button>
+                    </span>
+                  </Tooltip>
+                </li>
+              ))}
               <li>
                 <button type="button" onClick={() => { shut(); onOpen(p.id); }}>
                   <span>Why this reading</span>
@@ -252,13 +289,24 @@ function RowMenu({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
 
 /* Where this page and `/` legitimately part: there, the action column
    reports what was done; here it offers what can be done — and, far more
-   often, says that nothing needs doing. */
+   often, says that nothing needs doing.
+ *
+   The verb in the open is the engine's recommended action, worded by the
+   engine. The menu state lives here rather than inside RowMenu so that
+   pressing a primary "Limit" can open the editor that asks for the amount. */
 function Actions({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
-  const task = isTask(p);
+  const [open, setOpen] = useState(false);
+  const [limiting, setLimiting] = useState(false);
+
+  const primary = primaryOf(p);
+  /* Offered and refused. The engine always sends the reason when it refuses,
+     so the cell can be as short as the column needs and still explain
+     itself — a disabled control with no explanation is not allowed. */
+  const refused = primary ? null : offered(p).find((a) => !a.available) ?? null;
 
   return (
     <>
-      {task ? (
+      {primary ? (
         <Tooltip label={canAct
           ? 'Builds an unsigned transaction. Your wallet signs it.'
           : 'Connect this wallet to change its permissions.'}>
@@ -270,19 +318,25 @@ function Actions({ p, canAct, explorer, onRevoke, onLimit, onOpen }) {
               type="button"
               className={`a-pill ${canAct ? 'a-pill-go' : 'a-pill-off'}`}
               disabled={!canAct}
-              onClick={() => onRevoke(p)}
+              onClick={() => {
+                if (primary.kind === 'LIMIT') { setLimiting(true); setOpen(true); return; }
+                onRevoke(p);
+              }}
             >
-              Revoke
+              {primary.say}
             </button>
           </span>
         </Tooltip>
+      ) : refused ? (
+        <Tooltip label={refused.unavailable}>
+          <span className="a-none">Cannot correct</span>
+        </Tooltip>
       ) : (
-        <span className={`a-none${p.reading === 'UNKNOWN' ? '' : ' done'}`}>
-          {p.reading === 'UNKNOWN' ? 'Cannot correct' : 'Nothing needed'}
-        </span>
+        <span className="a-none done">Nothing needed</span>
       )}
 
       <RowMenu p={p} canAct={canAct} explorer={explorer}
+        open={open} setOpen={setOpen} limiting={limiting} setLimiting={setLimiting}
         onRevoke={onRevoke} onLimit={onLimit} onOpen={onOpen} />
     </>
   );
@@ -307,7 +361,10 @@ function useStacked() {
 }
 
 function Row({ p, was, open, canAct, explorer, sayWhat, onOpen, onRevoke, onLimit }) {
-  const changed = was && was.granted !== p.granted;
+  /* Compared by key, not by value. `granted` is a Capacity now, so `!==`
+     would compare object identity and report every row as changed on every
+     render; the key is a string and compares by value. */
+  const changed = was && was.grantedKey !== p.grantedKey;
 
   /* A card carries a name, a figure and a reading, and everything else waits
      for a tap. Four permissions at full height is a screen and a half of
@@ -323,15 +380,15 @@ function Row({ p, was, open, canAct, explorer, sayWhat, onOpen, onRevoke, onLimi
      once, when the figure it is showing is not the figure it was showing a
      moment ago. */
   const [settling, setSettling] = useState(false);
-  const seen = useRef(p.granted);
+  const seen = useRef(p.grantedKey);
 
   useEffect(() => {
-    if (seen.current === p.granted) return undefined;
-    seen.current = p.granted;
+    if (seen.current === p.grantedKey) return undefined;
+    seen.current = p.grantedKey;
     setSettling(true);
     const t = setTimeout(() => setSettling(false), 1500);
     return () => clearTimeout(t);
-  }, [p.granted]);
+  }, [p.grantedKey]);
 
   return (
     <PermissionRow
@@ -353,11 +410,11 @@ function Row({ p, was, open, canAct, explorer, sayWhat, onOpen, onRevoke, onLimi
       allowance={
         changed ? (
           <span className="a-sw-live">
-            <span className="was-value">{format(was.granted, p.decimals, p.symbol)}</span>
+            <span className="was-value">{say(was.granted, p.decimals, p.symbol)}</span>
             <span className="now-value"><Allowance p={p} /></span>
           </span>
         ) : (
-          <span className={p.unbounded ? 'bad' : undefined}><Allowance p={p} /></span>
+          <span className={p.granted?.kind === 'UNBOUNDED' ? 'bad' : undefined}><Allowance p={p} /></span>
         )
       }
 
@@ -366,9 +423,11 @@ function Row({ p, was, open, canAct, explorer, sayWhat, onOpen, onRevoke, onLimi
       /* The fourth fact on a phone card: whether money that has not arrived
          yet is already covered. It is the reason an empty balance is not
          safety, and it was only ever said in the evidence panel. */
-      future={p.futureExposed
-        ? <span className="a-future-on">covered</span>
-        : <span className="a-future-off">not covered</span>}
+      future={p.futureExposed == null
+        ? <span className="a-future-off">not established</span>
+        : p.futureExposed
+          ? <span className="a-future-on">covered</span>
+          : <span className="a-future-off">not covered</span>}
       state={<StateChip tone={tone(p)}>{reading(p.reading).label}</StateChip>}
       action={
         <Actions p={p} canAct={canAct} explorer={explorer}
@@ -454,7 +513,10 @@ const rank = (p) => RANK[p.reading] ?? 2;
 export default function Ledger({
   rows, resetKey, previous, openId, canAct, explorer, empty, onOpen, onRevoke, onLimit,
 }) {
-  const anyUnreadable = rows.some((p) => !p.remediable);
+  /* Counted rather than guessed at. `remediable` is false for more reasons
+     than one, so it cannot stand in for "did not answer" now that the engine
+     names that separately. */
+  const unread = rows.filter((p) => p.unreadable).length;
 
   /* Ranked, then cut. Both halves of that have to happen in this order or the
      cut means something different. */
@@ -559,9 +621,11 @@ export default function Ledger({
             <span> Connect this wallet to revoke its permissions.</span>
           </p>
         )}
-        {rows.length > 0 && canAct && anyUnreadable && (
+        {rows.length > 0 && unread > 0 && (
           <p className="lnote">
-            One permission could not be read, so no correction is offered for it.
+            {unread === 1
+              ? 'One permission did not answer, so no correction is offered for it.'
+              : `${unread} permissions did not answer, so no correction is offered for them.`}
             <span> Unknown is not a finding of no issue.</span>
           </p>
         )}

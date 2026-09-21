@@ -15,11 +15,12 @@
 const BASE = import.meta.env.PUBLIC_TXGUARD_API || 'https://txguard-api.fly.dev';
 
 class ApiError extends Error {
-  constructor({ code, message, retryable, correlationId }) {
+  constructor({ code, message, retryable, correlationId, retryAfter }) {
     super(message);
     this.code = code;
     this.retryable = retryable;
     this.correlationId = correlationId;
+    this.retryAfter = retryAfter ?? null;
   }
 }
 
@@ -41,17 +42,137 @@ async function get(path) {
   const body = await res.json().catch(() => null);
 
   if (!res.ok) {
-    throw new ApiError(body || { code: 'UNKNOWN', message: `Request failed (${res.status}).` });
+    /* The envelope is nested: every non-2xx body is `{ error: { code, ... } }`
+       (TECH §70). It used to be flat, and a reader that still expects the flat
+       one gets `undefined` for the code and falls through to the generic
+       sentence — which is how a rate limit starts reading as "something went
+       wrong". The flat form is still accepted so that a proxy or an older
+       deployment answering in front of the engine is not mistaken for one. */
+    throw new ApiError(
+      body?.error || body || { code: 'INTERNAL_ERROR', message: `Request failed (${res.status}).` },
+    );
   }
   return body;
 }
 
-export function chains() {
-  return get('/v1/chains');
+/* ---- the adapter -------------------------------------------------------
+ *
+ * THE COMPONENTS ARE NOT TOLD THE WIRE CHANGED. /v1 changed shape in place —
+ * capacities instead of bare amounts, `unreadable` instead of `readable`,
+ * `chainId` instead of `id`, a plan of steps instead of one transaction — and
+ * thirty-odd field reads are spread across six components. Converting them
+ * would put the wire's spelling in six places and guarantee that the next
+ * change to it is another six-file edit. It is translated once, here.
+ *
+ * WHAT IT MUST NOT DO. The engine now returns the pairs whose `allowance()`
+ * failed, with `unreadable` set and no figure, where it used to drop them
+ * silently. Mapping any of that to zero, or filtering those rows back out to
+ * keep the old shape tidy, would put a failed read on the screen as a clean
+ * wallet — the exact defect the release fixes. NONE is zero. UNKNOWN is not,
+ * and never becomes a number on the way through.
+ */
+
+/**
+ * A Capacity as a decimal string, for the two fields that are quantities in
+ * every state the wire can put them in.
+ *
+ * FINITE is its own amount. NONE is "0", because the chain really does hold
+ * nothing. UNKNOWN comes back null, which `format` prints as "Not
+ * established". NOTHING HERE INVENTS A FIGURE: there is no kind whose value
+ * is a number the engine did not send.
+ *
+ * It is used for `held` and `reachableNow` and NOT for `granted`. A balance
+ * has no unbounded form, and the contract says ReachableNow is never an
+ * unbounded allowance projected into a figure — so for these two the only
+ * non-numeric kind is UNKNOWN, and null is the whole of it. `granted` has
+ * UNBOUNDED, which is not a quantity at all, so it stays a Capacity.
+ */
+function quantity(cap) {
+  switch (cap?.kind) {
+    case 'FINITE': return cap.amount ?? null;
+    case 'NONE': return '0';
+    default: return null;
+  }
 }
 
-export function permissions(chainId, address) {
-  return get(`/v1/permissions/${chainId}/${address}`);
+/**
+ * A Capacity in the words a screen shows it in. The one place that decides
+ * how "no ceiling", "nothing" and "we could not tell" are worded, so that six
+ * components cannot word them six ways or reduce them to a number.
+ *
+ * UNBOUNDED is "Unlimited" and never a figure. 2^256-1 is what an unbounded
+ * ERC-20 approval usually holds on the chain, and usually is not evidence:
+ * the engine says UNBOUNDED precisely so that nobody converts it, and a
+ * number we supplied cannot be checked against a block explorer.
+ */
+export function say(cap, decimals, symbol) {
+  switch (cap?.kind) {
+    case 'FINITE': return format(cap.amount, decimals, symbol);
+    case 'UNBOUNDED': return 'Unlimited';
+    case 'NONE': return 'None';
+    default: return 'Not established';
+  }
+}
+
+/**
+ * A stable scalar for one question: is this the same allowance we last saw?
+ *
+ * IT IS A COMPARISON KEY AND NEVER A FIGURE. Nothing formats it, nothing
+ * parses it, and it exists because `was.granted !== p.granted` compares
+ * object identity once `granted` is a Capacity — which is never equal, so a
+ * table would report every row as changed on every render. A string compares
+ * by value.
+ */
+function key(cap) {
+  return cap?.kind === 'FINITE' ? `FINITE:${cap.amount}` : (cap?.kind ?? 'UNKNOWN');
+}
+
+/**
+ * One permission, in the shape the table, the sheet and the receipt expect.
+ *
+ * `granted` IS PASSED THROUGH AS THE CAPACITY IT IS. The old wire carried a
+ * number and a separate `unbounded` boolean beside it, and the engine deleted
+ * the boolean because the two could contradict each other. Re-deriving it
+ * here would put that contradiction back one layer down, and giving UNBOUNDED
+ * a number would hand the detail sheet's "Raw allowance" row — an evidence
+ * line, whose whole purpose is to be checkable against an explorer — a figure
+ * no read produced. Components read it through `say`, or switch on `kind`.
+ *
+ * `unreadable` passes through untouched. It is the marker: null when the
+ * reading answered, and otherwise why it did not.
+ */
+function permission(p) {
+  const granted = p.granted ?? { kind: 'UNKNOWN', amount: null };
+  return {
+    ...p,
+    granted,
+    grantedKey: key(granted),
+    held: quantity(p.held),
+    reachableNow: quantity(p.reachableNow),
+  };
+}
+
+/* The engine's own vocabulary for a correction, in the two words this site
+   has always used for it. The check in demo/Handoff.jsx compares what came
+   back against what was asked for, and it compares these. */
+const ACTIONS = {
+  REVOKE_ERC20_ALLOWANCE: 'REVOKE',
+  SET_CUSTOM_ERC20_ALLOWANCE: 'LIMIT',
+  SET_EXACT_ERC20_ALLOWANCE: 'LIMIT',
+};
+
+/** The chain list. Every caller here reads `id`; the wire says `chainId`. */
+export async function chains() {
+  const cs = await get('/v1/chains');
+  return (cs ?? []).map((c) => ({ ...c, id: c.chainId }));
+}
+
+export async function permissions(chainId, address) {
+  const scan = await get(`/v1/permissions/${chainId}/${address}`);
+  /* Every row is kept, including the ones that did not answer. Nothing is
+     filtered here and nothing ever should be: a row dropped on the way
+     through is a permission the page never knew it failed to read. */
+  return { ...scan, id: scan.chainId, permissions: (scan.permissions ?? []).map(permission) };
 }
 
 /**
@@ -60,16 +181,41 @@ export function permissions(chainId, address) {
  * `amount` asks for a boundary rather than a removal — approve(spender, n)
  * instead of approve(spender, 0) — in base units, as a decimal string.
  *
- * THE ENGINE DOES NOT HONOUR IT YET. Today it answers every call with
- * action: "REVOKE" whatever is asked of it. The parameter is sent anyway
- * because the alternative is a control that quietly means something else, and
- * the caller checks the action it got back against the one it asked for
- * (see demo/Handoff.jsx). When the engine learns to build a limit, the page
- * starts offering one without another line changing here.
+ * The engine now honours it, and answers with a SEQUENCE rather than a
+ * transaction: a revoke is one step, and narrowing a live allowance is two,
+ * because ERC-20 will not let several widely held tokens replace a non-zero
+ * allowance in one go. The steps that come back are the ones that REMAIN —
+ * the engine reads the chain and works out what is already done — so this
+ * hands over the first of them and says how many are left. The caller signs
+ * one, asks again, and gets whatever is still outstanding.
+ *
+ * `status: NOTHING_TO_DO` with no steps is a 200 and a state, not a failure:
+ * it is what a finished correction, or one somebody else already made, looks
+ * like. The caller must render it rather than treat it as an error.
  */
-export function remediation(chainId, holder, token, spender, amount) {
+export async function remediation(chainId, holder, token, spender, amount) {
   const q = amount ? `?amount=${encodeURIComponent(amount)}` : '';
-  return get(`/v1/remediation/${chainId}/${holder}/${token}/${spender}${q}`);
+  const plan = await get(`/v1/remediation/${chainId}/${holder}/${token}/${spender}${q}`);
+
+  const steps = plan.steps ?? [];
+  const step = steps[0] ?? null;
+
+  return {
+    ...plan,
+    action: ACTIONS[plan.action] ?? plan.action,
+    step,
+    stepsRemaining: steps.length,
+    /* The one transaction that is ready to be handed over now. Null when
+       there is nothing left to sign, which is a state and not a fault. */
+    to: step?.transaction?.to ?? null,
+    data: step?.transaction?.data ?? null,
+    value: step?.transaction?.value ?? '0',
+    decodesTo: step?.decodesTo ?? null,
+    /* What the chain should read once THIS step lands — the value the step's
+       own calldata sets, never a projection towards the final target. It is
+       what the read-back is checked against. */
+    expectedAfter: step?.expectedAllowanceAfter ?? null,
+  };
 }
 
 /**

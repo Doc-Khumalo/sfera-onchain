@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPublicClient, custom } from 'viem';
 import { send } from '../../lib/wallet.js';
-import { remediation, permissions, format } from '../../lib/api.js';
+import { remediation, permissions, format, say } from '../../lib/api.js';
 import { explain } from '../../lib/readings.js';
 import { Dialog, DialogContent } from '../ui/Dialog.jsx';
 import { Button } from '../ui/Button.jsx';
@@ -20,13 +20,19 @@ import { Button } from '../ui/Button.jsx';
  * what was intended the mismatch is shown rather than a tick.
  */
 export default function Handoff({ perm, intent, chain, chainId, owner, provider, explorer, onCancel, onSettle }) {
-  const [stage, setStage] = useState('loading'); // loading|ready|wallet|pending|verifying|verified|mismatch|rejected|failed
+  const [stage, setStage] = useState('loading'); // loading|ready|settled|unbuildable|wallet|pending|verifying|verified|mismatch|rejected|failed
   const [hash, setHash] = useState(null);
   const [after, setAfter] = useState(null);
   const [error, setError] = useState(null);
   const [tx, setTx] = useState(null);
+  /* Bumped when a step lands and another remains, which sends the effect
+     below back to the engine. Resumption is a re-read: the engine reads the
+     allowance again and answers with whatever is still outstanding, so
+     nothing about a half-done correction is held here. */
+  const [round, setRound] = useState(0);
 
-  const granted = perm.unbounded ? 'Unlimited' : format(perm.granted, perm.decimals, perm.symbol);
+  const granted = perm.unreadable ? 'Did not answer'
+    : say(perm.granted, perm.decimals, perm.symbol);
 
   /* What was asked for, in the words the row used. A limit keeps the
      permission and caps it; a revoke removes it. Every screen below says which
@@ -42,24 +48,28 @@ export default function Handoff({ perm, intent, chain, chainId, owner, provider,
     remediation(chainId, owner, perm.asset, perm.beneficiary, wants === 'limit' ? intent.amount : undefined)
       .then((plan) => {
         if (!live) return;
-        /* THE BYTES ARE CHECKED AGAINST THE ASK. The engine builds one
-           correction today — approve(spender, 0) — and answers a request for a
-           boundary with it regardless. Handing that over under a button that
-           said "limit" would set the allowance to zero while the screen
-           claimed otherwise, which is the exact failure this whole product
-           exists to prevent. So a plan that does not do what was asked is not
-           offered for signature; it is shown, named, and stopped. */
+        /* THE BYTES ARE CHECKED AGAINST THE ASK. The engine now builds a
+           boundary as well as a removal, so this ordinarily passes — but it
+           stays, because it is the check and not the capability. A plan that
+           answers a request for a limit with a removal would set the allowance
+           to zero while the screen said otherwise, which is the exact failure
+           this whole product exists to prevent. A plan that does not do what
+           was asked is not offered for signature; it is shown and stopped. */
         if (wants === 'limit' && plan.action !== 'LIMIT') {
           setTx(plan);
           setStage('unbuildable');
           return;
         }
         setTx(plan);
-        setStage('ready');
+        /* NOTHING_TO_DO is a 200 and a state, not a failure: the chain is
+           already where the correction was aiming. It is what a finished
+           correction looks like, and what one somebody else already made
+           looks like, so it is shown rather than raised. */
+        setStage(plan.status === 'NOTHING_TO_DO' ? 'settled' : 'ready');
       })
       .catch((e) => { if (live) { setError(e); setStage('failed'); } });
     return () => { live = false; };
-  }, [chainId, owner, perm.asset, perm.beneficiary, wants, intent?.amount]);
+  }, [chainId, owner, perm.asset, perm.beneficiary, wants, intent?.amount, round]);
 
   async function handOver() {
     setStage('wallet');
@@ -102,22 +112,47 @@ export default function Handoff({ perm, intent, chain, chainId, owner, provider,
         const fresh = await permissions(chainId, owner);
         if (!live) return;
 
+        /* Matched on the pair, not on the id. The id on `perm` is the one
+           the dashboard built by prefixing the chain to the engine's, so
+           comparing the two never matched a row: a revoke read back as
+           verified because nothing was found, and a limit read back as a
+           mismatch for the same reason. The asset and the beneficiary are
+           what a permission is, and they come from the chain unchanged. */
         const still = (fresh.permissions || []).find(
-          (p) => p.id.toLowerCase() === perm.id.toLowerCase(),
+          (p) => p.asset.toLowerCase() === perm.asset.toLowerCase()
+            && p.beneficiary.toLowerCase() === perm.beneficiary.toLowerCase(),
         );
         setAfter(still);
 
-        /* A revoke is verified by the permission being gone. A limit is
-           verified by it still being there and no larger than what was asked
-           for — the opposite test, on the same data. One check for both would
-           report every successful limit as a failure. */
-        if (wants === 'limit') {
-          let ok = false;
-          try { ok = !!still && BigInt(still.granted ?? '0') <= BigInt(intent.amount); } catch { ok = false; }
-          setStage(ok ? 'verified' : 'mismatch');
-        } else {
-          setStage(still ? 'mismatch' : 'verified');
+        /* CHECKED AGAINST WHAT THIS STEP SAID THE CHAIN WOULD READ, and only
+           where the read-back is a figure.
+         *
+           It used to be `BigInt(still.granted ?? '0') <= BigInt(intent.amount)`,
+           which turned three different absences into the same zero: a row
+           that is not there, an allowance with no ceiling, and a reading that
+           did not answer. Zero passes every "no larger than what was asked
+           for" test there is, so an unreadable read-back would have printed
+           "Access successfully limited" over an allowance nobody had seen.
+         *
+           So the kind decides, and only FINITE is compared. Anything else
+           settles as a mismatch — the direction that withholds the tick,
+           because the tick is the one thing a person cannot take back. */
+        const kind = still ? still.granted?.kind : 'NONE';
+        const want = tx?.expectedAfter;
+        let ok = false;
+        if (want?.kind === 'NONE') {
+          ok = !still || kind === 'NONE';
+        } else if (want?.kind === 'FINITE' && kind === 'FINITE') {
+          try { ok = BigInt(still.granted.amount) <= BigInt(want.amount); } catch { ok = false; }
         }
+
+        if (!ok) { setStage('mismatch'); return; }
+        /* Narrowing a live allowance is zero-then-set on the tokens that
+           revert otherwise, and the zeroing has just landed. Ask again rather
+           than assume: the engine reads the chain and hands back the one step
+           that remains. */
+        if ((tx?.stepsRemaining ?? 1) > 1) { setStage('loading'); setRound((n) => n + 1); return; }
+        setStage('verified');
       } catch (e) {
         if (!live) return;
         setError(e);
@@ -157,13 +192,29 @@ export default function Handoff({ perm, intent, chain, chainId, owner, provider,
               </div>
               <div className="row">
                 <dt>Access now</dt>
-                <dd>{granted}</dd>
+                {/* The allowance the plan was derived from, at the block it
+                    was read at — not the figure the row carried when this
+                    screen opened. On the second step of a narrowing those are
+                    different, and the one the plan acts on is this one. */}
+                <dd>{tx.basis ? say(tx.basis.allowance, perm.decimals, perm.symbol) : granted}</dd>
               </div>
               <div className="row lead">
                 <dt>Access after</dt>
-                <dd>{leaves}</dd>
+                {/* After THIS transaction, which on a two-step narrowing is
+                    not yet the boundary that was asked for. Printing the
+                    final target on the zeroing step would be the screen
+                    describing a state the chain will not be in. */}
+                <dd>{say(tx.expectedAfter, perm.decimals, perm.symbol)}</dd>
               </div>
             </dl>
+
+            {tx.stepsTotal > 1 && (
+              <p className="ev-note">
+                Step {(tx.stepsCompleted ?? 0) + 1} of {tx.stepsTotal} · {tx.step?.label}.
+                {' '}{tx.step?.why} The correction ends at {leaves}.
+              </p>
+            )}
+            {tx.caveat && <p className="h-body">{tx.caveat}</p>}
 
             <p className="h-body">
               Your wallet will ask you to sign. TX Guard cannot sign for you.
@@ -182,6 +233,25 @@ export default function Handoff({ perm, intent, chain, chainId, owner, provider,
             <div className="d-actions">
               <Button onClick={handOver}>Continue to wallet</Button>
               <Button variant="link" onClick={onCancel}>Cancel</Button>
+            </div>
+          </>
+        )}
+
+        {/* Already where the correction was aiming. Nothing to sign, and
+            nothing went wrong. */}
+        {stage === 'settled' && (
+          <>
+            <p className="rule-label seal">There is nothing left to do</p>
+            <p className="h-body">
+              {chain?.name || 'The chain'} already reads {leaves.toLowerCase() === 'none' ? 'no allowance' : leaves}{' '}
+              for {perm.label || 'this spender'}, so the engine has no transaction to build.
+              That is either a correction that has already landed or one somebody else made.
+            </p>
+            <p className="ev-note">
+              Read back from the chain at block {tx?.basis?.blockNumber}. Nothing was signed.
+            </p>
+            <div className="d-actions">
+              <Button onClick={onSettle}>Back to permissions</Button>
             </div>
           </>
         )}
@@ -223,15 +293,15 @@ export default function Handoff({ perm, intent, chain, chainId, owner, provider,
           <>
             <p className="rule-label">This cannot be built yet</p>
             <p className="h-body">
-              A limit was asked for. The engine returned a removal instead,
+              A limit was asked for. The engine returned something else,
               <code> {tx?.decodesTo}</code>, so nothing is offered for signature
-              here. It would have set the allowance to zero under a button that
-              said otherwise.
+              here. Handing it over would have changed the allowance to a figure
+              other than the one on the button.
             </p>
             <p className="h-unsigned">
-              Setting a boundary needs one change in the engine, and this screen
-              starts working the day it lands. Until then the honest options are
-              to remove the permission or to leave it.
+              This is the check refusing rather than the correction failing, and
+              it is the reason the control can exist at all. The honest options
+              are to remove the permission or to leave it.
             </p>
             <div className="d-actions">
               <Button onClick={() => { setStage('loading'); onCancel(); }}>Leave it as it is</Button>
@@ -275,8 +345,11 @@ export default function Handoff({ perm, intent, chain, chainId, owner, provider,
             {/* UX §60 — never call this success. */}
             <p className="rule-label">The result does not match the expected permission</p>
             <p className="h-body">
-              The transaction confirmed, but the permission is still present.
-              Read it again before relying on it.
+              The transaction confirmed, and the chain does not read back what
+              this step said it would. {after
+                ? `It now reads ${say(after.granted, after.decimals, after.symbol)}.`
+                : 'The permission was not found on the read-back.'}
+              {' '}Read it again before relying on it.
             </p>
             <div className="d-actions">
               <Button onClick={onSettle}>Back to permissions</Button>

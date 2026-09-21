@@ -1,5 +1,5 @@
 import { Counter, Amount } from '../ui/Counter.jsx';
-import { format, isDollar } from '../../lib/api.js';
+import { format, isDollar, say } from '../../lib/api.js';
 import { reading } from '../../lib/readings.js';
 import { PermissionReceipt } from '../Receipt.jsx';
 
@@ -22,12 +22,13 @@ import { PermissionReceipt } from '../Receipt.jsx';
  * something reachable could not join that sum.
  */
 
-/* What the engine knows about expiry, in the words the table uses. The payload
-   carries no expiry field, so this comes from its own reasoning. */
+/* What the engine knows about expiry. It is a field now rather than a phrase
+   to be found inside the reasons list — see the same note in demo/Ledger.jsx. */
 function expiryOf(p) {
-  if ((p.because ?? []).some((b) => /no expiry/i.test(b))) return 'Never';
-  if (p.reading === 'EXPIRED') return 'Expired';
+  if (p.expired) return 'Expired';
   if (p.reading === 'REMOVED') return 'Removed';
+  if (p.ends?.kind === 'NEVER') return 'Never';
+  if (p.ends?.kind === 'AT' && p.ends.at) return new Date(p.ends.at).toLocaleDateString();
   return 'Not established';
 }
 
@@ -52,6 +53,9 @@ export default function Verdict({ perms, readAt, scanning, failed, waiting }) {
   const apps = new Set(live.map((p) => (p.label || p.beneficiary).toLowerCase()));
   const unbounded = perms.filter((p) => p.reading === 'UNBOUNDED');
   const attention = perms.filter((p) => p.attention);
+  /* Rows the engine asked about and could not read. They reach no figure this
+     sentence can add up, which is not the same as reaching nothing. */
+  const unread = perms.filter((p) => p.unreadable);
 
   const dollars = live.filter((p) => isDollar(p.symbol));
   const cents = dollars.reduce((n, p) => n + toCents(p), 0n);
@@ -109,7 +113,9 @@ export default function Verdict({ perms, readAt, scanning, failed, waiting }) {
      detected is not presented as guaranteed safety, and an empty result is
      the case that sentence was written for. Mint is for a wallet whose
      permissions were read, counted, and reach nothing. */
-  const clear = !blank && perms.length > 0 && live.length === 0;
+  /* And never while a reading did not answer. A row the chain would not
+     answer for has not been shown to reach nothing; it has not been read. */
+  const clear = !blank && perms.length > 0 && live.length === 0 && unread.length === 0;
   const tone = attention.length > 0 ? 'bad' : clear ? 'ok clear' : 'ok';
 
   const kicker = waiting ? 'Not read yet'
@@ -132,7 +138,11 @@ export default function Verdict({ perms, readAt, scanning, failed, waiting }) {
         ? 'That is not the same as this wallet having none. It means the applications we know to ask about do not hold one.'
         : attention.length > 0
           ? (cents === 0n && unpriced.every((p) => rawOf(p) === 0n)
-            ? 'The balances these reach are empty. The authority is not: it covers whatever arrives next, without being asked again.'
+            /* "The balances are empty" is a finding, and it cannot be made
+               about a reading that did not answer. */
+            ? (unread.length > 0
+              ? 'Some of these did not answer, so what they reach is not established. An unread permission is not an empty one, and no correction is offered for it.'
+              : 'The balances these reach are empty. The authority is not: it covers whatever arrives next, without being asked again.')
             : 'Each of these was granted once and has been live ever since. Removing one is a transaction your own wallet signs.')
           : 'Bounded is not safe. It is a smaller blast radius, not none.';
 
@@ -185,8 +195,10 @@ export default function Verdict({ perms, readAt, scanning, failed, waiting }) {
       ) : (
         <PermissionReceipt
           perm={{ ...worst, readingLabel: reading(worst.reading).label }}
-          allowance={worst.unbounded ? 'Unlimited' : asMoney(worst, worst.granted)}
-          reachable={asMoney(worst, worst.reachableNow)}
+          allowance={worst.unreadable ? 'Did not answer'
+            : worst.granted?.kind === 'FINITE' ? asMoney(worst, worst.granted.amount)
+              : say(worst.granted, worst.decimals, worst.symbol)}
+          reachable={worst.reachableNow == null ? 'Not established' : asMoney(worst, worst.reachableNow)}
           expires={expiryOf(worst)}
           /* The wallet's whole reach, in the units it can be said in — and
              without a "$0.00" clause when there are no dollars in it. */

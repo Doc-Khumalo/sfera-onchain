@@ -47,7 +47,9 @@ const SEALED = new Set(['BOUNDED', 'REMOVED', 'EXPIRED']);
  */
 export function PermissionReceipt({ perm, was, allowance, reachable, expires, action, state }) {
   const sealed = perm ? SEALED.has(perm.reading) : false;
-  const changed = perm && was && was.granted !== perm.granted;
+  /* Compared by key. `granted` is a Capacity, so `!==` on it would compare
+     object identity — never equal, so every render would claim a change. */
+  const changed = perm && was && was.grantedKey !== perm.grantedKey;
 
   return (
     <article className={`perm perm-live${perm ? (sealed ? ' perm-sealed' : ' perm-stamped') : ' perm-blank'}`}>
@@ -89,7 +91,11 @@ export function PermissionReceipt({ perm, was, allowance, reachable, expires, ac
           <div className="prow"><dt>Reachable now</dt><dd>{reachable}</dd></div>
           <div className="prow">
             <dt>Future deposits</dt>
-            <dd>{!perm ? 'Not established' : perm.futureExposed ? 'Exposed' : 'Not exposed'}</dd>
+            {/* Three values, not two. `futureExposed` is nullable on the
+                wire so that "no future exposure" and "we could not tell" are
+                not the same answer, and printing the second as the first is
+                the receipt saying something the chain did not. */}
+            <dd>{perm?.futureExposed == null ? 'Not established' : perm.futureExposed ? 'Exposed' : 'Not exposed'}</dd>
           </div>
           <div className="prow"><dt>Access ends</dt><dd>{expires}</dd></div>
         </dl>

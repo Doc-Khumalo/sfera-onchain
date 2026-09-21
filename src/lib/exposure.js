@@ -35,6 +35,7 @@ function toCents(p) {
  */
 export function exposure(perms) {
   const live = (perms ?? []).filter((p) => rawOf(p) > 0n);
+  const unread = (perms ?? []).filter((p) => p.unreadable);
 
   const dollars = live.filter((p) => isDollar(p.symbol));
   const cents = dollars.reduce((n, p) => n + toCents(p), 0n);
@@ -63,8 +64,16 @@ export function exposure(perms) {
        caller must not paint it as one: a wallet can hold live unbounded
        authority over an empty balance, which is the reading people misjudge
        and the second example in data/site.js exists to show. Mint belongs to
-       a wallet that reaches nothing AND covers nothing arriving later. */
-    reachesNothing: (perms ?? []).length > 0 && live.length === 0,
+       a wallet that reaches nothing AND covers nothing arriving later.
+
+       A ROW THAT DID NOT ANSWER IS NOT A ROW THAT REACHES NOTHING. The engine
+       returns those rows now, with no figure, and `rawOf` reads no figure as
+       nought — so without this line a wallet whose allowance calls all failed
+       would come back as one with nothing to take. */
+    reachesNothing: (perms ?? []).length > 0 && live.length === 0 && unread.length === 0,
+    /* Asked about, and did not answer. Counted separately from `attention`
+       because it is the one state no correction can be offered for. */
+    unread: unread.length,
     /* Authority that is live whatever the balance says. */
     attention: (perms ?? []).filter((p) => p.attention).length,
   };
