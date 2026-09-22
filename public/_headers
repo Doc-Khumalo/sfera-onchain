@@ -23,4 +23,4 @@
   # connect-src names the engine. It was 'none', which blocks every fetch the
   # page makes — so /demo could never have read a permission in production. It
   # reads correctly on localhost because the dev server sends no CSP at all.
-  Content-Security-Policy: default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; connect-src 'self' https://txguard-api.fly.dev; frame-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'
+  Content-Security-Policy: default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; connect-src 'self' https://txguard-api-next.fly.dev; frame-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'
