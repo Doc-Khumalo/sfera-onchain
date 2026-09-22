@@ -217,7 +217,7 @@ export default function Handoff({ perm, intent, chain, chainId, owner, provider,
             {tx.caveat && <p className="h-body">{tx.caveat}</p>}
 
             <p className="h-body">
-              Your wallet will ask you to sign. TX Guard cannot sign for you.
+              Your wallet will ask you to sign. We cannot sign for you.
             </p>
             <p className="h-unsigned">This payload is unsigned. We hand it over and stop.</p>
 

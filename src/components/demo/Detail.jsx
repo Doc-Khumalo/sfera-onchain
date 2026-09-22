@@ -150,7 +150,7 @@ export default function Detail({ perm, explorer, canAct = true, onClose, onAct }
           </div>
         </dl>
         <p className="ev-note">
-          Read from the chain by the TX Guard engine. No index, no third party.
+          Read from the chain by the Sfera Onchain engine. No index, no third party.
         </p>
       </details>
 
