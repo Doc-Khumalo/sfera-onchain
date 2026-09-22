@@ -12,7 +12,10 @@
  * wallet to sign. Marketing Plan §30, we do not sign on your behalf.
  */
 
-const BASE = import.meta.env.PUBLIC_TXGUARD_API || 'https://txguard-api.fly.dev';
+// BRANCH ONLY, NEVER MERGE TO MAIN. This branch builds the verification
+// preview at txguard.sferaonchain.pages.dev, which reads the new engine on
+// txguard-api-next while the live demo keeps reading txguard-api.
+const BASE = import.meta.env.PUBLIC_TXGUARD_API || 'https://txguard-api-next.fly.dev';
 
 class ApiError extends Error {
   constructor({ code, message, retryable, correlationId, retryAfter }) {
