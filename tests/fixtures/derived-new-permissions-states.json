@@ -1,0 +1,307 @@
+{
+  "chainId": 8453,
+  "chain": "Base",
+  "explorer": "https://basescan.org",
+  "holder": "0x8ea5ad2A58c1DaE75394B1e8636E6518eb6daC50",
+  "readAt": "2026-09-23T00:26:35.059143702Z",
+  "checked": 60,
+  "block": {
+    "chainId": 8453,
+    "blockNumber": "51666923",
+    "blockHash": "0xbc2ebdb668adb39f5f10e2c10bdb90c6c664559c088526011ad4a0361d0cd39b",
+    "blockTimestamp": "2026-09-23T00:26:33Z",
+    "capturedAt": "2026-09-23T00:26:35.059143702Z"
+  },
+  "permissions": [
+    {
+      "id": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "symbol": "USDC",
+      "decimals": 6,
+      "granted": {
+        "kind": "UNBOUNDED",
+        "amount": null
+      },
+      "held": {
+        "kind": "FINITE",
+        "amount": "22709705378"
+      },
+      "reachableNow": {
+        "kind": "FINITE",
+        "amount": "22709705378"
+      },
+      "ends": {
+        "kind": "NEVER",
+        "at": null
+      },
+      "expired": false,
+      "endsSay": "never expires",
+      "actions": [
+        {
+          "kind": "REMOVE",
+          "available": true,
+          "say": "Remove",
+          "unavailable": null,
+          "primary": true
+        }
+      ],
+      "futureExposed": true,
+      "reading": "UNBOUNDED",
+      "unreadable": null,
+      "ungranted": null,
+      "attention": true,
+      "remediable": true,
+      "because": [
+        "no ceiling on the amount",
+        "no expiry",
+        "there is a balance to take now"
+      ],
+      "standard": "ERC-20"
+    },
+    {
+      "id": "0x4200000000000000000000000000000000000006-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0x4200000000000000000000000000000000000006",
+      "symbol": "WETH",
+      "decimals": 18,
+      "granted": {
+        "kind": "FINITE",
+        "amount": "1500000000000000000"
+      },
+      "held": {
+        "kind": "FINITE",
+        "amount": "27457804074879192"
+      },
+      "reachableNow": {
+        "kind": "FINITE",
+        "amount": "1500000000000000000"
+      },
+      "ends": {
+        "kind": "NEVER",
+        "at": null
+      },
+      "expired": false,
+      "endsSay": "never expires",
+      "actions": [
+        {
+          "kind": "REMOVE",
+          "available": true,
+          "say": "Remove",
+          "unavailable": null,
+          "primary": false
+        }
+      ],
+      "futureExposed": false,
+      "reading": "BOUNDED",
+      "unreadable": null,
+      "ungranted": null,
+      "attention": false,
+      "remediable": true,
+      "because": [
+        "a ceiling below the balance it applies to"
+      ],
+      "standard": "ERC-20"
+    },
+    {
+      "id": "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
+      "symbol": "USDT",
+      "decimals": 6,
+      "granted": {
+        "kind": "NONE",
+        "amount": null
+      },
+      "held": {
+        "kind": "NONE",
+        "amount": null
+      },
+      "reachableNow": {
+        "kind": "NONE",
+        "amount": null
+      },
+      "ends": {
+        "kind": "NEVER",
+        "at": null
+      },
+      "expired": false,
+      "endsSay": "never expires",
+      "actions": [
+        {
+          "kind": "REMOVE",
+          "available": false,
+          "say": "Remove",
+          "unavailable": "The allowance is already zero, so there is nothing to remove.",
+          "primary": false
+        }
+      ],
+      "futureExposed": false,
+      "reading": "REMOVED",
+      "unreadable": null,
+      "ungranted": null,
+      "attention": false,
+      "remediable": false,
+      "because": [
+        "the allowance is zero"
+      ],
+      "standard": "ERC-20"
+    },
+    {
+      "id": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+      "symbol": "cbBTC",
+      "decimals": 8,
+      "granted": {
+        "kind": "FINITE",
+        "amount": "100000000"
+      },
+      "held": {
+        "kind": "FINITE",
+        "amount": "250000000"
+      },
+      "reachableNow": {
+        "kind": "NONE",
+        "amount": null
+      },
+      "ends": {
+        "kind": "AT",
+        "at": "2026-01-04T00:00:00Z"
+      },
+      "expired": true,
+      "endsSay": "expired on 4 January 2026",
+      "actions": [
+        {
+          "kind": "REMOVE",
+          "available": false,
+          "say": "Remove",
+          "unavailable": "This authority has lapsed, so there is nothing to remove.",
+          "primary": false
+        }
+      ],
+      "futureExposed": false,
+      "reading": "EXPIRED",
+      "unreadable": null,
+      "ungranted": null,
+      "attention": false,
+      "remediable": false,
+      "because": [
+        "the authority lapsed on its own terms"
+      ],
+      "standard": "ERC-20"
+    },
+    {
+      "id": "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
+      "symbol": "DEGEN",
+      "decimals": 18,
+      "granted": {
+        "kind": "FINITE",
+        "amount": "9000000000000000000000"
+      },
+      "held": {
+        "kind": "FINITE",
+        "amount": "4200000000000000000000"
+      },
+      "reachableNow": {
+        "kind": "FINITE",
+        "amount": "4200000000000000000000"
+      },
+      "ends": {
+        "kind": "NEVER",
+        "at": null
+      },
+      "expired": false,
+      "endsSay": "never expires",
+      "actions": [
+        {
+          "kind": "REMOVE",
+          "available": false,
+          "say": "Remove",
+          "unavailable": "This token is outside the registry this engine builds corrections against.",
+          "primary": false
+        }
+      ],
+      "futureExposed": true,
+      "reading": "OVER_WIDE",
+      "unreadable": null,
+      "ungranted": null,
+      "attention": true,
+      "remediable": false,
+      "because": [
+        "a ceiling larger than the balance it applies to",
+        "there is a balance to take now"
+      ],
+      "standard": "ERC-20"
+    },
+    {
+      "id": "0x2416092f143378750bb29b79eD961ab195CcEea5-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+      "symbol": "ezETH",
+      "decimals": 18,
+      "granted": {
+        "kind": "UNKNOWN",
+        "amount": null
+      },
+      "held": {
+        "kind": "UNKNOWN",
+        "amount": null
+      },
+      "reachableNow": {
+        "kind": "UNKNOWN",
+        "amount": null
+      },
+      "ends": null,
+      "expired": false,
+      "endsSay": null,
+      "actions": [
+        {
+          "kind": "REMOVE",
+          "available": false,
+          "say": "Remove",
+          "unavailable": "This reading did not answer, so there is nothing to build a correction against.",
+          "primary": false
+        },
+        {
+          "kind": "READ_AGAIN",
+          "available": true,
+          "say": "Read again",
+          "unavailable": null,
+          "primary": true
+        }
+      ],
+      "futureExposed": null,
+      "reading": "UNKNOWN",
+      "unreadable": "CALL_REVERTED",
+      "ungranted": null,
+      "attention": false,
+      "remediable": false,
+      "because": [
+        "the allowance call reverted"
+      ],
+      "standard": "ERC-20"
+    }
+  ],
+  "coverage": {
+    "tokens": 6,
+    "spenders": 10,
+    "notCovered": [
+      "What Permit2 has granted onward",
+      "Signature based approvals",
+      "Spend permissions",
+      "NFT and collection operators",
+      "Any spender or token not in the registry"
+    ],
+    "partial": true,
+    "notAnswered": 1
+  }
+}

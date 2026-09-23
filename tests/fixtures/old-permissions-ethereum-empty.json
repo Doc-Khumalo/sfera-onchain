@@ -1,0 +1,20 @@
+{
+  "chainId": 1,
+  "chain": "Ethereum",
+  "explorer": "https://etherscan.io",
+  "holder": "0x8ea5ad2A58c1DaE75394B1e8636E6518eb6daC50",
+  "readAt": "2026-09-23T00:26:32Z",
+  "checked": 50,
+  "permissions": [],
+  "coverage": {
+    "tokens": 5,
+    "spenders": 10,
+    "notCovered": [
+      "What Permit2 has granted onward",
+      "Signature based approvals",
+      "Spend permissions",
+      "NFT and collection operators",
+      "Any spender or token not in the registry"
+    ]
+  }
+}

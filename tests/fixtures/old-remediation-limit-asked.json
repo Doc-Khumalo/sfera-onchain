@@ -1,0 +1,9 @@
+{
+  "action": "REVOKE",
+  "to": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "data": "0x095ea7b3000000000000000000000000000000000022d473030f116ddee9f6b43ac78ba30000000000000000000000000000000000000000000000000000000000000000",
+  "value": "0x0",
+  "decodesTo": "approve(0x000000000022D473030F116dDEE9F6B43aC78BA3, 0)",
+  "signed": false,
+  "note": "Unsigned. Your wallet will ask you to sign. TX Guard cannot sign for you."
+}

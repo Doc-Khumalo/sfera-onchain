@@ -1,0 +1,107 @@
+[
+  {
+    "chainId": 1,
+    "name": "Ethereum",
+    "explorer": "https://etherscan.io",
+    "tokens": 5,
+    "spenders": 10
+  },
+  {
+    "chainId": 8453,
+    "name": "Base",
+    "explorer": "https://basescan.org",
+    "tokens": 6,
+    "spenders": 10
+  },
+  {
+    "chainId": 42161,
+    "name": "Arbitrum",
+    "explorer": "https://arbiscan.io",
+    "tokens": 5,
+    "spenders": 10
+  },
+  {
+    "chainId": 10,
+    "name": "Optimism",
+    "explorer": "https://optimistic.etherscan.io",
+    "tokens": 9,
+    "spenders": 10
+  },
+  {
+    "chainId": 137,
+    "name": "Polygon",
+    "explorer": "https://polygonscan.com",
+    "tokens": 3,
+    "spenders": 10
+  },
+  {
+    "chainId": 56,
+    "name": "BNB Chain",
+    "explorer": "https://bscscan.com",
+    "tokens": 5,
+    "spenders": 10
+  },
+  {
+    "chainId": 43114,
+    "name": "Avalanche",
+    "explorer": "https://snowtrace.io",
+    "tokens": 3,
+    "spenders": 10
+  },
+  {
+    "chainId": 130,
+    "name": "Unichain",
+    "explorer": "https://uniscan.xyz",
+    "tokens": 4,
+    "spenders": 9
+  },
+  {
+    "chainId": 59144,
+    "name": "Linea",
+    "explorer": "https://lineascan.build",
+    "tokens": 6,
+    "spenders": 10
+  },
+  {
+    "chainId": 534352,
+    "name": "Scroll",
+    "explorer": "https://scrollscan.com",
+    "tokens": 5,
+    "spenders": 10
+  },
+  {
+    "chainId": 100,
+    "name": "Gnosis",
+    "explorer": "https://gnosisscan.io",
+    "tokens": 8,
+    "spenders": 10
+  },
+  {
+    "chainId": 42220,
+    "name": "Celo",
+    "explorer": "https://celoscan.io",
+    "tokens": 3,
+    "spenders": 10
+  },
+  {
+    "chainId": 324,
+    "name": "zkSync Era",
+    "explorer": "https://era.zksync.network",
+    "tokens": 3,
+    "spenders": 10
+  },
+  {
+    "chainId": 999,
+    "name": "Hyperliquid",
+    "explorer": "",
+    "tokens": 2,
+    "spenders": 10
+  },
+  {
+    "chainId": 4663,
+    "name": "Robinhood",
+    "explorer": "",
+    "tokens": 2,
+    "spenders": 10
+  }
+]

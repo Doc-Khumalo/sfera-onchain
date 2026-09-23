@@ -1,0 +1,192 @@
+{
+  "chainId": 130,
+  "chain": "Unichain",
+  "explorer": "https://uniscan.xyz",
+  "holder": "0x8ea5ad2A58c1DaE75394B1e8636E6518eb6daC50",
+  "readAt": "2026-09-23T00:27:31.889260092Z",
+  "block": {
+    "chainId": 130,
+    "blockNumber": "59374888",
+    "blockHash": "0x173d415a9de72ff5bc07dde40b004a2fca28029d0bd16af43278cef9dabde6d4",
+    "blockTimestamp": "2026-09-23T00:27:27Z",
+    "capturedAt": "2026-09-23T00:27:31.889260092Z"
+  },
+  "checked": 36,
+  "permissions": [
+    {
+      "id": "0x8f187aA05619a017077f5308904739877ce9eA21-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0x8f187aA05619a017077f5308904739877ce9eA21",
+      "symbol": "UNI",
+      "decimals": 18,
+      "granted": {
+        "kind": "UNBOUNDED",
+        "amount": null
+      },
+      "held": {
+        "kind": "FINITE",
+        "amount": "0"
+      },
+      "reachableNow": {
+        "kind": "FINITE",
+        "amount": "0"
+      },
+      "denomination": "OTHER",
+      "reachableValue": null,
+      "rank": {
+        "tier": "UNGRANTED_REACH",
+        "tierSay": "Reported for addresses that never granted them",
+        "because": "the token also reports this allowance for an address that never granted one",
+        "position": 1,
+        "withinTier": 1
+      },
+      "ends": {
+        "kind": "NEVER",
+        "at": null
+      },
+      "expired": false,
+      "endsSay": "never expires",
+      "actions": [
+        {
+          "kind": "LIMIT",
+          "available": true,
+          "say": "Limit",
+          "unavailable": null,
+          "primary": true
+        },
+        {
+          "kind": "REMOVE",
+          "available": true,
+          "say": "Remove",
+          "unavailable": null,
+          "primary": false
+        },
+        {
+          "kind": "READ_AGAIN",
+          "available": false,
+          "say": "Read again",
+          "unavailable": "This reading answered, so there is nothing to ask again.",
+          "primary": false
+        },
+        {
+          "kind": "WATCH",
+          "available": false,
+          "say": "Tell me about this",
+          "unavailable": "We do not keep alert rules yet, so there is nothing to open.",
+          "primary": false
+        }
+      ],
+      "atRisk": {
+        "count": 0,
+        "say": "not counted as granted by this wallet",
+        "tone": "ATTENTION"
+      },
+      "futureExposed": true,
+      "reading": "UNBOUNDED",
+      "unreadable": null,
+      "ungranted": {
+        "probe": "0xd6E6DBFaCc033E867964DB595e6C4b60B1C0A148",
+        "granted": {
+          "kind": "UNBOUNDED",
+          "amount": null
+        },
+        "say": "This token also reports an unbounded allowance for an address that never granted one."
+      },
+      "attention": true,
+      "remediable": true,
+      "because": [
+        "no ceiling on the amount",
+        "no expiry",
+        "the balance is empty today, and any deposit is covered"
+      ],
+      "standard": "ERC-20"
+    }
+  ],
+  "reachable": {
+    "money": {
+      "value": "0.00",
+      "currency": "USD",
+      "say": "$0.00",
+      "rate": {
+        "source": "face-value",
+        "asOf": "2026-09-23T00:27:31.889260092Z",
+        "stale": false,
+        "staleSay": null
+      }
+    },
+    "atLeast": true,
+    "because": [
+      {
+        "reason": "ASSET_NOT_DOLLAR_DENOMINATED",
+        "count": 1,
+        "say": "1 permission is in a token we do not price, so it is outside this figure",
+        "retryable": false
+      }
+    ],
+    "missing": [],
+    "excluded": {
+      "permissions": 1,
+      "assets": 1,
+      "say": "and 1 permission in a token we do not price"
+    },
+    "say": "at least $0.00",
+    "counted": 0
+  },
+  "tiers": [
+    {
+      "tier": "UNBOUNDED_REACH",
+      "heading": "Can take everything · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    },
+    {
+      "tier": "UNKNOWN_REACH",
+      "heading": "We could not establish what this can take · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    },
+    {
+      "tier": "BOUNDED_REACH",
+      "heading": "Can take a set amount · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    },
+    {
+      "tier": "UNGRANTED_REACH",
+      "heading": "Reported for addresses that never granted them · 1",
+      "count": {
+        "count": 1,
+        "say": "1 permission",
+        "tone": "ATTENTION"
+      }
+    }
+  ],
+  "atRisk": {
+    "count": 0,
+    "say": "nothing at risk",
+    "tone": "NEUTRAL"
+  },
+  "coverage": {
+    "tokens": 4,
+    "spenders": 9,
+    "notCovered": [
+      "What ⁨Permit2⁩ has granted onward",
+      "Signature based approvals",
+      "Spend permissions",
+      "NFT and collection operators",
+      "Any spender or token not in the registry"
+    ],
+    "partial": false,
+    "notAnswered": 0
+  }
+}

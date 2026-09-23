@@ -1,0 +1,44 @@
+{
+  "chainId": 130,
+  "chain": "Unichain",
+  "explorer": "https://uniscan.xyz",
+  "holder": "0x8ea5ad2A58c1DaE75394B1e8636E6518eb6daC50",
+  "readAt": "2026-09-23T00:27:08Z",
+  "checked": 36,
+  "permissions": [
+    {
+      "id": "0x8f187aA05619a017077f5308904739877ce9eA21-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0x8f187aA05619a017077f5308904739877ce9eA21",
+      "symbol": "UNI",
+      "decimals": 18,
+      "readable": true,
+      "granted": "Unlimited",
+      "unbounded": true,
+      "held": "0",
+      "reachableNow": "0",
+      "futureExposed": true,
+      "reading": "UNBOUNDED",
+      "attention": true,
+      "remediable": true,
+      "because": [
+        "no ceiling on the amount",
+        "no expiry",
+        "the balance is empty today, and any deposit is covered"
+      ],
+      "standard": "ERC-20"
+    }
+  ],
+  "coverage": {
+    "tokens": 4,
+    "spenders": 9,
+    "notCovered": [
+      "What Permit2 has granted onward",
+      "Signature based approvals",
+      "Spend permissions",
+      "NFT and collection operators",
+      "Any spender or token not in the registry"
+    ]
+  }
+}

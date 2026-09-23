@@ -1,0 +1,95 @@
+{
+  "chainId": 1,
+  "chain": "Ethereum",
+  "explorer": "https://etherscan.io",
+  "holder": "0x8ea5ad2A58c1DaE75394B1e8636E6518eb6daC50",
+  "readAt": "2026-09-23T00:26:33.51960236Z",
+  "block": {
+    "chainId": 1,
+    "blockNumber": "26036595",
+    "blockHash": "0xc63f3020c9303e5263c912ecf4503cbe9a9957467e4dd5079453d12301d3e92d",
+    "blockTimestamp": "2026-09-23T00:26:23Z",
+    "capturedAt": "2026-09-23T00:26:33.51960236Z"
+  },
+  "checked": 50,
+  "permissions": [],
+  "reachable": {
+    "money": {
+      "value": "0.00",
+      "currency": "USD",
+      "say": "$0.00",
+      "rate": {
+        "source": "face-value",
+        "asOf": "2026-09-23T00:26:33.51960236Z",
+        "stale": false,
+        "staleSay": null
+      }
+    },
+    "atLeast": false,
+    "because": [],
+    "missing": [],
+    "excluded": {
+      "permissions": 0,
+      "assets": 0,
+      "say": ""
+    },
+    "say": "$0.00",
+    "counted": 0
+  },
+  "tiers": [
+    {
+      "tier": "UNBOUNDED_REACH",
+      "heading": "Can take everything · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    },
+    {
+      "tier": "UNKNOWN_REACH",
+      "heading": "We could not establish what this can take · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    },
+    {
+      "tier": "BOUNDED_REACH",
+      "heading": "Can take a set amount · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    },
+    {
+      "tier": "UNGRANTED_REACH",
+      "heading": "Reported for addresses that never granted them · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    }
+  ],
+  "atRisk": {
+    "count": 0,
+    "say": "nothing at risk",
+    "tone": "NEUTRAL"
+  },
+  "coverage": {
+    "tokens": 5,
+    "spenders": 10,
+    "notCovered": [
+      "What ⁨Permit2⁩ has granted onward",
+      "Signature based approvals",
+      "Spend permissions",
+      "NFT and collection operators",
+      "Any spender or token not in the registry"
+    ],
+    "partial": false,
+    "notAnswered": 0
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "intentFingerprint": "0x832176c60d375aaa60931b8ef5ef85f6f01d9e0119dad1ef89e1fc060864e2a1",
+  "status": "STEPS_REMAIN",
+  "action": "REVOKE_ERC20_ALLOWANCE",
+  "chainId": 8453,
+  "holder": "0x8ea5ad2A58c1DaE75394B1e8636E6518eb6daC50",
+  "asset": {
+    "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "known": true,
+    "symbol": "USDC",
+    "name": null,
+    "decimals": 6
+  },
+  "spender": {
+    "address": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+    "role": "SPENDER",
+    "label": "Permit2"
+  },
+  "target": {
+    "kind": "NONE",
+    "amount": null
+  },
+  "basis": {
+    "allowance": {
+      "kind": "UNBOUNDED",
+      "amount": null
+    },
+    "held": {
+      "kind": "FINITE",
+      "amount": "22394765378"
+    },
+    "blockNumber": "51666957",
+    "blockTime": "2026-09-23T00:27:41Z",
+    "fingerprint": "0x181d8ca0e569cabd12de55784526b152a8fd23867c28d318535b098caf9fc53a"
+  },
+  "changed": null,
+  "stepsTotal": 1,
+  "stepsCompleted": 0,
+  "steps": [
+    {
+      "order": 1,
+      "action": "REVOKE_ERC20_ALLOWANCE",
+      "label": "Set to zero",
+      "why": "Removes the allowance. The spender can move nothing.",
+      "transaction": {
+        "chainId": 8453,
+        "from": "0x8ea5ad2A58c1DaE75394B1e8636E6518eb6daC50",
+        "to": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "value": "0",
+        "data": "0x095ea7b3000000000000000000000000000000000022d473030f116ddee9f6b43ac78ba30000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "decodesTo": "approve(0x000000000022D473030F116dDEE9F6B43aC78BA3, 0)",
+      "expectedAllowanceAfter": {
+        "kind": "FINITE",
+        "amount": "0"
+      }
+    }
+  ],
+  "caveat": null,
+  "note": "Unsigned. Your wallet will ask you to sign. We cannot sign for you."
+}

@@ -1,0 +1,375 @@
+{
+  "chainId": 8453,
+  "chain": "Base",
+  "explorer": "https://basescan.org",
+  "holder": "0x8ea5ad2A58c1DaE75394B1e8636E6518eb6daC50",
+  "readAt": "2026-09-23T00:26:35.059143702Z",
+  "block": {
+    "chainId": 8453,
+    "blockNumber": "51666923",
+    "blockHash": "0xbc2ebdb668adb39f5f10e2c10bdb90c6c664559c088526011ad4a0361d0cd39b",
+    "blockTimestamp": "2026-09-23T00:26:33Z",
+    "capturedAt": "2026-09-23T00:26:35.059143702Z"
+  },
+  "checked": 60,
+  "permissions": [
+    {
+      "id": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "symbol": "USDC",
+      "decimals": 6,
+      "granted": {
+        "kind": "UNBOUNDED",
+        "amount": null
+      },
+      "held": {
+        "kind": "FINITE",
+        "amount": "22709705378"
+      },
+      "reachableNow": {
+        "kind": "FINITE",
+        "amount": "22709705378"
+      },
+      "denomination": "USD",
+      "reachableValue": {
+        "value": "22709.70",
+        "currency": "USD",
+        "say": "$22,709.70",
+        "rate": {
+          "source": "face-value",
+          "asOf": "2026-09-23T00:26:35.059143702Z",
+          "stale": false,
+          "staleSay": null
+        }
+      },
+      "rank": {
+        "tier": "UNBOUNDED_REACH",
+        "tierSay": "Can take everything",
+        "because": "no ceiling, so it also reaches whatever arrives later",
+        "position": 1,
+        "withinTier": 1
+      },
+      "ends": {
+        "kind": "NEVER",
+        "at": null
+      },
+      "expired": false,
+      "endsSay": "never expires",
+      "actions": [
+        {
+          "kind": "LIMIT",
+          "available": true,
+          "say": "Limit",
+          "unavailable": null,
+          "primary": true
+        },
+        {
+          "kind": "REMOVE",
+          "available": true,
+          "say": "Remove",
+          "unavailable": null,
+          "primary": false
+        },
+        {
+          "kind": "READ_AGAIN",
+          "available": false,
+          "say": "Read again",
+          "unavailable": "This reading answered, so there is nothing to ask again.",
+          "primary": false
+        },
+        {
+          "kind": "WATCH",
+          "available": false,
+          "say": "Tell me about this",
+          "unavailable": "We do not keep alert rules yet, so there is nothing to open.",
+          "primary": false
+        }
+      ],
+      "atRisk": {
+        "count": 1,
+        "say": "1 unbounded",
+        "tone": "CRITICAL"
+      },
+      "futureExposed": true,
+      "reading": "UNBOUNDED",
+      "unreadable": null,
+      "ungranted": null,
+      "attention": true,
+      "remediable": true,
+      "because": [
+        "no ceiling on the amount",
+        "no expiry",
+        "there is a balance to take now"
+      ],
+      "standard": "ERC-20"
+    },
+    {
+      "id": "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
+      "symbol": "USDT",
+      "decimals": 6,
+      "granted": {
+        "kind": "UNBOUNDED",
+        "amount": null
+      },
+      "held": {
+        "kind": "FINITE",
+        "amount": "0"
+      },
+      "reachableNow": {
+        "kind": "FINITE",
+        "amount": "0"
+      },
+      "denomination": "USD",
+      "reachableValue": {
+        "value": "0.00",
+        "currency": "USD",
+        "say": "$0.00",
+        "rate": {
+          "source": "face-value",
+          "asOf": "2026-09-23T00:26:35.059143702Z",
+          "stale": false,
+          "staleSay": null
+        }
+      },
+      "rank": {
+        "tier": "UNBOUNDED_REACH",
+        "tierSay": "Can take everything",
+        "because": "no ceiling, so it also reaches whatever arrives later",
+        "position": 2,
+        "withinTier": 2
+      },
+      "ends": {
+        "kind": "NEVER",
+        "at": null
+      },
+      "expired": false,
+      "endsSay": "never expires",
+      "actions": [
+        {
+          "kind": "LIMIT",
+          "available": true,
+          "say": "Limit",
+          "unavailable": null,
+          "primary": true
+        },
+        {
+          "kind": "REMOVE",
+          "available": true,
+          "say": "Remove",
+          "unavailable": null,
+          "primary": false
+        },
+        {
+          "kind": "READ_AGAIN",
+          "available": false,
+          "say": "Read again",
+          "unavailable": "This reading answered, so there is nothing to ask again.",
+          "primary": false
+        },
+        {
+          "kind": "WATCH",
+          "available": false,
+          "say": "Tell me about this",
+          "unavailable": "We do not keep alert rules yet, so there is nothing to open.",
+          "primary": false
+        }
+      ],
+      "atRisk": {
+        "count": 1,
+        "say": "1 unbounded",
+        "tone": "CRITICAL"
+      },
+      "futureExposed": true,
+      "reading": "UNBOUNDED",
+      "unreadable": null,
+      "ungranted": null,
+      "attention": true,
+      "remediable": true,
+      "because": [
+        "no ceiling on the amount",
+        "no expiry",
+        "the balance is empty today, and any deposit is covered"
+      ],
+      "standard": "ERC-20"
+    },
+    {
+      "id": "0x4200000000000000000000000000000000000006-0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "beneficiary": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "label": "Permit2",
+      "asset": "0x4200000000000000000000000000000000000006",
+      "symbol": "WETH",
+      "decimals": 18,
+      "granted": {
+        "kind": "UNBOUNDED",
+        "amount": null
+      },
+      "held": {
+        "kind": "FINITE",
+        "amount": "27457804074879192"
+      },
+      "reachableNow": {
+        "kind": "FINITE",
+        "amount": "27457804074879192"
+      },
+      "denomination": "OTHER",
+      "reachableValue": null,
+      "rank": {
+        "tier": "UNBOUNDED_REACH",
+        "tierSay": "Can take everything",
+        "because": "no ceiling, so it also reaches whatever arrives later",
+        "position": 3,
+        "withinTier": 3
+      },
+      "ends": {
+        "kind": "NEVER",
+        "at": null
+      },
+      "expired": false,
+      "endsSay": "never expires",
+      "actions": [
+        {
+          "kind": "LIMIT",
+          "available": true,
+          "say": "Limit",
+          "unavailable": null,
+          "primary": true
+        },
+        {
+          "kind": "REMOVE",
+          "available": true,
+          "say": "Remove",
+          "unavailable": null,
+          "primary": false
+        },
+        {
+          "kind": "READ_AGAIN",
+          "available": false,
+          "say": "Read again",
+          "unavailable": "This reading answered, so there is nothing to ask again.",
+          "primary": false
+        },
+        {
+          "kind": "WATCH",
+          "available": false,
+          "say": "Tell me about this",
+          "unavailable": "We do not keep alert rules yet, so there is nothing to open.",
+          "primary": false
+        }
+      ],
+      "atRisk": {
+        "count": 1,
+        "say": "1 unbounded",
+        "tone": "CRITICAL"
+      },
+      "futureExposed": true,
+      "reading": "UNBOUNDED",
+      "unreadable": null,
+      "ungranted": null,
+      "attention": true,
+      "remediable": true,
+      "because": [
+        "no ceiling on the amount",
+        "no expiry",
+        "there is a balance to take now"
+      ],
+      "standard": "ERC-20"
+    }
+  ],
+  "reachable": {
+    "money": {
+      "value": "22709.70",
+      "currency": "USD",
+      "say": "$22,709.70",
+      "rate": {
+        "source": "face-value",
+        "asOf": "2026-09-23T00:26:35.059143702Z",
+        "stale": false,
+        "staleSay": null
+      }
+    },
+    "atLeast": true,
+    "because": [
+      {
+        "reason": "REACH_UNBOUNDED",
+        "count": 2,
+        "say": "2 permissions have no ceiling, so they also reach whatever arrives later",
+        "retryable": false
+      },
+      {
+        "reason": "ASSET_NOT_DOLLAR_DENOMINATED",
+        "count": 1,
+        "say": "1 permission is in a token we do not price, so it is outside this figure",
+        "retryable": false
+      }
+    ],
+    "missing": [],
+    "excluded": {
+      "permissions": 1,
+      "assets": 1,
+      "say": "and 1 permission in a token we do not price"
+    },
+    "say": "at least $22,709.70",
+    "counted": 2
+  },
+  "tiers": [
+    {
+      "tier": "UNBOUNDED_REACH",
+      "heading": "Can take everything · 3",
+      "count": {
+        "count": 3,
+        "say": "3 permissions",
+        "tone": "CRITICAL"
+      }
+    },
+    {
+      "tier": "UNKNOWN_REACH",
+      "heading": "We could not establish what this can take · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    },
+    {
+      "tier": "BOUNDED_REACH",
+      "heading": "Can take a set amount · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    },
+    {
+      "tier": "UNGRANTED_REACH",
+      "heading": "Reported for addresses that never granted them · 0",
+      "count": {
+        "count": 0,
+        "say": "no permissions",
+        "tone": "NEUTRAL"
+      }
+    }
+  ],
+  "atRisk": {
+    "count": 3,
+    "say": "3 unbounded",
+    "tone": "CRITICAL"
+  },
+  "coverage": {
+    "tokens": 6,
+    "spenders": 10,
+    "notCovered": [
+      "What ⁨Permit2⁩ has granted onward",
+      "Signature based approvals",
+      "Spend permissions",
+      "NFT and collection operators",
+      "Any spender or token not in the registry"
+    ],
+    "partial": false,
+    "notAnswered": 0
+  }
+}
