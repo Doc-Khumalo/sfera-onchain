@@ -12,7 +12,13 @@
  * wallet to sign. Marketing Plan §30, we do not sign on your behalf.
  */
 
-const BASE = import.meta.env.PUBLIC_TXGUARD_API || 'https://txguard-api.fly.dev';
+/* Read through a binding rather than the member expression, so that the same
+   module loads under plain Node — `node --test` imports this file to exercise
+   the adapter against saved fixtures, and there is no `import.meta.env` there.
+   Vite replaces `import.meta.env` itself, so the site is unaffected. */
+const ENV = (typeof import.meta !== 'undefined' && import.meta.env) || {};
+
+const BASE = ENV.PUBLIC_TXGUARD_API || 'https://txguard-api.fly.dev';
 
 class ApiError extends Error {
   constructor({ code, message, retryable, correlationId, retryAfter }) {
@@ -70,7 +76,115 @@ async function get(path) {
  * keep the old shape tidy, would put a failed read on the screen as a clean
  * wallet — the exact defect the release fixes. NONE is zero. UNKNOWN is not,
  * and never becomes a number on the way through.
+ *
+ * IT READS BOTH SHAPES, AND DECIDES BY THE FIELDS IN FRONT OF IT. /v1 changed
+ * in place, so during the cutover the same path answers in either shape
+ * depending on which deployment is in front of it — and a site that reads only
+ * one of them is broken for the length of the changeover. Nothing here
+ * switches on a host name or a version flag: a host is a deployment detail
+ * that a proxy, a preview or a rollback changes without telling anyone, and
+ * there is no version to read because the version did not change. The payload
+ * says what it is, per response and per row, so a half-rolled-out engine
+ * cannot produce a page that is wrong about half its rows.
+ *
+ * THE OLD SHAPE HAS NO WAY TO SAY "THIS PAIR DID NOT ANSWER". It dropped those
+ * pairs, so what the new shape shows as a row with `unreadable` set is, on the
+ * old wire, simply absent. Nothing here invents the missing row: a row the
+ * engine did not send is a row this file does not have, and manufacturing one
+ * would be a fabricated reading. What it does instead is refuse to claim the
+ * read was complete — `notAnswered` stays null rather than becoming 0, and
+ * `readStated` is false, which is what the page reads to withhold an
+ * all-clear. An absent row is silent; a false zero is a statement.
  */
+
+/** A Capacity is the new wire's quantity: `{ kind, amount }`. */
+const isCapacity = (v) => !!v && typeof v === 'object' && typeof v.kind === 'string';
+
+/**
+ * Which shape one permission row is in.
+ *
+ * Decided per row on the fields it carries, never on the response around it.
+ * The new shape says `granted` as a Capacity and carries `unreadable`; the old
+ * one says `granted` as a bare string beside a separate `unbounded` boolean,
+ * and says `readable` instead. Any of those is conclusive on its own, so a row
+ * is read correctly even where an engine is mid-rollout and inconsistent.
+ */
+function rowIsNew(p) {
+  if (isCapacity(p?.granted)) return true;
+  if ('unreadable' in (p ?? {}) || Array.isArray(p?.actions)) return true;
+  if ('readable' in (p ?? {}) || 'unbounded' in (p ?? {})) return false;
+  /* Neither vocabulary. Nothing is assumed: the row is carried through the new
+     path, where an absent Capacity becomes UNKNOWN rather than a figure. */
+  return true;
+}
+
+/**
+ * The old wire's `granted` as the Capacity it was always describing.
+ *
+ * `unbounded: true` came with the literal string "Unlimited" in `granted` —
+ * which is why the boolean existed, and why the engine deleted both in favour
+ * of one field that cannot contradict itself. The boolean is believed here,
+ * because it is the only thing on the old wire that distinguishes "no ceiling"
+ * from a figure, and UNBOUNDED never acquires a number on the way through.
+ *
+ * Anything that is not a readable decimal string becomes UNKNOWN rather than
+ * zero. "Unlimited" arriving without the boolean is the case that matters: it
+ * parses as nothing, and reading it as nothing means reading an unlimited
+ * allowance as an empty one.
+ */
+function oldCapacity(granted, unbounded) {
+  if (unbounded === true) return { kind: 'UNBOUNDED', amount: null };
+  if (granted === null || granted === undefined) return { kind: 'UNKNOWN', amount: null };
+  const raw = String(granted).trim();
+  if (!/^\d+$/.test(raw)) return { kind: 'UNKNOWN', amount: null };
+  return raw === '0' ? { kind: 'NONE', amount: null } : { kind: 'FINITE', amount: raw };
+}
+
+/** The old wire's `held` and `reachableNow`: a decimal string, or nothing. */
+function oldQuantity(v) {
+  if (v === null || v === undefined) return null;
+  const raw = String(v).trim();
+  return /^\d+$/.test(raw) ? raw : null;
+}
+
+/**
+ * What an old-shape row offers, in the new shape's `actions[]`.
+ *
+ * THE ENGINE DECIDES THIS WHEREVER THE ENGINE SAYS SO. The new wire carries
+ * `actions[]` and the page renders it; the old wire carries no such decision,
+ * so something has to stand in or every row against the old engine offers
+ * nothing at all and the correction path is dead for the length of the
+ * cutover. What stands in is the derivation the page itself used before
+ * `actions[]` existed — `remediable`, plus the fact that nothing can be
+ * corrected for a reading that did not answer — and it lives here rather than
+ * back in six components.
+ *
+ * NO LIMIT IS OFFERED. The old engine answers every call with a removal
+ * whatever is asked of it, so there is no boundary to prepare: drawing the
+ * control would be the product promising what it cannot do, and the handoff
+ * would refuse it after the click. So the verb is absent rather than present
+ * and disabled — an action that does not exist is not an action that is
+ * temporarily unavailable.
+ *
+ * `primary` follows `attention`. A bounded permission over a live balance is
+ * not a task, and marking every row as one is the wall of red this table was
+ * rebuilt to stop being.
+ */
+function oldActions(p, unreadable) {
+  const why = unreadable
+    ? 'This reading did not answer, so there is nothing to build a correction against. Unknown is not a finding of no issue.'
+    : p.remediable === false
+      ? 'The engine does not offer a correction for this permission.'
+      : null;
+
+  return [{
+    kind: 'REMOVE',
+    available: !why,
+    say: 'Remove',
+    unavailable: why,
+    primary: !why && !!p.attention,
+  }];
+}
 
 /**
  * A Capacity as a decimal string, for the two fields that are quantities in
@@ -140,8 +254,19 @@ function key(cap) {
  *
  * `unreadable` passes through untouched. It is the marker: null when the
  * reading answered, and otherwise why it did not.
+ *
+ * AN OLD-SHAPE ROW LEAVES HERE IN THE SAME INTERNAL FORM. `readable: false`
+ * becomes `unreadable: 'NOT_STATED'` — truthy, so every guard that withholds a
+ * figure from an unread row fires, and honest, because the old wire does not
+ * say WHICH call failed and a named cause would be one we made up. Expiry has
+ * no field on the old wire at all: `ends` and `endsSay` stay absent rather
+ * than being mined out of the reasons prose, which is the string-matching that
+ * broke the first time the engine reworded a sentence. The screen then reads
+ * "Not established", which is what is true.
  */
-function permission(p) {
+export function adaptPermission(p) {
+  if (!rowIsNew(p)) return oldPermission(p);
+
   const granted = p.granted ?? { kind: 'UNKNOWN', amount: null };
   return {
     ...p,
@@ -150,6 +275,35 @@ function permission(p) {
     held: quantity(p.held),
     reachableNow: quantity(p.reachableNow),
   };
+}
+
+function oldPermission(p) {
+  /* The old wire's marker, inverted. `readable` absent is not `readable:
+     false`: a row the old engine sent at all is one it read, and only an
+     explicit false says otherwise. */
+  const unreadable = p.readable === false ? 'NOT_STATED' : null;
+  const granted = unreadable ? { kind: 'UNKNOWN', amount: null } : oldCapacity(p.granted, p.unbounded);
+
+  const row = {
+    ...p,
+    granted,
+    grantedKey: key(granted),
+    held: oldQuantity(p.held),
+    reachableNow: oldQuantity(p.reachableNow),
+    unreadable,
+    /* The engine said EXPIRED, so this is its reading rather than ours. The
+       date it lapsed on is not on this wire, so there is no `ends` and no
+       `endsSay`, and the panel says the access end is not established. */
+    expired: p.reading === 'EXPIRED' ? true : undefined,
+    ends: undefined,
+    endsSay: undefined,
+    actions: oldActions(p, unreadable),
+  };
+  /* The old spellings do not travel any further than this file. Two fields
+     saying one thing is how they came to contradict each other. */
+  delete row.readable;
+  delete row.unbounded;
+  return row;
 }
 
 /* The engine's own vocabulary for a correction, in the two words this site
@@ -161,18 +315,58 @@ const ACTIONS = {
   SET_EXACT_ERC20_ALLOWANCE: 'LIMIT',
 };
 
-/** The chain list. Every caller here reads `id`; the wire says `chainId`. */
+/**
+ * The chain list. Every caller here reads `id`; the new wire says `chainId`
+ * and the old one said `id`, so both are carried and `id` is whichever came.
+ */
+export function adaptChains(cs) {
+  return (cs ?? []).map((c) => ({ ...c, chainId: c.chainId ?? c.id, id: c.chainId ?? c.id }));
+}
+
 export async function chains() {
-  const cs = await get('/v1/chains');
-  return (cs ?? []).map((c) => ({ ...c, id: c.chainId }));
+  return adaptChains(await get('/v1/chains'));
+}
+
+/**
+ * One chain's reading.
+ *
+ * `readStated` IS THE COMPLETENESS OF THE READ, AND IT IS A THIRD STATE. The
+ * new wire says how many pairs did not answer, so the page can say it. The old
+ * wire dropped them, so nobody can: the count is not zero, it is unknown, and
+ * `notAnswered` therefore stays null rather than being rounded down to a
+ * figure that would read as "everything answered". The page must not paint an
+ * all-clear over a read whose completeness was never stated — see
+ * lib/exposure.js, where the mint tone is withheld.
+ */
+export function adaptScan(scan) {
+  const s = scan ?? {};
+  const cov = s.coverage ?? {};
+  /* Stated by the presence of the field, not by its value: `notAnswered: 0` is
+     an engine saying every pair answered, which is exactly the claim the old
+     wire cannot make. */
+  const readStated = typeof cov.notAnswered === 'number';
+
+  return {
+    ...s,
+    id: s.chainId ?? s.id,
+    chainId: s.chainId ?? s.id,
+    coverage: {
+      ...cov,
+      notAnswered: readStated ? cov.notAnswered : null,
+      partial: typeof cov.partial === 'boolean' ? cov.partial : null,
+    },
+    readStated,
+    /* Every row is kept, including the ones that did not answer. Nothing is
+       filtered here and nothing ever should be: a row dropped on the way
+       through is a permission the page never knew it failed to read. And
+       nothing is added: the old wire's missing rows stay missing, because a
+       row this file invented would be a reading nobody took. */
+    permissions: (s.permissions ?? []).map((p) => ({ ...adaptPermission(p), readStated })),
+  };
 }
 
 export async function permissions(chainId, address) {
-  const scan = await get(`/v1/permissions/${chainId}/${address}`);
-  /* Every row is kept, including the ones that did not answer. Nothing is
-     filtered here and nothing ever should be: a row dropped on the way
-     through is a permission the page never knew it failed to read. */
-  return { ...scan, id: scan.chainId, permissions: (scan.permissions ?? []).map(permission) };
+  return adaptScan(await get(`/v1/permissions/${chainId}/${address}`));
 }
 
 /**
@@ -192,17 +386,24 @@ export async function permissions(chainId, address) {
  * `status: NOTHING_TO_DO` with no steps is a 200 and a state, not a failure:
  * it is what a finished correction, or one somebody else already made, looks
  * like. The caller must render it rather than treat it as an error.
+ *
+ * THE OLD SHAPE WAS ONE FLAT TRANSACTION. `to`, `data` and `decodesTo` sat at
+ * the top of the body with no plan around them, so it is read as the
+ * single-step plan it always was — which is also the truth about it, since the
+ * old engine only ever built a removal.
  */
-export async function remediation(chainId, holder, token, spender, amount) {
-  const q = amount ? `?amount=${encodeURIComponent(amount)}` : '';
-  const plan = await get(`/v1/remediation/${chainId}/${holder}/${token}/${spender}${q}`);
-
-  const steps = plan.steps ?? [];
+export function adaptPlan(plan) {
+  const p = plan ?? {};
+  /* A plan is the new shape when it carries the plan: a `steps` array. The old
+     body carried the transaction itself at the top level and nothing else. */
+  const steps = Array.isArray(p.steps) ? p.steps : flatSteps(p);
   const step = steps[0] ?? null;
 
   return {
-    ...plan,
-    action: ACTIONS[plan.action] ?? plan.action,
+    ...p,
+    action: ACTIONS[p.action] ?? p.action,
+    stepsTotal: p.stepsTotal ?? steps.length,
+    stepsCompleted: p.stepsCompleted ?? 0,
     step,
     stepsRemaining: steps.length,
     /* The one transaction that is ready to be handed over now. Null when
@@ -216,6 +417,51 @@ export async function remediation(chainId, holder, token, spender, amount) {
        what the read-back is checked against. */
     expectedAfter: step?.expectedAllowanceAfter ?? null,
   };
+}
+
+/**
+ * The old flat body as the one step it is.
+ *
+ * `expectedAllowanceAfter` is READ OUT OF THE CALLDATA WE WERE HANDED, not
+ * guessed at from the action. approve(spender, n) says n in its last word, so
+ * the figure the read-back is checked against is the figure this transaction
+ * actually sets — checkable by anyone against the same bytes on screen. An
+ * action name is not evidence of what the bytes do, which is the whole reason
+ * the handoff decodes them in the first place; and a step with no verifiable
+ * expectation gets none, so the read-back withholds its tick rather than
+ * granting one against a number nobody produced.
+ */
+const APPROVE = '0x095ea7b3';
+
+function setBy(data) {
+  const hex = typeof data === 'string' ? data.toLowerCase() : '';
+  /* selector + spender word + amount word, and nothing after it. */
+  if (!hex.startsWith(APPROVE) || hex.length !== 10 + 128) return null;
+  let v;
+  try { v = BigInt('0x' + hex.slice(10 + 64)); } catch { return null; }
+  /* NONE is zero. It is stated as NONE rather than FINITE "0" because the
+     read-back has to match a row the old engine drops entirely once the
+     allowance is nought, and NONE is the kind that covers both an absent row
+     and one reading zero. */
+  return v === 0n ? { kind: 'NONE', amount: null } : { kind: 'FINITE', amount: v.toString() };
+}
+
+function flatSteps(p) {
+  if (!p.to || !p.data) return [];
+  return [{
+    order: 1,
+    action: p.action,
+    label: 'Set to zero',
+    why: null,
+    transaction: { to: p.to, data: p.data, value: p.value ?? '0' },
+    decodesTo: p.decodesTo ?? null,
+    expectedAllowanceAfter: setBy(p.data),
+  }];
+}
+
+export async function remediation(chainId, holder, token, spender, amount) {
+  const q = amount ? `?amount=${encodeURIComponent(amount)}` : '';
+  return adaptPlan(await get(`/v1/remediation/${chainId}/${holder}/${token}/${spender}${q}`));
 }
 
 /**

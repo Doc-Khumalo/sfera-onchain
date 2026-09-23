@@ -26,6 +26,11 @@ export default function Detail({ perm, explorer, canAct = true, onClose, onAct }
     CALL_REVERTED: 'The allowance call reverted. That is a property of this contract, so asking again will not change it.',
     NO_ANSWER: 'The allowance call came back without a value we can read. It is worth asking again.',
     ASSET_UNREADABLE: 'The contract did not answer the calls needed to interpret a quantity of it, so no amount here can be stated.',
+    /* The engine said the reading did not answer and did not say which call
+       failed — the older /v1 shape carries no reason. Naming one would be
+       ours rather than the engine's, so the sheet says what is known and
+       stops. */
+    NOT_STATED: 'The reading did not answer. This engine does not say which call failed, so the reason is not established either.',
   };
 
   return (

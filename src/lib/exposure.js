@@ -69,8 +69,20 @@ export function exposure(perms) {
        A ROW THAT DID NOT ANSWER IS NOT A ROW THAT REACHES NOTHING. The engine
        returns those rows now, with no figure, and `rawOf` reads no figure as
        nought — so without this line a wallet whose allowance calls all failed
-       would come back as one with nothing to take. */
-    reachesNothing: (perms ?? []).length > 0 && live.length === 0 && unread.length === 0,
+       would come back as one with nothing to take.
+
+       NOR IS A ROW THAT WAS NEVER SENT. An engine still answering in the old
+       /v1 shape drops the pairs whose allowance() failed instead of returning
+       them, so there is no unread row to count and no way to count one: the
+       reading may be whole or may be missing half a wallet, and that wire does
+       not say which. `readStated` is what the adapter stamps on every row to
+       record the difference (see lib/api.js), and a read whose completeness
+       was never stated cannot produce "reaches nothing" — that is a claim
+       about everything asked, and it is the figure a caller paints mint. */
+    reachesNothing: (perms ?? []).length > 0
+      && live.length === 0
+      && unread.length === 0
+      && (perms ?? []).every((p) => p.readStated !== false),
     /* Asked about, and did not answer. Counted separately from `attention`
        because it is the one state no correction can be offered for. */
     unread: unread.length,

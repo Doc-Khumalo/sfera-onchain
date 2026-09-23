@@ -385,6 +385,14 @@ export default function Dashboard({ embedded = false }) {
         (r.permissions ?? []).map((p) => ({ ...p, chain: r.chain, id: `${r.chain.id}:${p.id}` }))
       ),
       checked: ok.reduce((n, r) => n + (r.checked ?? 0), 0),
+      /* WHETHER THE READ SAID HOW COMPLETE IT WAS, across fifteen chains, and
+         it takes one silent chain to unstate the lot. An engine on the older
+         /v1 shape drops the pairs whose allowance() failed without counting
+         them, so a reading that includes one such chain cannot claim to be a
+         full account of this wallet — and the honest summary of fourteen
+         stated chains and one unstated one is "not established", not a total
+         that quietly leaves the unstated one out. */
+      readStated: ok.every((r) => r.readStated),
       coverage: {
         tokens: ok[0]?.coverage?.tokens,
         spenders: ok[0]?.coverage?.spenders,
@@ -466,6 +474,9 @@ export default function Dashboard({ embedded = false }) {
           ...was,
           permissions: [...kept, ...fresh],
           checked: (was.checked ?? 0) + (r.checked ?? 0),
+          /* One chain rejoining the reading cannot make the whole of it
+             stated, and cannot unstate it on its own either. */
+          readStated: (was.readStated ?? true) && r.readStated,
           chainsRead: [...(was.chainsRead ?? []).filter((c) => c.id !== chain.id), chain],
           chainsFailed: (was.chainsFailed ?? []).filter((c) => c.id !== chain.id),
         };
@@ -670,6 +681,10 @@ export default function Dashboard({ embedded = false }) {
      like a wallet with nothing on it. */
   const unread = !address || status !== 'ready';
   const uncertain = narrowed || unread;
+  /* Whether the engine that answered says how much of what it asked actually
+     answered. True until a reading says otherwise, so nothing on screen turns
+     tentative before there is anything on it. */
+  const readStated = result?.readStated !== false;
   const unreadCap = !address
     ? 'nothing asked yet'
     : status === 'scanning' ? 'reading the chain' : 'the chain did not answer';
@@ -710,11 +725,16 @@ export default function Dashboard({ embedded = false }) {
     onReset: null,
   } : {
     title: onChain ? `Nothing on ${onChain.name}` : 'Nothing under this filter',
+    /* "N pairs asked · none held a permission" is an account of all N, and
+       only an engine that says how many did not answer can support it. On the
+       older /v1 shape a pair whose allowance() failed is dropped without being
+       counted, so what is known is that the answers held nothing — not that
+       every pair answered. */
     where: perms.length === 0
-      ? `${result?.checked ?? 0} pairs asked · none held a permission`
+      ? `${result?.checked ?? 0} pairs asked · ${readStated ? 'none held a permission' : 'none of the answers held a permission'}`
       : `${perms.length} read · ${filter === 'all' ? 'none on this chain' : `none ${filterName.toLowerCase()}`}`,
     note: perms.length === 0
-      ? 'Nothing found is not the same as nothing existing. This asks a known list of tokens and spenders, and what it did not ask about is listed below.'
+      ? `Nothing found is not the same as nothing existing. This asks a known list of tokens and spenders, and what it did not ask about is listed below.${readStated ? '' : ' This engine also does not report the pairs it could not read, so how many of them answered is not established.'}`
       : 'Everything read is still there. This view is narrowed, so widen it to see the rest.',
     onReset: narrowed
       ? () => { setFilter('all'); setChainFilter(new Set()); }
@@ -960,6 +980,7 @@ export default function Dashboard({ embedded = false }) {
                 canAct={mode === 'wallet'}
                 explorer={result?.explorer}
                 empty={emptyShape}
+                readStated={readStated}
                 onOpen={(id) => setOpenId(id === openId ? null : id)}
                 onRevoke={(p) => setHandoff({ perm: p, intent: { kind: 'revoke' } })}
                 onLimit={(p, to) => setHandoff({ perm: p, intent: { kind: 'limit', ...to } })}

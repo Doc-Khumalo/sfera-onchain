@@ -511,7 +511,8 @@ const RANK = {
 const rank = (p) => RANK[p.reading] ?? 2;
 
 export default function Ledger({
-  rows, resetKey, previous, openId, canAct, explorer, empty, onOpen, onRevoke, onLimit,
+  rows, resetKey, previous, openId, canAct, explorer, empty, readStated = true,
+  onOpen, onRevoke, onLimit,
 }) {
   /* Counted rather than guessed at. `remediable` is false for more reasons
      than one, so it cannot stand in for "did not answer" now that the engine
@@ -627,6 +628,20 @@ export default function Ledger({
               ? 'One permission did not answer, so no correction is offered for it.'
               : `${unread} permissions did not answer, so no correction is offered for them.`}
             <span> Unknown is not a finding of no issue.</span>
+          </p>
+        )}
+        {/* THE SILENCE IS SAID OUT LOUD. An engine on the older /v1 shape does
+            not return the pairs whose allowance() failed and does not count
+            them either, so a failed read is ABSENT from this table rather than
+            standing in it marked unread — and the count above cannot find what
+            was never sent. No row is invented to fill the gap; what is stated
+            instead is that the list may be short, because a table that says
+            nothing about it is a table claiming to be complete. */}
+        {!readStated && (
+          <p className="lnote">
+            This engine does not report the pairs it could not read, so any that
+            failed are missing from this list rather than shown.
+            <span> What is here was read. That this is all of it is not established.</span>
           </p>
         )}
     </div>
