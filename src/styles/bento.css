@@ -1203,7 +1203,9 @@
   color: var(--ice);
   box-shadow: none;
 }
-.dash.is-read:not(.is-searching) .b-top { margin-top: 0; }
+/* The search belongs to the page, not to the navigation: it needs clear air
+   under the breadcrumb, not the crumb's own margin and nothing else. */
+.dash.is-read:not(.is-searching) .b-top { margin-top: 20px; }
 .dash .crumbs { margin-bottom: 36px; }
 
 /* ==========================================================================

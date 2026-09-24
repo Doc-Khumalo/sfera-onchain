@@ -203,7 +203,6 @@ export default function Bento({
             <span>{takers}</span> application{takers === 1 ? '' : 's'} can take <span>at least </span>
             <strong>{unread ? '—' : <Amount raw={ex.cents.toString()} decimals={2} money prefix="$" />}</strong> from this wallet. <em>Nothing expires.</em>
           </h3>
-          <p className="b-reach-note">Each of these was granted once and has been live ever since. Removing one is a transaction your own wallet signs.</p>
         </section>
 
         <section className="b-card tall">

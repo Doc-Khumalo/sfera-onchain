@@ -1,11 +1,33 @@
 # Email on sferaonchain.xyz
 
-> **Not yet live.** This is the plan and the reference, not a record. Nothing in
-> section 2 onward has been applied. Checked against Cloudflare's docs on
-> 15 September 2026.
+> **Not yet live.** This is the plan, not a record. Nothing below section 1 has
+> been applied. Checked against Microsoft's, Resend's and Cloudflare's docs on
+> 16 September 2026.
 
-Cloudflare Email Routing, on the zone that already holds the DNS. Free, no
-mailbox to pay for, and set up in the dashboard you already have open for Pages.
+Microsoft 365 for the mailboxes, Resend for the mail the product sends itself.
+Cloudflare keeps the DNS and nothing else.
+
+| | Who does it | Where | Cost |
+|---|---|---|---|
+| **Mailboxes** — send and receive, both founders | Microsoft 365 | the apex, `sferaonchain.xyz` | ~$13/mo |
+| **Transactional** — the list confirmation | Resend, already in the code | `updates.sferaonchain.xyz` | free tier |
+
+**Cloudflare Email Routing is no longer part of this.** It was the free way to
+receive mail without a mailbox, and paying for mailboxes removes the reason it
+existed. A domain has one set of apex MX records and Microsoft needs them.
+
+### What the money buys that the free path could not
+
+Three problems that had no clean answer an hour ago, all gone:
+
+- **Replying as the domain.** Email Routing could only forward, so every reply
+  left as `leslie.khumalo@icloud.com` and handed a stranger your personal
+  address. Now `hello@` is a real mailbox that sends.
+- **Two of you on one address.** A routing rule maps one address to exactly one
+  destination; reaching both inboxes needed an Email Worker. A shared mailbox
+  does it natively, and both of you can send *as* it.
+- **Mail on a phone.** Routing gave no IMAP, so there was nothing for a mail
+  client to attach to. Exchange handles this and works in Apple Mail.
 
 ## 1. What the domain looks like before you start
 
@@ -13,191 +35,280 @@ Verified by `dig` on 15 September 2026.
 
 | | |
 |---|---|
-| Nameservers | `saanvi`/`shane.ns.cloudflare.com` — full Cloudflare DNS, which Email Routing requires |
+| Nameservers | `saanvi`/`shane.ns.cloudflare.com` — Cloudflare DNS, unchanged by any of this |
 | MX | none |
 | TXT at apex | none, so no SPF |
 | DKIM | none |
 | `_dmarc` | `v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;` |
 
+**There is no mail to migrate and no cutover risk.** The domain has never had an
+MX record, so nothing is running that this can break. That will not be true the
+second time, so do it properly now.
+
 The DMARC record is GoDaddy's leftover default, carried through the nameserver
-move. It still ships your aggregate reports to GoDaddy's collector on a domain
+move. It still ships aggregate reports to GoDaddy's collector for a domain
 GoDaddy no longer serves. Section 5 replaces it.
 
 **Do not apply the two optional records in `DEPLOY.md` §7.** That file suggests
-`v=spf1 -all` and a null MX to stop spoofing, on the reasoning that the domain
-sends no mail. That reasoning expires the moment this document is carried out —
-a null MX means "this domain accepts no mail", which is the opposite of what
-Email Routing needs. They were never applied. Leave it that way.
+`v=spf1 -all` and a null MX on the reasoning that the domain sends no mail. It is
+obsolete twice over: a null MX declares the domain accepts no mail, and the
+domain is about to do both. They were never applied. Leave it that way.
 
-## 2. The catch, before you spend forty minutes on it
+## 2. What to buy
 
-**Email Routing receives. It cannot send.** Cloudflare states it plainly:
+**Microsoft 365 Business Basic, two seats** — one for you, one for Blagoja.
 
-> Email Routing does not support sending or replying from your Cloudflare domain.
+| | Per user, annual | Per user, monthly | Two seats, annual |
+|---|---|---|---|
+| Business Basic | $6.48/mo | $8.40/mo | **~$156/yr** |
+| Business Standard | $12.95/mo | $16.80/mo | ~$311/yr |
 
-So `hello@sferaonchain.xyz` on the site collects mail perfectly, and the moment
-you hit reply the message leaves as `leslie.khumalo@icloud.com`. The person who
-wrote to the company address learns your personal one, and the thread moves
-there permanently. For a contact address on a landing page that is often an
-acceptable trade. For anything that looks like sales correspondence it is not.
+US list prices, which changed on 1 July 2026; your region and currency will
+differ. Annual commitment is roughly a 23% discount and worth taking for
+something you are not going to cancel in March.
 
-Two ways out, both later and neither blocking:
+**Basic, not Standard.** The only difference that matters here is desktop Office
+apps. Basic gives you Exchange mailboxes, Outlook on web and mobile, Teams and
+1TB of OneDrive per user. Mail works in Apple Mail on the Mac and on the iPhone
+regardless of tier. Buy Standard only if you want Word and Excel installed
+locally, which is a separate decision from email.
 
-- **Cloudflare Email Sending**, a separate product on the same zone, gives you
-  SMTP at `smtp.mx.cloudflare.net` and its own `cf-bounce` records. Pair it with
-  Apple Mail's "send as" and replies go out correctly. Cheapest fix that keeps
-  everything in one dashboard.
-- **iCloud+ custom domain** replaces Email Routing outright. Apple's MX records,
-  send and receive in the Mail app you already use, about a dollar a month.
-  Cleaner, but it is a swap, not an addition — a domain has one set of MX records.
+**Do not buy seats for the role addresses.** This is the part people get wrong
+and pay for annually. `hello@`, `security@`, `abuse@` and `dmarc@` become
+**shared mailboxes**, which cost nothing: up to 50 GB each with no licence
+assigned. You also get up to 200 aliases per user at no cost. Two seats is the
+correct number no matter how many addresses you end up with.
 
-## 3. Addresses
+## 3. The mailbox map
 
-Three role addresses at the apex.
-
-| Address | Goes to | Why |
+| Address | Type | Who gets it |
 |---|---|---|
-| `hello@sferaonchain.xyz` | your iCloud inbox | the public contact address, replacing the LinkedIn link |
-| `security@sferaonchain.xyz` | your iCloud inbox | where someone reports a vulnerability instead of tweeting it |
-| `abuse@sferaonchain.xyz` | your iCloud inbox | the RFC 2142 role address; registrars and hosts expect it to exist |
+| `leslie@sferaonchain.xyz` | licensed mailbox | you |
+| `blagoja@sferaonchain.xyz` | licensed mailbox | Blagoja |
+| `hello@sferaonchain.xyz` | shared, free | both, with **Send As** |
+| `security@sferaonchain.xyz` | shared, free | both, with **Send As** |
+| `abuse@sferaonchain.xyz` | shared, free | both |
+| `dmarc@sferaonchain.xyz` | shared, free | both; it is where section 5's reports land |
 
-No catch-all. A catch-all is convenient for a week and a spam magnet forever,
-because the domain is public on the site and gets scraped. If you want
-per-signup addresses, turn on **subaddressing** in Email Routing settings and
-use `hello+stripe@` — it matches the `hello@` rule with no new rule needed.
+Grant **Send As** on `hello@` and `security@` explicitly — membership alone lets
+you read, not answer as the address, and a reply that goes out as
+`leslie@sferaonchain.xyz` from a thread addressed to `hello@` is the exact
+problem this was bought to solve.
 
-### The subdomains, and a question about them
+`dmarc@` exists so XML reports have somewhere to go that is not a person's inbox.
+They are dull. The point is that a sudden volume of them means someone is
+spoofing you.
 
-`updates.` and `sales.` work. Cloudflare added subdomain support to Email
-Routing, up to 30 domains per zone counting the apex, configured from the apex
-domain's Email Routing settings rather than as separate zones.
+No catch-all. Convenient for a week, a spam magnet forever, because the address
+is public on the site and gets scraped. Use aliases for anything specific.
 
-But it is worth saying what they will and will not do here, because the shape of
-the request suggests the other product. Subdomains like `updates.` and `sales.`
-are conventionally used to **segregate outbound sending reputation** — so that a
-bulk product-update blast that earns spam complaints cannot damage the
-deliverability of mail from the apex. That is a sending concern, and Email
-Routing does not send. Under Email Routing, `sales@sales.sferaonchain.xyz` is
-simply a longer, harder-to-say address that forwards to the same inbox as
-`hello@` would.
+## 4. Creating the account and setting it up
 
-If the goal is **receiving** departmental mail, you want `sales@sferaonchain.xyz`
-at the apex — one rule, no subdomain, shorter on a business card. If the goal is
-**sending** newsletters from a reputation-isolated subdomain, that is Cloudflare
-Email Sending or a provider like Resend, and it is a different setup that this
-document does not cover. Say which and I will write the missing half.
+The order matters in one place only: **MX last.** Microsoft's own guidance is to
+create the mailboxes before you point MX at the tenant, because mail that arrives
+for a user who does not exist yet bounces. Everything else can be done in any
+order you like.
 
-Section 6 sets up the subdomains as asked. Skip it if the above changes your mind.
+### 4a. Sign up
 
-## 4. Turning it on
+Go to microsoft.com, Microsoft 365 for business, and pick **Business Basic**.
+The one-month free trial advertised on Microsoft's site is for Business
+*Standard*; Basic is generally bought directly. If you take a trial, note that it
+**converts to a paid subscription automatically** when the month is up — that is
+the default, not a prompt.
 
-Cloudflare dashboard, the `sferaonchain.xyz` zone, **Compute > Email Service >
-Email Routing**. The dashboard moved this under Email Service when Routing and
-Sending were merged; if you are following an older tutorial that says "Email" in
-the sidebar, this is the same thing.
+You will need a card, and a business name, address and phone number.
 
-**Verify the destination first.** Add `leslie.khumalo@icloud.com` as a
-destination address. Apple sends a confirmation mail; click the link in it.
-Rules pointing at an unverified destination silently fail, and this is the step
-people skip.
+Sign up with a personal address you already control — `leslie.khumalo@icloud.com`
+is right — because at this moment there is no mailbox on the domain yet. It
+becomes the account's contact address, not an address on the domain.
 
-**Enable Email Routing.** Cloudflare writes these records itself:
+**The one irreversible decision in the whole process** comes here. Microsoft
+assigns your tenant a default domain, `something.onmicrosoft.com`, and you choose
+the `something`. It **cannot be renamed or deleted, ever**. It is a fallback
+identity that stays in the background for the life of the tenant, SharePoint is
+tied to it, and its name turns up inside the MX hostname you will paste into
+Cloudflare in 4e.
 
-| Type | Name | Value |
+Type **`sferaonchain`**. Not your name, not a variation, not a test value you
+plan to fix later. People live with `contoso-test-2` for a decade because of this
+screen.
+
+### 4b. Add the domain
+
+Admin centre, **Settings > Domains > Add domain**, enter `sferaonchain.xyz`.
+
+Microsoft gives you a TXT record like `MS=msXXXXXXXX` to prove you own it. Add it
+at the apex in the Cloudflare zone. It usually verifies within minutes on
+Cloudflare DNS.
+
+When it offers to add the remaining DNS records for you, **decline and choose to
+add them yourself.** Its automated path does not apply to Cloudflare, and you
+want MX held back until 4d is done anyway.
+
+### 4c. Create the two users
+
+**Users > Active users > Add a user**, twice. Assign a Business Basic licence to
+each.
+
+Accounts are created on `sferaonchain.onmicrosoft.com` first; once 4b has
+verified, edit each username so the domain part reads `@sferaonchain.xyz`. You
+want `leslie@sferaonchain.xyz` and `blagoja@sferaonchain.xyz`.
+
+**Keep the original `admin@sferaonchain.onmicrosoft.com` account, and write its
+password down somewhere that is not this repo.** It is your way back in if the
+custom domain's DNS is ever broken or misconfigured — including by you, during
+4e. Signing in through `onmicrosoft.com` does not depend on the Cloudflare zone
+being correct. This costs nothing and is the difference between a bad afternoon
+and a support ticket.
+
+### 4d. Create the shared mailboxes
+
+Admin centre, **Teams & groups > Shared mailboxes > Add a shared mailbox**, once
+each for `hello@`, `security@`, `abuse@` and `dmarc@`. Assign **no licence** —
+they are free up to 50 GB, and assigning one is how people quietly start paying
+for six seats instead of two.
+
+Add both of you as members. Then, on `hello@` and `security@`, grant **Send As**
+explicitly. Read and Send As are separate permissions and membership alone gives
+only the first. Section 7 has a check for this because it is the one setting that,
+if missed, leaves you exactly where the free plan had you.
+
+### 4e. The DNS records
+
+Now the rest, all in the Cloudflare zone. Microsoft generates these **with values
+specific to your tenant** — use what the admin centre shows you, not what is
+written here. The MX hostname contains your tenant name and is not guessable.
+
+| Type | Name | Points at |
 |---|---|---|
-| MX | `@` | three hostnames under `*.mx.cloudflare.net`, priorities assigned automatically |
-| TXT | `@` | `v=spf1 include:_spf.mx.cloudflare.net ~all` |
-| TXT | `cf2024-1._domainkey` | Cloudflare's DKIM public key |
+| MX | `@` | `<tenant>.mail.protection.outlook.com`, priority 0 |
+| TXT | `@` | `v=spf1 include:spf.protection.outlook.com -all` |
+| CNAME | `autodiscover` | `autodiscover.outlook.com` |
+| CNAME | `selector1._domainkey` | Microsoft's DKIM endpoint for your tenant |
+| CNAME | `selector2._domainkey` | the second DKIM endpoint |
 
-The MX hostnames are randomised per zone — you will get three first names, not
-literally `route1/2/3`. These records are **locked** after onboarding and cannot
-be edited from DNS > Records until you unlock them. That is a feature. Do not
-unlock them to tidy them up.
+Microsoft publishes a Cloudflare-specific walkthrough. Follow that one rather
+than a generic guide, because of this:
 
-**Add the three rules**, each a custom address forwarding to the verified
-destination. Two warnings from the docs worth carrying: duplicate patterns are
-silently hazardous, because only the rule listed first processes mail; and `.`
-is a normal character in a pattern, so there is no Gmail-style dot-collapsing.
+**Every CNAME above must be DNS-only — grey cloud, not proxied.** Microsoft
+states it plainly for the DKIM records: with the proxy on, lookups return
+Cloudflare's IP addresses instead of the CNAME target and DKIM verification
+fails. It fails silently and looks like Microsoft being slow. Expect to hit this
+at least once; section 7's `dig` checks catch it.
+
+Skip the Teams `sip` and `lyncdiscover` CNAMEs and the SRV records unless you
+intend to use Teams for calls. They are not needed for mail.
+
+### 4f. Turn DKIM on
+
+Adding the CNAMEs does not enable signing. Once they resolve, enable DKIM for
+`sferaonchain.xyz` in the Defender portal. It stays off until you throw that
+switch, and mail sent before you do is unsigned.
 
 ## 5. Replacing the DMARC record
 
-Edit the existing `_dmarc` TXT record rather than adding a second one. Two DMARC
-records on a name is a configuration error and receivers treat the domain as
+Edit the existing `_dmarc` TXT record rather than adding a second. Two DMARC
+records on one name is a configuration error and receivers treat the domain as
 having none at all.
 
+**Start here**, the same day you cut MX over:
+
 ```
-TXT   _dmarc   v=DMARC1; p=reject; rua=mailto:dmarc@sferaonchain.xyz; aspf=s; adkim=s;
+TXT   _dmarc   v=DMARC1; p=none; rua=mailto:dmarc@sferaonchain.xyz;
 ```
 
-`p=reject` rather than GoDaddy's `p=quarantine`, because nothing legitimately
-sends mail as this domain — forwarding is not sending — so every message
-claiming to be from it is forged and should be refused outright rather than
-dropped in a junk folder where someone might fish it out. Strict alignment for
-the same reason: there is no subdomain or third-party sender to be lenient
-toward yet. The reports now come to you, via a fourth routing rule for
-`dmarc@`, instead of to GoDaddy. They arrive as XML attachments and are dull;
-the point is that a sudden volume of them means someone is spoofing you.
+`p=none` monitors without enforcing. There are now **two** senders to get aligned
+— Microsoft on the apex and Resend on the subdomain — and tightening before both
+are confirmed means silently rejecting your own mail.
 
-**If you later add Email Sending or iCloud+, revisit this record first.**
-`p=reject` with strict alignment will reject your own mail until the new
-sender's SPF include and DKIM selector are in place.
+**Then tighten**, once reports at `dmarc@` show both passing for a week or two:
 
-## 6. The subdomains, if you still want them
+```
+TXT   _dmarc   v=DMARC1; p=reject; rua=mailto:dmarc@sferaonchain.xyz;
+```
 
-Email Routing, the `sferaonchain.xyz` domain, **Settings**, the **Subdomains**
-form. Add `updates.sferaonchain.xyz` and `sales.sferaonchain.xyz`. Cloudflare
-adds the required DNS records to each subdomain. Once they propagate, create
-routing rules on the subdomain exactly as on the apex.
+Leave alignment relaxed, which is the default. The Resend mail's From domain and
+signing domain differ by a subdomain, and strict alignment is the kind of thing
+that breaks mail six months later for reasons nobody remembers.
 
-The docs say nothing about nested subdomains or wildcards. Assume neither works.
+## 6. Resend, unchanged
+
+This half is unaffected by the Microsoft decision and still needs doing —
+`functions/api/subscribe.js` calls the Resend API to confirm list signups, and
+fails quietly when unconfigured, which is why nobody has noticed.
+
+Add the domain in Resend as **`updates.sferaonchain.xyz`** — the subdomain, not
+the root. Resend's own guidance is to verify a subdomain both for reputation
+separation and **to avoid conflicts with existing MX records**, and the apex MX
+now belongs to Microsoft. Copy the records it shows exactly; the set varies with
+when the domain was added, and newer ones may be CNAMEs where older ones are TXT
+and MX. **Grey cloud on any CNAME**, for the same reason as section 4.
+
+Then three Pages environment variables, `RESEND_API_KEY` marked **encrypted**:
+
+```
+RESEND_API_KEY   <the key from Resend>
+MAIL_FROM        Sfera Onchain <hello@updates.sferaonchain.xyz>
+MAIL_REPLY_TO    hello@sferaonchain.xyz
+```
+
+`MAIL_FROM` must be on the verified **subdomain**. `MAIL_REPLY_TO` is the apex
+shared mailbox, so when a subscriber replies to come off the list — which the
+mail body tells them to do — it lands somewhere both of you can see. The code
+reads `env.MAIL_REPLY_TO || from`, so leaving it unset sends unsubscribe requests
+into the sending subdomain, where nothing is listening.
+
+Redeploy after setting them.
 
 ## 7. Check it worked
 
 ```
-dig MX sferaonchain.xyz +short              # three *.mx.cloudflare.net hostnames
-dig TXT sferaonchain.xyz +short             # the _spf.mx.cloudflare.net include
-dig TXT cf2024-1._domainkey.sferaonchain.xyz +short
-dig TXT _dmarc.sferaonchain.xyz +short      # yours, not onsecureserver.net
-dig MX updates.sferaonchain.xyz +short      # only if section 6 was done
+dig MX sferaonchain.xyz +short                        # <tenant>.mail.protection.outlook.com
+dig TXT sferaonchain.xyz +short                       # spf.protection.outlook.com
+dig CNAME autodiscover.sferaonchain.xyz +short
+dig CNAME selector1._domainkey.sferaonchain.xyz +short # a Microsoft host, NOT a Cloudflare IP
+dig TXT _dmarc.sferaonchain.xyz +short                # yours, not onsecureserver.net
+dig MX updates.sferaonchain.xyz +short                # Resend's
 ```
 
-Then send a real message to each address from an account that is not the
-destination, and confirm it lands. Mail to an address with no matching rule is
-rejected, not delivered, so a typo in a rule looks identical to the feature
-being broken.
+A Cloudflare IP where a Microsoft hostname belongs means the record is proxied.
+Grey cloud it and re-check.
 
-## Limits worth knowing before you build on it
+Then the things `dig` cannot tell you:
 
-| | |
-|---|---|
-| Routing rules per domain | 200 |
-| Destination addresses per account | 200, shared across every domain |
-| Domains per zone | 30, apex included |
-| Inbound message size | 25 MiB, larger is rejected |
+- Send to each of the six addresses from outside and confirm delivery.
+- **Reply from `hello@` and check the From address on what arrives.** If it says
+  `leslie@`, Send As is not granted and the main thing you paid for is not on.
+- Send from `hello@` to a Gmail address, then in Gmail use Show original to
+  confirm SPF, DKIM and DMARC all pass.
+- Subscribe on the live site with a real address, confirm the mail arrives, and
+  confirm replying to it reaches `hello@`.
 
 ## Gotchas, so they are not hit twice
 
-- **A verified destination is not optional.** Rules to an unverified address fail
-  without an obvious error.
-- **Cloudflare rejects unauthenticated inbound mail.** A message must pass SPF or
-  carry a valid DKIM signature, and is rejected if it fails the sender's own
-  DMARC policy. Legitimate mail from badly configured small senders will
-  occasionally bounce, and that is Cloudflare's decision, not yours to tune.
-- **Non-delivery reports are not forwarded to the original sender.** If something
-  is rejected, the person who wrote to you may learn nothing about it.
-- **A sender's restrictive DMARC policy can still break forwarding**, which
-  Cloudflare lists as a known limitation despite SRS and ARC being in use.
-- **Internationalised local parts are unsupported.** The domain side may be
-  non-ASCII; the part before the `@` may not.
-- **Mail sent from a Worker shows as "dropped" in the summary** even when it was
-  delivered. Only relevant if you ever add an auto-responder.
+- **Proxied CNAMEs break both Microsoft DKIM and Resend verification.** Grey
+  cloud, always. Expect to hit this at least once.
+- **Adding DKIM records does not enable DKIM.** It is a separate switch.
+- **Send As is not the same as shared mailbox access.** Grant it explicitly.
+- **Only one SPF record per domain.** One TXT at the apex, not two — if you ever
+  add a third sender, merge the includes into the single record and mind the
+  ten-lookup limit.
+- **Shared mailboxes are free up to 50 GB**, and need an Exchange Online Plan 2
+  licence beyond that. Not a concern at this scale, but it is the trap that turns
+  a free mailbox into a billed one years later.
+- **Confirmation failures are swallowed by design.** `subscribe.js` logs and
+  moves on, so a Resend outage looks like nothing at all. `wrangler pages
+  deployment tail` is where mail problems surface.
 
 ## Outstanding
 
-- `src/data/site.js` still exports `CONTACT` as a LinkedIn URL, used in six
-  places across `Header.jsx`, `Developers.jsx`, `Ask.jsx`, `alt.astro` and
-  `demo.astro`. Switching it to `mailto:hello@sferaonchain.xyz` also means
-  dropping `target="_blank" rel="noopener"` at each call site, which is
+- `src/data/site.js` exports `CONTACT` as a LinkedIn URL, used in six places
+  across `Header.jsx`, `Developers.jsx`, `Ask.jsx`, `alt.astro` and `demo.astro`,
+  plus `SiteHeader.astro`. Switching it to `mailto:hello@sferaonchain.xyz` also
+  means dropping `target="_blank" rel="noopener"` at each call site, which is
   meaningless on a `mailto:`. **Do this only after section 7 passes.** A
   published address that bounces is worse than a LinkedIn link.
-- Sending as the domain is unsolved by design. See section 2.
+- The subscriber KV binding is still unbound, so signups are refused before the
+  mail path is reached at all. See `DEPLOY.md`, "The email list". Resend can be
+  perfectly configured and still send nothing until this is done.

@@ -195,8 +195,8 @@ MX    @   .        priority 0
 ```
 
 **Superseded, and never applied. Do not add these.** A null MX declares that the
-domain accepts no mail, which is incompatible with receiving any. See `EMAIL.md`,
-which sets up Cloudflare Email Routing and covers spoofing through DMARC instead.
+domain accepts no mail, and the domain now does both. See `EMAIL.md`, which puts
+Microsoft 365 on the apex and covers spoofing through DMARC instead.
 
 ## 8. Check it worked
 
@@ -282,9 +282,14 @@ and no mail is sent. To turn it on, add these as Pages environment variables
 
 | Variable | What it is |
 | --- | --- |
-| `RESEND_API_KEY` | A Resend API key. The domain has to be verified with them first, which is three DNS records in the zone you already control. |
-| `MAIL_FROM` | The sender, e.g. `Sfera Onchain <hello@sferaonchain.xyz>`. Must be on the verified domain. |
-| `MAIL_REPLY_TO` | Optional. Where "take me off the list" replies land. Defaults to `MAIL_FROM`. |
+| `RESEND_API_KEY` | A Resend API key. The domain has to be verified with them first, which is a handful of DNS records in the zone you already control. |
+| `MAIL_FROM` | The sender, `Sfera Onchain <hello@updates.sferaonchain.xyz>`. Must be on the verified **subdomain**, not the apex. |
+| `MAIL_REPLY_TO` | Where "take me off the list" replies land: `hello@sferaonchain.xyz`. Defaults to `MAIL_FROM`, which is an inbox nobody reads — set it. |
+
+**Verify `updates.sferaonchain.xyz` with Resend, not the apex.** The apex MX
+belongs to Microsoft 365, and Resend's own guidance is to use a
+subdomain to avoid exactly that conflict. See `EMAIL.md` §5, which also covers
+the proxied-CNAME trap that makes verification fail silently on Cloudflare.
 
 The mail is plain text and carries no tracking pixel. It is sent after the
 address is stored and its failure is swallowed: a provider having a bad
