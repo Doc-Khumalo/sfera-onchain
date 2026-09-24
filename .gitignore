@@ -8,3 +8,6 @@ design/
 .env.local
 .env.*.local
 .env.production
+
+# Generated explorations and captures, not the site.
+output/
