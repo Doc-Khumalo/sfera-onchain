@@ -1,0 +1,53 @@
+---
+/**
+ * Three places the product works, each with what it does and the one thing it
+ * cannot. The limit line is the point: the MetaMask panel warns but cannot
+ * rewrite a request, and saying so here is what makes the rest believable.
+ */
+const SURFACES = [
+  {
+    key: 'In MetaMask',
+    title: 'Flagged before you sign.',
+    body: 'Our panel reads every approval as MetaMask shows it, says what it grants, and stops you once on anything unlimited.',
+    limit: 'MetaMask does not let a panel rewrite a request. The cap is set in MetaMask itself.',
+    tone: 'bad',
+    icon: 'M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z',
+  },
+  {
+    key: 'On the dashboard',
+    title: 'Capped in one tap.',
+    body: 'Every app that can move your money, on every chain we read, in one ring. Limit or remove each one, sign it in MetaMask, and we read the chain back.',
+    limit: 'We read the major assets and apps on each chain, and say when something is outside that.',
+    tone: 'ok',
+    icon: 'M12 3a9 9 0 1 0 9 9M12 3v9h9',
+  },
+  {
+    key: 'On Telegram',
+    title: 'Told when it changes.',
+    body: 'Sign in once, link Telegram, and get a message when a new approval appears, anything unlimited can reach you, or an approval grows.',
+    limit: 'Catches approvals made outside MetaMask, too.',
+    tone: 'tg',
+    icon: 'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4',
+  },
+];
+---
+
+<section class="k-surfaces" id="product">
+  <div class="k-surfaces__head">
+    <span class="k-eyebrow">Product</span>
+    <h2>Where you sign, where you fix it, and when to look.</h2>
+  </div>
+  <div class="k-surfaces__grid">
+    {SURFACES.map((s) => (
+      <article class="k-surface">
+        <span class={`k-surface__icon k-surface__icon--${s.tone}`}>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d={s.icon} /></svg>
+        </span>
+        <span class="k-eyebrow">{s.key}</span>
+        <h3>{s.title}</h3>
+        <p>{s.body}</p>
+        <p class="k-surface__limit">{s.limit}</p>
+      </article>
+    ))}
+  </div>
+</section>

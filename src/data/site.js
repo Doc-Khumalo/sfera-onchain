@@ -12,6 +12,13 @@
 
 export const CONTACT = 'https://www.linkedin.com/in/khumalo-leslie/';
 
+/* The dashboard, where a wallet is read and capped. */
+export const APP = 'https://app.sferaonchain.xyz/';
+/* Add to MetaMask asks the wallet for the Snap in place; without MetaMask the
+   link falls through to the dashboard, which offers the same button. */
+export const SNAP = APP;
+export const SNAP_ID = 'npm:@sferaonchain/snap';
+
 export const FOUNDERS = [
   {
     name: 'Leslie Khumalo',

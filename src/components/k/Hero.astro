@@ -1,0 +1,94 @@
+---
+/**
+ * The hero: the same promise the app makes, the two ways in, and the product
+ * as it looks today — a dashboard card, and the MetaMask panel over it.
+ *
+ * Both pictures are drawn in markup, not screenshots, so they stay sharp and
+ * cost nothing to load. The figures are an example wallet's and say so.
+ */
+import ChainStack from '../ChainStack.jsx';
+import { APP, SNAP, SNAP_ID } from '../../data/site.js';
+---
+
+<section class="k-hero">
+  <div class="k-hero__type">
+    <span class="k-live"><span class="k-dot" aria-hidden="true"></span>Live on mainnet, on all available chains</span>
+    <h1>Cap what apps can take.</h1>
+    <p class="k-lede">
+      Find every app that can move your money. Cap it in one tap. We flag the
+      next one in MetaMask, before you sign.
+    </p>
+    <div class="k-ctas">
+      <a class="k-btn k-btn--primary" href={SNAP} data-snap={SNAP_ID}>
+        <span class="k-btn__fox"><img src="/metamask-fox.svg" alt="" width="24" height="24" /></span>
+        Add to MetaMask
+      </a>
+      <a class="k-btn k-btn--outline" href={APP}>
+        Read any wallet
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </a>
+    </div>
+    <p class="k-promises">
+      <span>Free to read</span><span aria-hidden="true">·</span>
+      <span>No gas to look</span><span aria-hidden="true">·</span>
+      <span>We never ask for your key</span>
+    </p>
+    <ChainStack label="and every other chain we read" />
+  </div>
+
+  <div class="k-hero__art" aria-label="An example wallet in the dashboard, and the MetaMask panel" role="img">
+    <div class="k-shot">
+      <div class="k-shot__top">
+        <svg class="k-ring" viewBox="0 0 160 160" width="150" height="150" aria-hidden="true">
+          <circle cx="80" cy="80" r="64" class="k-ring__track" />
+          <circle cx="80" cy="80" r="64" class="k-ring__arc k-ring__arc--bad" stroke-dasharray="168 402" />
+          <circle cx="80" cy="80" r="64" class="k-ring__arc k-ring__arc--warn" stroke-dasharray="96 402" stroke-dashoffset="-171" />
+          <circle cx="80" cy="80" r="64" class="k-ring__arc k-ring__arc--bad" stroke-dasharray="40 402" stroke-dashoffset="-270" />
+          <circle cx="80" cy="80" r="64" class="k-ring__arc k-ring__arc--ok" stroke-dasharray="86 402" stroke-dashoffset="-313" />
+        </svg>
+        <div>
+          <b class="k-shot__figure">$23,661</b>
+          <span class="k-shot__say">can be taken from this wallet by 3 apps</span>
+          <span class="k-shot__meta">Example wallet · read just now</span>
+        </div>
+      </div>
+      <div class="k-card">
+        <div class="k-card__head">
+          <span class="k-card__mark">UN</span>
+          <span class="k-card__who"><b>Uniswap Permit2</b><span>USDC · Ethereum</span></span>
+          <span class="k-card__value">$8,420</span>
+        </div>
+        <p>Can move all of your USDC, today and anything you add later.</p>
+        <div class="k-card__acts"><span class="k-act k-act--primary">Limit</span><span class="k-act">Remove</span></div>
+      </div>
+    </div>
+
+    <div class="k-panel">
+      <div class="k-panel__bar"><img src="/metamask-fox.svg" alt="" width="16" height="16" />MetaMask · Spending cap request</div>
+      <div class="k-panel__body">
+        <span class="k-panel__from">Insights from <b>Sfera Onchain</b></span>
+        <b class="k-panel__head">This can move all of your USDC.</b>
+        <p class="k-panel__warn"><b>Unlimited.</b> Lower the spending cap above before you confirm.</p>
+        <p class="k-panel__row"><span>Already reachable</span><span>$12,690 · 8 chains</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  /* Add to MetaMask, in place: MetaMask asks to install the Snap. Without
+     MetaMask, or if it refuses the method, the link opens the dashboard. */
+  document.querySelectorAll('[data-snap]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const wallet = window.ethereum;
+      if (!wallet || typeof wallet.request !== 'function') return;
+      event.preventDefault();
+      wallet
+        .request({ method: 'wallet_requestSnaps', params: { [link.dataset.snap]: {} } })
+        .catch((error) => {
+          if (error && error.code === 4001) return;
+          window.location.href = link.href;
+        });
+    });
+  });
+</script>

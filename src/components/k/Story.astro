@@ -1,0 +1,104 @@
+---
+/**
+ * How it works, as the app used to tell it: six short lines that play by
+ * themselves, with a receipt beside them that changes as the story does.
+ *
+ * Tapping moves on. Pointing at an earlier line takes the story back to it;
+ * lines not yet said are never touched. With reduced motion, every line shows
+ * at once and the receipt rests on the last.
+ *
+ * Every line is in the markup, so the page reads complete without the script:
+ * the script only hides the lines not yet reached.
+ */
+const LINES = [
+  { a: 'A swap asks you to ', b: 'Approve', c: '.', tone: 'quiet' },
+  { a: 'Underneath, it wants ', b: 'all your USDC', c: '. Forever.', tone: 'bad' },
+  { a: 'We flag it in MetaMask, ', b: 'before you sign', c: '.', tone: 'bad' },
+  { a: 'Already signed it? ', b: 'One tap caps it', c: ' to what you meant.', tone: 'ok' },
+  { a: 'You sign the cap in MetaMask. ', b: 'Never us', c: '.', tone: 'ok' },
+  { a: 'We check the chain: ', b: 'exactly', c: ' what you set.', tone: 'ok' },
+];
+const BEFORE = [['Amount', 'Unlimited'], ['Expires', 'Never'], ['Reaches', 'Entire balance'], ['Later deposits', 'Covered']];
+const AFTER = [['Amount', '100 USDC'], ['Reaches', '100 USDC, no more'], ['Later deposits', 'Out of reach'], ['Revoke', 'One tap']];
+const RECEIPTS = [
+  { reading: 'What the button says', tone: 'quiet', rows: [['Action', 'Swap'], ['Amount', '100 USDC'], ['Button', 'Approve'], ['Asks for', '?']], foot: 'Before we look', stamp: '' },
+  { reading: 'Unbounded', tone: 'bad', rows: BEFORE, foot: 'As requested', stamp: 'Too wide' },
+  { reading: 'Unbounded · flagged', tone: 'bad', rows: BEFORE, foot: 'In your MetaMask', stamp: 'Look first' },
+  { reading: 'Bounded', tone: 'ok', rows: AFTER, foot: 'As corrected', stamp: '' },
+  { reading: 'Bounded · unsigned', tone: 'ok', rows: AFTER, foot: 'In your MetaMask', stamp: 'Yours' },
+  { reading: 'Bounded · on chain', tone: 'ok', rows: AFTER, foot: 'Read back from the chain', stamp: 'Verified' },
+];
+---
+
+<section class="k-story" id="how" data-story>
+  <div class="k-story__grid">
+    <div class="k-story__lines" data-lines>
+      <h2 class="k-eyebrow">How it works</h2>
+      {LINES.map((line, i) => (
+        <p class={`k-say k-say--${line.tone}${i === LINES.length - 1 ? ' is-last is-now' : ''}`} data-say={i}>
+          {line.a}<span>{line.b}</span>{line.c}
+        </p>
+      ))}
+      <button type="button" class="k-story__again" data-again hidden>Hear it again</button>
+    </div>
+    <div class="k-story__side">
+      {RECEIPTS.map((r, i) => (
+        <div class={`k-receipt k-receipt--${r.tone}`} data-receipt={i} hidden={i !== RECEIPTS.length - 1}>
+          <div class="k-receipt__title">Access receipt</div>
+          <div class="k-receipt__reading">● {r.reading}</div>
+          <div class="k-receipt__rule"></div>
+          {r.rows.map(([k, v], j) => (
+            <div class="k-receipt__row"><span>{k}</span><i></i><b class={j === 0 ? 'is-big' : ''}>{v}</b></div>
+          ))}
+          <div class="k-receipt__rule"></div>
+          <div class="k-receipt__foot">{r.foot}</div>
+          {r.stamp ? <span class="k-receipt__stamp">{r.stamp}</span> : null}
+        </div>
+      ))}
+      <p class="k-story__hint">Tap to move on. Point at a line to go back.</p>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-story]');
+    if (!root) return;
+    const lines = [...root.querySelectorAll('[data-say]')];
+    const receipts = [...root.querySelectorAll('[data-receipt]')];
+    const again = root.querySelector('[data-again]');
+    const LINE_MS = 2900;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let shown = 1;
+    let timer = 0;
+    const draw = () => {
+      lines.forEach((line, i) => {
+        line.hidden = i >= shown;
+        line.classList.toggle('is-now', i === shown - 1);
+      });
+      receipts.forEach((r, i) => { r.hidden = i !== shown - 1; });
+      again.hidden = shown < lines.length;
+    };
+    const next = () => {
+      clearTimeout(timer);
+      if (shown >= lines.length) return;
+      timer = setTimeout(() => { shown += 1; draw(); next(); }, LINE_MS);
+    };
+    const start = () => { shown = 1; draw(); next(); };
+    root.querySelector('[data-lines]').addEventListener('click', (event) => {
+      if (event.target === again) return;
+      if (shown < lines.length) { shown += 1; draw(); next(); }
+    });
+    lines.forEach((line, i) => {
+      line.addEventListener('mouseenter', () => {
+        if (i < shown - 1) { shown = i + 1; draw(); next(); }
+      });
+    });
+    again.addEventListener('click', start);
+    /* Starts when it comes into view, so nobody misses the opening lines. */
+    const seen = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { seen.disconnect(); start(); }
+    }, { threshold: 0.35 });
+    seen.observe(root);
+  })();
+</script>

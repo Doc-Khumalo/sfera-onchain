@@ -43,11 +43,11 @@ export default function Developers() {
     <section className="dev reveal" id="developers">
       <div className="dev-top">
         <div className="col-type">
-          <h2>One integration.</h2>
+          <h2>One integration, and the request is right before it is signed.</h2>
           <p className="lede">
-            Explain authority, compare it with user intent and offer a safer
-            permission across supported EVM standards - without building every
-            decoder and control flow yourself.
+            Inside your wallet or app, we read what a request really asks for
+            and hand back the smaller one your user meant. Your user signs. We
+            never do.
           </p>
 
           {/* The honest version of a feature list: what you stop owning. */}
