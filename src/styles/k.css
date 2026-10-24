@@ -13,13 +13,6 @@
   text-transform: uppercase;
   color: var(--mist);
 }
-.k-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 3px var(--ok-dim);
-}
 
 /* ---- hero -------------------------------------------------------------- */
 .k-hero {
@@ -37,17 +30,6 @@
   align-items: flex-start;
   gap: 24px;
   min-width: 0;
-}
-.k-live {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: var(--ok-dim);
-  color: var(--ok);
-  font: 600 12.5px/1 var(--display);
 }
 .k-hero h1 {
   margin: 0;
@@ -98,14 +80,6 @@
   border: 1px solid var(--rule);
   color: var(--ice);
   font-weight: 600;
-}
-.k-promises {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  font: 400 13px/1.4 var(--display);
-  color: var(--slate);
 }
 
 /* the product, drawn */
