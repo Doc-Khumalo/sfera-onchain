@@ -18,11 +18,11 @@
 .k-hero {
   max-width: var(--page);
   margin: 0 auto;
-  padding: 56px var(--gutter) 96px;
+  padding: 48px var(--gutter) 96px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 56px;
-  align-items: center;
+  align-items: start;
 }
 .k-hero__type {
   display: flex;
