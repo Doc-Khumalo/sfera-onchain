@@ -14,12 +14,12 @@ const LINES = [
   { a: 'A swap asks you to ', b: 'Approve', c: '.', tone: 'quiet' },
   { a: 'Underneath, it wants ', b: 'all your USDC', c: '. Forever.', tone: 'bad' },
   { a: 'We flag it in MetaMask, ', b: 'before you sign', c: '.', tone: 'bad' },
-  { a: 'Already signed it? ', b: 'One tap caps it', c: ' to what you meant.', tone: 'ok' },
+  { a: 'Already signed it? ', b: 'Cap it', c: ' to what you meant.', tone: 'ok' },
   { a: 'You sign the cap in MetaMask. ', b: 'Never us', c: '.', tone: 'ok' },
   { a: 'We check the chain: ', b: 'exactly', c: ' what you set.', tone: 'ok' },
 ];
 const BEFORE = [['Amount', 'Unlimited'], ['Expires', 'Never'], ['Reaches', 'Entire balance'], ['Later deposits', 'Covered']];
-const AFTER = [['Amount', '100 USDC'], ['Reaches', '100 USDC, no more'], ['Later deposits', 'Out of reach'], ['Revoke', 'One tap']];
+const AFTER = [['Amount', '100 USDC'], ['Reaches', '100 USDC, no more'], ['Later deposits', 'Out of reach'], ['Revoke', 'One transaction']];
 const RECEIPTS = [
   { reading: 'What the button says', tone: 'quiet', rows: [['Action', 'Swap'], ['Amount', '100 USDC'], ['Button', 'Approve'], ['Asks for', '?']], foot: 'Before we look', stamp: '' },
   { reading: 'Unbounded', tone: 'bad', rows: BEFORE, foot: 'As requested', stamp: 'Too wide' },

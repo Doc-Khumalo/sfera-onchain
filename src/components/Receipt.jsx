@@ -147,7 +147,7 @@ export default function Receipt() {
           </div>
           <div className="prow exp exp-3">
             <dt>Access ends</dt>
-            <dd><span className="was">Never</span><span className="now">On use</span></dd>
+            <dd><span className="was">Never</span><span className="now">Once 100 USDC is spent</span></dd>
           </div>
         </dl>
       </div>

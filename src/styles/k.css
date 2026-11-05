@@ -452,3 +452,9 @@
 /* the real mark beside the wordmark, in the shared header */
 .a-mark { display: inline-flex; align-items: center; gap: 9px; }
 .a-glyph path { fill: var(--mint); }
+
+.k-panel__note {
+  margin: 0;
+  font: 400 11.5px/1.45 var(--display);
+  color: #9b9fa6;
+}

@@ -31,11 +31,11 @@ const GROUPS = [
       },
       {
         q: 'Do you store my wallet history?',
-        a: `The analysis path has no database at all. ADR 001 keeps it
-            stateless: signed, short-lived envelopes carry all the context a
-            decision needs, which removes backups, migrations and recovery from
-            the picture. Persistence arrives with the permission dashboard, not
-            before.`,
+        a: `Only if you sign in. Reading a wallet keeps nothing about it: the
+            read is worked out and handed back. Signed in, we keep your reads so
+            alerts can compare one with the next, and deleting your account
+            deletes them. The demo page may log which address it was asked to
+            read, and nothing else.`,
       },
     ],
   },
@@ -62,10 +62,10 @@ const GROUPS = [
         q: 'Why not ship a browser extension?',
         a: `Asking a mainstream user to discover, trust and install a new
             security extension is high friction, and wallet-native features
-            commoditise standalone ones. Distribution is integrations - an SDK,
-            a decision API and a widget - rather than installs. The extension
-            stays in the deferred register until integrations alone stop
-            providing reach.`,
+            commoditise standalone ones. So we live in the wallet you already
+            use, as a MetaMask Snap, and next to it on the dashboard. The
+            engine underneath is built to be integrated, and we talk to wallets
+            and apps about that directly.`,
       },
     ],
   },
@@ -76,16 +76,17 @@ const GROUPS = [
         q: 'What is the difference between limiting and revoking?',
         a: `Revoking removes authority that nothing needs any more. Limiting
             cuts authority something still needs down to the amount the action
-            actually required, and attaches an expiry where there was none.
+            actually required, and nothing more.
             Most standing permissions want limiting rather than deleting, which
             is why the default is not simply to remove everything.`,
       },
       {
         q: 'Which chains do you read?',
-        a: `Fifteen EVM chains. The domain model is chain-independent by
-            design - Base is the first implementation environment, not the
-            product definition - so adding a chain touches the state reader and
-            configuration and nothing else.`,
+        a: `All available chains on the dashboard, every one read the same way
+            at once. On each, we ask about the major tokens and the apps known
+            to use them, so a token or app outside that list will not show, and
+            we say so. Adding a chain touches the state reader and configuration
+            and nothing else.`,
       },
     ],
   },
@@ -96,15 +97,14 @@ const GROUPS = [
         q: 'What will it cost?',
         a: `Basic protection is free and stays free on purpose. Paywalling the
             sentence “this application can take everything” would sell fear and
-            starve the integrations the paid layer depends on. Pro is $6.99 a
-            month and Family $12.99; the revenue is in the developer tiers.`,
+            starve the integrations a paid layer would depend on. Reading a
+            wallet and fixing what you find are free. Nothing is for sale yet.`,
       },
       {
         q: 'Can I use it today?',
-        a: `Not yet - we are pre-release. The MVP ships on 14 January 2027 and
-            runs on Base Sepolia first. If you are building something that asks
-            users for standing authority, that is exactly when we want to
-            talk.`,
+        a: `Yes. It runs on mainnet today. Add Sfera Onchain to MetaMask, or
+            read any wallet on the dashboard. If you are building something that
+            asks users for standing authority, we want to talk.`,
       },
     ],
   },

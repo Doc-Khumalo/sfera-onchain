@@ -14,8 +14,9 @@ import { APP, SNAP, SNAP_ID } from '../../data/site.js';
   <div class="k-hero__type">
     <h1>Cap what apps can take.</h1>
     <p class="k-lede">
-      Find every app that can move your money. Cap it in one tap. We flag the
-      next one in MetaMask, before you sign.
+      See which apps can move your money, across the major tokens on every
+      chain we read. Cap them, and we check the chain. We flag the next
+      approval in MetaMask, before you sign.
     </p>
     <div class="k-ctas">
       <a class="k-btn k-btn--primary" href={SNAP} data-snap={SNAP_ID}>
@@ -61,9 +62,11 @@ import { APP, SNAP, SNAP_ID } from '../../data/site.js';
       <div class="k-panel__bar"><img src="/metamask-fox.svg" alt="" width="16" height="16" />MetaMask · Spending cap request</div>
       <div class="k-panel__body">
         <span class="k-panel__from">Insights from <b>Sfera Onchain</b></span>
-        <b class="k-panel__head">This can move all of your USDC.</b>
-        <p class="k-panel__warn"><b>Unlimited.</b> Lower the spending cap above before you confirm.</p>
-        <p class="k-panel__row"><span>Already reachable</span><span>$12,690 · 8 chains</span></p>
+        <b class="k-panel__head">This grants unlimited access to one of your tokens.</b>
+        <p class="k-panel__warn"><b>Unlimited.</b> This permission has no upper limit on the amount it can move.</p>
+        <p class="k-panel__row"><span>Token</span><span>USDC</span></p>
+        <p class="k-panel__row"><span>Access limit</span><span>No limit</span></p>
+        <p class="k-panel__note">We can only read this request. To ask for a smaller amount, change it in the application and sign again.</p>
       </div>
     </div>
   </div>

@@ -43,11 +43,11 @@ export default function Developers() {
     <section className="dev reveal" id="developers">
       <div className="dev-top">
         <div className="col-type">
-          <h2>One integration, and the request is right before it is signed.</h2>
+          <h2>For wallets and apps.</h2>
           <p className="lede">
-            Inside your wallet or app, we read what a request really asks for
-            and hand back the smaller one your user meant. Your user signs. We
-            never do.
+            The engine behind this site reads what a request really asks for
+            and builds the smaller one your user meant. Your user signs; we never
+            do. It is not public yet, so integrations start with a conversation.
           </p>
 
           {/* The honest version of a feature list: what you stop owning. */}
@@ -72,9 +72,9 @@ export default function Developers() {
           <Receipt />
 
           <p className="dr-foot">
-            Rendered from four fields - <b>reading</b>, <b>reachableNow</b>,{' '}
-            <b>because</b>, <b>remediable</b> - and a plan whose <b>signed</b> is
-            always false.
+            Drawn from the engine's reading of the request: what it grants, what
+            it can reach now, why, and what can be done. The plan comes back
+            unsigned.
           </p>
         </div>
       </div>
